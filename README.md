@@ -24,12 +24,14 @@ Notified Frontend is a complete rewrite of the original JavaFX application ([Jav
 ## 🛠️ Tech Stack
 
 ### Core
+
 - **React 18** - UI library with hooks and modern patterns
 - **TypeScript** - Type-safe development
 - **Vite** - Lightning-fast build tool and dev server
 - **React Router v6** - Client-side routing with protected routes
 
 ### Styling & UI
+
 - **TailwindCSS** - Utility-first CSS framework
 - **ShadCN/UI** - High-quality, accessible component primitives
 - **Framer Motion** - Smooth animations and transitions
@@ -37,11 +39,13 @@ Notified Frontend is a complete rewrite of the original JavaFX application ([Jav
 - **Neumorphic Design** - Soft shadows and modern aesthetics
 
 ### State & Data
+
 - **Zustand** - Lightweight state management
 - **TanStack Query (React Query)** - Server state management
 - **Axios** - HTTP client with interceptors
 
 ### Code Quality
+
 - **ESLint** - Linting and code standards
 - **Prettier** - Code formatting
 - **Husky** - Git hooks for pre-commit checks
@@ -72,7 +76,10 @@ notified-frontend/
 │   │   ├── auth.service.ts
 │   │   ├── student.service.ts
 │   │   ├── subject.service.ts
-│   │   └── record.service.ts
+│   │   ├── record.service.ts
+│   │   ├── attendance.service.ts
+│   │   ├── notification.service.ts
+│   │   └── user.service.ts
 │   ├── store/             # Zustand stores
 │   │   ├── authStore.ts
 │   │   └── toastStore.ts
@@ -108,12 +115,14 @@ notified-frontend/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/Java-Project-IM/notified-frontend.git
    cd notified-frontend
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    # or
@@ -123,18 +132,23 @@ notified-frontend/
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    ```
 
    Edit `.env` and configure:
+
    ```env
-   VITE_API_BASE_URL=http://localhost:3000/api
+   VITE_API_BASE_URL=http://localhost:5000/api/v1
    VITE_APP_NAME=Notified
    VITE_APP_VERSION=1.0.0
    ```
 
+   **⚠️ Important**: The backend API uses `/api/v1/` prefix for all routes. Make sure your `VITE_API_BASE_URL` includes `/api/v1` at the end.
+
 4. **Run the development server**
+
    ```bash
    npm run dev
    ```
@@ -161,28 +175,31 @@ npm run preview
 
 Create a `.env` file in the root directory:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
+| Variable            | Description          | Default                     |
+| ------------------- | -------------------- | --------------------------- |
 | `VITE_API_BASE_URL` | Backend API endpoint | `http://localhost:3000/api` |
-| `VITE_APP_NAME` | Application name | `Notified` |
-| `VITE_APP_VERSION` | App version | `1.0.0` |
+| `VITE_APP_NAME`     | Application name     | `Notified`                  |
+| `VITE_APP_VERSION`  | App version          | `1.0.0`                     |
 
 ---
 
 ## 📖 Features & Pages
 
 ### 🏠 Landing Page
+
 - Hero section with call-to-action
 - Feature showcase
 - Responsive design
 
 ### 🔐 Authentication
+
 - **Login** - Email/password with validation
 - **Signup** - New user registration
 - **Protected Routes** - Auto-redirect if not authenticated
 - **Session Management** - Persistent auth with Zustand
 
 ### 📊 Dashboard
+
 - Real-time statistics cards
 - Total students, subjects, and records
 - Today's activity count
@@ -190,6 +207,7 @@ Create a `.env` file in the root directory:
 - Greeting with user's name
 
 ### 👥 Student Management
+
 - View all students in a searchable table
 - Add new students with auto-generated student numbers
 - Edit existing student information
@@ -198,6 +216,7 @@ Create a `.env` file in the root directory:
 - Guardian information management
 
 ### 📚 Subject Management
+
 - List all subjects with filtering
 - Create new subjects (code, name, section, year level)
 - Update subject details
@@ -205,6 +224,7 @@ Create a `.env` file in the root directory:
 - View enrolled students per subject
 
 ### 📋 Records & Logs
+
 - View attendance and activity records
 - Filter by date range
 - Search by student name/number
@@ -216,6 +236,7 @@ Create a `.env` file in the root directory:
 ## 🎨 Design Philosophy
 
 ### Color Palette
+
 Based on the original JavaFX app with modern enhancements:
 
 - **Primary**: `#2196F3` (Blue) - Primary actions, links
@@ -226,6 +247,7 @@ Based on the original JavaFX app with modern enhancements:
 - **Neutral**: Grays for text and backgrounds
 
 ### UI Components
+
 - **Neumorphic Shadows** - Soft, elevated card designs
 - **Smooth Transitions** - Framer Motion animations
 - **Responsive Grid** - Mobile-first approach
@@ -238,6 +260,7 @@ Based on the original JavaFX app with modern enhancements:
 The frontend expects a REST API with the following endpoints:
 
 ### Authentication
+
 ```
 POST   /api/auth/login      - User login
 POST   /api/auth/signup     - User registration
@@ -246,6 +269,7 @@ GET    /api/auth/me         - Get current user
 ```
 
 ### Students
+
 ```
 GET    /api/students        - Get all students
 GET    /api/students/:id    - Get student by ID
@@ -256,6 +280,7 @@ POST   /api/students/email  - Send bulk email
 ```
 
 ### Subjects
+
 ```
 GET    /api/subjects        - Get all subjects
 GET    /api/subjects/:id    - Get subject by ID
@@ -265,6 +290,7 @@ DELETE /api/subjects/:id    - Delete subject
 ```
 
 ### Records
+
 ```
 GET    /api/records         - Get all records
 GET    /api/records/:id     - Get record by ID
@@ -279,16 +305,19 @@ All endpoints expect `Authorization: Bearer <token>` header for authenticated re
 ## 🧪 Testing
 
 ### Run Linter
+
 ```bash
 npm run lint
 ```
 
 ### Format Code
+
 ```bash
 npm run format
 ```
 
 ### Type Check
+
 ```bash
 npm run build  # TypeScript compilation happens during build
 ```
@@ -298,18 +327,21 @@ npm run build  # TypeScript compilation happens during build
 ## 🚢 Deployment
 
 ### Vercel (Recommended)
+
 1. Push code to GitHub
 2. Import project in Vercel dashboard
 3. Set environment variables
 4. Deploy!
 
 ### Netlify
+
 ```bash
 npm run build
 # Upload dist/ folder to Netlify
 ```
 
 ### Docker
+
 ```dockerfile
 FROM node:18-alpine
 WORKDIR /app
@@ -329,11 +361,11 @@ CMD ["nginx", "-g", "daemon off;"]
 
 The application supports three user roles:
 
-| Role | Permissions |
-|------|-------------|
-| **Superadmin** | Full access to all features, user management |
-| **Admin** | Manage students, subjects, records (no user admin) |
-| **Staff** | View-only access to students and records |
+| Role           | Permissions                                        |
+| -------------- | -------------------------------------------------- |
+| **Superadmin** | Full access to all features, user management       |
+| **Admin**      | Manage students, subjects, records (no user admin) |
+| **Staff**      | View-only access to students and records           |
 
 Roles are enforced on the frontend via protected routes and on the backend via API middleware.
 
@@ -359,6 +391,7 @@ Roles are enforced on the frontend via protected routes and on the backend via A
 5. Open a Pull Request
 
 ### Code Style
+
 - Use TypeScript for all new files
 - Follow ESLint and Prettier rules
 - Write meaningful commit messages
@@ -368,27 +401,29 @@ Roles are enforced on the frontend via protected routes and on the backend via A
 
 ## 📝 Scripts Reference
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start development server with HMR |
-| `npm run build` | Build for production |
-| `npm run preview` | Preview production build locally |
-| `npm run lint` | Run ESLint |
-| `npm run lint:fix` | Fix ESLint errors |
-| `npm run format` | Format code with Prettier |
-| `npm run format:check` | Check code formatting |
+| Script                 | Description                       |
+| ---------------------- | --------------------------------- |
+| `npm run dev`          | Start development server with HMR |
+| `npm run build`        | Build for production              |
+| `npm run preview`      | Preview production build locally  |
+| `npm run lint`         | Run ESLint                        |
+| `npm run lint:fix`     | Fix ESLint errors                 |
+| `npm run format`       | Format code with Prettier         |
+| `npm run format:check` | Check code formatting             |
 
 ---
 
 ## 🐛 Troubleshooting
 
 ### Port Already in Use
+
 ```bash
 # Change port in vite.config.ts or use:
 npm run dev -- --port 5174
 ```
 
 ### Module Not Found
+
 ```bash
 npm install  # Reinstall dependencies
 rm -rf node_modules package-lock.json
@@ -396,11 +431,13 @@ npm install
 ```
 
 ### TypeScript Errors
+
 ```bash
 npx tsc --noEmit  # Check for type errors
 ```
 
 ### Build Fails
+
 - Ensure Node.js version is 18+
 - Clear cache: `rm -rf node_modules/.vite`
 - Check environment variables
@@ -435,6 +472,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 📞 Support
 
 For issues, questions, or contributions:
+
 - Open an issue on GitHub
 - Contact: [your-email@example.com]
 - Documentation: [Link to docs]

@@ -8,7 +8,7 @@ export const authService = {
   },
 
   async signup(data: SignupData): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/signup', data)
+    const response = await apiClient.post<AuthResponse>('/auth/register', data)
     return response.data
   },
 
@@ -22,7 +22,16 @@ export const authService = {
   },
 
   async refreshToken(): Promise<{ token: string }> {
-    const response = await apiClient.post<{ token: string }>('/auth/refresh')
+    const response = await apiClient.post<{ token: string }>('/auth/refresh-token')
+    return response.data
+  },
+
+  async updatePassword(data: { currentPassword: string; newPassword: string }): Promise<void> {
+    await apiClient.put('/auth/update-password', data)
+  },
+
+  async updateProfile(data: Partial<User>): Promise<User> {
+    const response = await apiClient.put<User>('/auth/update-profile', data)
     return response.data
   },
 }

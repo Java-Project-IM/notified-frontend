@@ -12,6 +12,18 @@ export const studentService = {
     return response.data
   },
 
+  async getByStudentNumber(studentNumber: string): Promise<Student> {
+    const response = await apiClient.get<Student>(`/students/number/${studentNumber}`)
+    return response.data
+  },
+
+  async generateStudentNumber(): Promise<{ studentNumber: string }> {
+    const response = await apiClient.get<{ studentNumber: string }>(
+      '/students/generate/student-number'
+    )
+    return response.data
+  },
+
   async create(data: StudentFormData): Promise<Student> {
     const response = await apiClient.post<Student>('/students', data)
     return response.data
@@ -31,13 +43,5 @@ export const studentService = {
       params: { q: query },
     })
     return response.data
-  },
-
-  async sendEmail(studentIds: number[], subject: string, message: string): Promise<void> {
-    await apiClient.post('/students/email', {
-      studentIds,
-      subject,
-      message,
-    })
   },
 }

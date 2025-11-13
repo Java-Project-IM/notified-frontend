@@ -7,23 +7,18 @@ export const recordService = {
     return response.data
   },
 
+  async getToday(): Promise<Record[]> {
+    const response = await apiClient.get<Record[]>('/records/today')
+    return response.data
+  },
+
+  async getStats(): Promise<DashboardStats> {
+    const response = await apiClient.get<DashboardStats>('/records/stats')
+    return response.data
+  },
+
   async getById(id: number): Promise<Record> {
     const response = await apiClient.get<Record>(`/records/${id}`)
-    return response.data
-  },
-
-  async create(studentId: number, recordType: string): Promise<Record> {
-    const response = await apiClient.post<Record>('/records', {
-      studentId,
-      recordType,
-    })
-    return response.data
-  },
-
-  async getByDateRange(startDate: string, endDate: string): Promise<Record[]> {
-    const response = await apiClient.get<Record[]>('/records/date-range', {
-      params: { startDate, endDate },
-    })
     return response.data
   },
 
@@ -32,15 +27,17 @@ export const recordService = {
     return response.data
   },
 
-  async getDashboardStats(): Promise<DashboardStats> {
-    const response = await apiClient.get<DashboardStats>('/records/stats')
+  async getBySubject(subjectId: number): Promise<Record[]> {
+    const response = await apiClient.get<Record[]>(`/records/subject/${subjectId}`)
     return response.data
   },
 
-  async search(query: string): Promise<Record[]> {
-    const response = await apiClient.get<Record[]>('/records/search', {
-      params: { q: query },
-    })
+  async getByType(type: string): Promise<Record[]> {
+    const response = await apiClient.get<Record[]>(`/records/type/${type}`)
     return response.data
+  },
+
+  async delete(id: number): Promise<void> {
+    await apiClient.delete(`/records/${id}`)
   },
 }
