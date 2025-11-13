@@ -147,7 +147,7 @@ export default function SubjectsPage() {
                 <p className="text-gray-600 text-sm">Total Subjects</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">{subjects.length}</p>
               </div>
-              <BookOpen className="w-12 h-12 text-purple-500 opacity-20" />
+              <BookOpen className="w-12 h-12 text-purple-500 " />
             </div>
           </motion.div>
 
@@ -164,7 +164,7 @@ export default function SubjectsPage() {
                   {new Set(subjects.map((s) => s.yearLevel)).size}
                 </p>
               </div>
-              <BookOpen className="w-12 h-12 text-blue-500 opacity-20" />
+              <BookOpen className="w-12 h-12 text-blue-500 " />
             </div>
           </motion.div>
 
@@ -181,7 +181,7 @@ export default function SubjectsPage() {
                   {new Set(subjects.map((s) => s.section)).size}
                 </p>
               </div>
-              <Users className="w-12 h-12 text-green-500 opacity-20" />
+              <Users className="w-12 h-12 text-green-500 " />
             </div>
           </motion.div>
 
@@ -196,7 +196,7 @@ export default function SubjectsPage() {
                 <p className="text-gray-600 text-sm">Active Classes</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">{subjects.length}</p>
               </div>
-              <Users className="w-12 h-12 text-orange-500 opacity-20" />
+              <Users className="w-12 h-12 text-orange-500 " />
             </div>
           </motion.div>
         </div>

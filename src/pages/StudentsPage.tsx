@@ -196,7 +196,7 @@ export default function StudentsPage() {
                 <p className="text-gray-600 text-sm">Total Students</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">{students.length}</p>
               </div>
-              <Users className="w-12 h-12 text-blue-500 opacity-20" />
+              <Users className="w-12 h-12 text-blue-500 " />
             </div>
           </motion.div>
 
@@ -211,7 +211,7 @@ export default function StudentsPage() {
                 <p className="text-gray-600 text-sm">Selected</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">{selectedStudents.size}</p>
               </div>
-              <Users className="w-12 h-12 text-green-500 opacity-20" />
+              <Users className="w-12 h-12 text-green-500 " />
             </div>
           </motion.div>
 
@@ -226,7 +226,7 @@ export default function StudentsPage() {
                 <p className="text-gray-600 text-sm">Active Today</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">0</p>
               </div>
-              <Users className="w-12 h-12 text-orange-500 opacity-20" />
+              <Users className="w-12 h-12 text-orange-500 " />
             </div>
           </motion.div>
 
@@ -243,7 +243,7 @@ export default function StudentsPage() {
                   {students.filter((s) => s.guardianName).length}
                 </p>
               </div>
-              <Users className="w-12 h-12 text-purple-500 opacity-20" />
+              <Users className="w-12 h-12 text-purple-500 " />
             </div>
           </motion.div>
         </div>

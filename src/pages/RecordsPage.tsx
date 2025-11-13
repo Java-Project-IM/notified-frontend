@@ -1,6 +1,14 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { FileText, Search, Calendar, Filter, BarChart3, Download } from 'lucide-react'
+import {
+  FileText,
+  Search,
+  Calendar,
+  BarChart3,
+  Download,
+  HandIcon,
+  CheckCircle2,
+} from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import MainLayout from '@/layouts/MainLayout'
 import { Button } from '@/components/ui/button'
@@ -105,7 +113,7 @@ Date Range: ${selectedDate || 'All Time'}
                 <p className="text-gray-600 text-sm">Total Records</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">{records.length}</p>
               </div>
-              <FileText className="w-12 h-12 text-teal-500 opacity-20" />
+              <FileText className="w-12 h-12 text-teal-500 " />
             </div>
           </motion.div>
 
@@ -120,7 +128,7 @@ Date Range: ${selectedDate || 'All Time'}
                 <p className="text-gray-600 text-sm">Arrivals</p>
                 <p className="text-3xl font-bold text-green-600 mt-1">{arrivals}</p>
               </div>
-              <div className="text-green-500 text-5xl">✅</div>
+              <CheckCircle2 className="w-12 h-12 text-green-500 text-5xl" />
             </div>
           </motion.div>
 
@@ -135,7 +143,7 @@ Date Range: ${selectedDate || 'All Time'}
                 <p className="text-gray-600 text-sm">Departures</p>
                 <p className="text-3xl font-bold text-orange-600 mt-1">{departures}</p>
               </div>
-              <div className="text-orange-500 text-5xl">🚪</div>
+              <HandIcon className="w-12 h-12 text-orange-500 " />
             </div>
           </motion.div>
 
@@ -150,7 +158,7 @@ Date Range: ${selectedDate || 'All Time'}
                 <p className="text-gray-600 text-sm">Today's Records</p>
                 <p className="text-3xl font-bold text-blue-600 mt-1">{todayRecords.length}</p>
               </div>
-              <Calendar className="w-12 h-12 text-blue-500 opacity-20" />
+              <Calendar className="w-12 h-12 text-blue-500 " />
             </div>
           </motion.div>
         </div>
