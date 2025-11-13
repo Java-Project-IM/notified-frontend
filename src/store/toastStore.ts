@@ -18,21 +18,30 @@ export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
   addToast: (toast) => {
     const id = Math.random().toString(36).substring(7)
-    set((state) => ({
-      toasts: [...state.toasts, { ...toast, id }],
-    }))
+    console.log('🍞 Adding toast:', { id, ...toast })
+    set((state) => {
+      const newToasts = [...state.toasts, { ...toast, id }]
+      console.log('📊 Current toasts:', newToasts.length)
+      return { toasts: newToasts }
+    })
     // Auto-remove after 5 seconds
     setTimeout(() => {
+      console.log('🗑️ Removing toast:', id)
       set((state) => ({
         toasts: state.toasts.filter((t) => t.id !== id),
       }))
     }, 5000)
   },
-  removeToast: (id) =>
+  removeToast: (id) => {
+    console.log('❌ Manually removing toast:', id)
     set((state) => ({
       toasts: state.toasts.filter((t) => t.id !== id),
-    })),
-  clearToasts: () => set({ toasts: [] }),
+    }))
+  },
+  clearToasts: () => {
+    console.log('🧹 Clearing all toasts')
+    set({ toasts: [] })
+  },
 }))
 
 // Helper hook for toast notifications
@@ -40,6 +49,8 @@ export const useToast = () => {
   const { addToast } = useToastStore()
 
   return {
+    addToast: (message: string, type: 'success' | 'error' | 'warning' | 'info', title?: string) =>
+      addToast({ message, title, type }),
     success: (message: string, title?: string) => addToast({ message, title, type: 'success' }),
     error: (message: string, title?: string) => addToast({ message, title, type: 'error' }),
     warning: (message: string, title?: string) => addToast({ message, title, type: 'warning' }),

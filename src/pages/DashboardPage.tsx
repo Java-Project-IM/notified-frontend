@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { recordService } from '@/services/record.service'
 import { useAuthStore } from '@/store/authStore'
+import { useToast } from '@/store/toastStore'
 import { ROUTES } from '@/utils/constants'
 import { getGreeting } from '@/lib/utils'
 import MainLayout from '@/layouts/MainLayout'
@@ -12,10 +13,24 @@ import MainLayout from '@/layouts/MainLayout'
 export default function DashboardPage() {
   const { user } = useAuthStore()
   const navigate = useNavigate()
+  const toast = useToast()
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
-    queryFn: recordService.getDashboardStats,
+    queryFn: async () => {
+      console.log('Fetching dashboard stats...')
+      try {
+        const data = await recordService.getStats()
+        console.log('Dashboard stats loaded:', data)
+        toast.success('Dashboard data loaded successfully', '📊 Data Loaded')
+        return data
+      } catch (err) {
+        console.error('Failed to load dashboard stats:', err)
+        toast.error('Failed to load dashboard statistics', '❌ Error')
+        throw err
+      }
+    },
+    retry: 1,
   })
 
   const statCards = [

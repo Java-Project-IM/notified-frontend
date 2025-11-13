@@ -11,6 +11,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/store/toastStore'
 import { ROUTES, APP_NAME, TOAST_MESSAGES } from '@/utils/constants'
 import { validateEmail } from '@/lib/utils'
+import { AuthResponse } from '@/types'
 
 export default function SignupPage() {
   const navigate = useNavigate()
@@ -26,20 +27,22 @@ export default function SignupPage() {
 
   const signupMutation = useMutation({
     mutationFn: authService.signup,
-    onSuccess: (data: unknown) => {
-      const authData = data as { user: unknown; token: string }
-      setAuth(authData.user, authData.token)
-      addToast('Account created successfully!', 'success')
-      navigate(ROUTES.DASHBOARD)
+    onSuccess: (data: AuthResponse) => {
+      console.log('Signup success, data:', data)
+      setAuth(data.user, data.token)
+      addToast('Account created successfully! Welcome aboard! 🎉', 'success', '✅ Success')
+      setTimeout(() => navigate(ROUTES.DASHBOARD), 500)
     },
     onError: (error: unknown) => {
+      console.error('Signup error:', error)
       const message = (error as { message?: string })?.message || TOAST_MESSAGES.ERROR
-      addToast(message, 'error')
+      addToast(message, 'error', '❌ Signup Failed')
     },
   })
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    console.log('Signup form submitted with:', formData)
 
     // Validation
     const newErrors: { name?: string; email?: string; password?: string } = {}
@@ -62,10 +65,12 @@ export default function SignupPage() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
+      addToast('Please fix the form errors', 'error', '⚠️ Validation Error')
       return
     }
 
     setErrors({})
+    addToast('Creating your account...', 'info', '🔄 Processing')
     signupMutation.mutate(formData)
   }
 
