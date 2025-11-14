@@ -150,7 +150,7 @@ export default function StudentModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-50"
           />
 
           {/* Modal */}
@@ -160,17 +160,17 @@ export default function StudentModal({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', duration: 0.5 }}
-              className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+              className="bg-slate-800/95 backdrop-blur-xl rounded-3xl shadow-enterprise-2xl border border-slate-700/50 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             >
               {/* Header */}
-              <div className="sticky top-0 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-6 rounded-t-3xl shadow-lg z-10">
+              <div className="sticky top-0 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-6 rounded-t-3xl shadow-lg z-10 border-b border-blue-500/30">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <motion.div
                       initial={{ rotate: -180, scale: 0 }}
                       animate={{ rotate: 0, scale: 1 }}
                       transition={{ type: 'spring', stiffness: 200 }}
-                      className="bg-white/20 p-2 rounded-xl backdrop-blur-sm"
+                      className="bg-white/20 p-2 rounded-xl backdrop-blur-sm border border-white/30"
                     >
                       <User className="w-6 h-6" />
                     </motion.div>
@@ -204,7 +204,7 @@ export default function StudentModal({
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-300 mb-2">
                     <Hash className="w-4 h-4 inline mr-1" />
                     Student Number *
                   </label>
@@ -214,17 +214,17 @@ export default function StudentModal({
                     onChange={(e) => handleChange('studentNumber', e.target.value)}
                     placeholder="e.g., 25-0001"
                     disabled={!!student}
-                    className={`h-12 rounded-xl border-2 transition-all ${
+                    className={`h-12 rounded-xl border-2 transition-all bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
                       errors.studentNumber
                         ? 'border-red-500 focus:border-red-600'
-                        : 'border-gray-200 focus:border-blue-500'
+                        : 'border-slate-600 focus:border-blue-500'
                     }`}
                   />
                   {errors.studentNumber && (
                     <motion.p
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-red-500 text-sm mt-2 flex items-center gap-1"
+                      className="text-red-400 text-sm mt-2 flex items-center gap-1"
                     >
                       ⚠️ {errors.studentNumber}
                     </motion.p>
@@ -238,7 +238,7 @@ export default function StudentModal({
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.2 }}
                   >
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-300 mb-2">
                       First Name *
                     </label>
                     <Input
@@ -246,17 +246,17 @@ export default function StudentModal({
                       value={formData.firstName}
                       onChange={(e) => handleChange('firstName', e.target.value)}
                       placeholder="John"
-                      className={`h-12 rounded-xl border-2 transition-all ${
+                      className={`h-12 rounded-xl border-2 transition-all bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
                         errors.firstName
                           ? 'border-red-500 focus:border-red-600'
-                          : 'border-gray-200 focus:border-blue-500'
+                          : 'border-slate-600 focus:border-blue-500'
                       }`}
                     />
                     {errors.firstName && (
                       <motion.p
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-red-500 text-sm mt-2 flex items-center gap-1"
+                        className="text-red-400 text-sm mt-2 flex items-center gap-1"
                       >
                         ⚠️ {errors.firstName}
                       </motion.p>
@@ -268,7 +268,7 @@ export default function StudentModal({
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.2 }}
                   >
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-300 mb-2">
                       Last Name *
                     </label>
                     <Input
@@ -276,17 +276,17 @@ export default function StudentModal({
                       value={formData.lastName}
                       onChange={(e) => handleChange('lastName', e.target.value)}
                       placeholder="Doe"
-                      className={`h-12 rounded-xl border-2 transition-all ${
+                      className={`h-12 rounded-xl border-2 transition-all bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
                         errors.lastName
                           ? 'border-red-500 focus:border-red-600'
-                          : 'border-gray-200 focus:border-blue-500'
+                          : 'border-slate-600 focus:border-blue-500'
                       }`}
                     />
                     {errors.lastName && (
                       <motion.p
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-red-500 text-sm mt-2 flex items-center gap-1"
+                        className="text-red-400 text-sm mt-2 flex items-center gap-1"
                       >
                         ⚠️ {errors.lastName}
                       </motion.p>
@@ -296,7 +296,7 @@ export default function StudentModal({
 
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     <Mail className="w-4 h-4 inline mr-1" />
                     Email *
                   </label>
@@ -305,14 +305,18 @@ export default function StudentModal({
                     value={formData.email}
                     onChange={(e) => handleChange('email', e.target.value)}
                     placeholder="john.doe@example.com"
-                    className={errors.email ? 'border-red-500' : ''}
+                    className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                      errors.email
+                        ? 'border-red-500 focus:border-red-600'
+                        : 'border-slate-600 focus:border-blue-500'
+                    }`}
                   />
-                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                  {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
                 </div>
 
                 {/* Section */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     <UsersIcon className="w-4 h-4 inline mr-1" />
                     Section
                   </label>
@@ -321,16 +325,19 @@ export default function StudentModal({
                     value={formData.section}
                     onChange={(e) => handleChange('section', e.target.value)}
                     placeholder="e.g., A, B, 1-A"
+                    className="h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 border-slate-600 focus:border-blue-500"
                   />
                 </div>
 
                 {/* Guardian Info */}
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Guardian Information</h3>
+                <div className="border-t border-slate-700/50 pt-6">
+                  <h3 className="text-lg font-semibold text-slate-200 mb-4">
+                    Guardian Information
+                  </h3>
 
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
                         Guardian Name
                       </label>
                       <Input
@@ -338,11 +345,12 @@ export default function StudentModal({
                         value={formData.guardianName}
                         onChange={(e) => handleChange('guardianName', e.target.value)}
                         placeholder="Jane Doe"
+                        className="h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 border-slate-600 focus:border-blue-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
                         Guardian Email
                       </label>
                       <Input
@@ -350,27 +358,35 @@ export default function StudentModal({
                         value={formData.guardianEmail}
                         onChange={(e) => handleChange('guardianEmail', e.target.value)}
                         placeholder="jane.doe@example.com"
-                        className={errors.guardianEmail ? 'border-red-500' : ''}
+                        className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                          errors.guardianEmail
+                            ? 'border-red-500 focus:border-red-600'
+                            : 'border-slate-600 focus:border-blue-500'
+                        }`}
                       />
                       {errors.guardianEmail && (
-                        <p className="text-red-500 text-sm mt-1">{errors.guardianEmail}</p>
+                        <p className="text-red-400 text-sm mt-1">{errors.guardianEmail}</p>
                       )}
                     </div>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-3 pt-6 border-t">
+                <div className="flex gap-3 pt-6 border-t border-slate-700/50">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handleClose}
-                    className="flex-1"
+                    className="flex-1 h-12 rounded-xl bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
                     disabled={isLoading}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" className="flex-1 shadow-neumorphic" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    className="flex-1 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg border-0"
+                    disabled={isLoading}
+                  >
                     {isLoading ? 'Saving...' : student ? 'Update Student' : 'Add Student'}
                   </Button>
                 </div>

@@ -119,7 +119,7 @@ export default function SubjectModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-50"
           />
 
           {/* Modal */}
@@ -129,17 +129,17 @@ export default function SubjectModal({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', duration: 0.5 }}
-              className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl"
+              className="bg-slate-800/95 backdrop-blur-xl rounded-3xl shadow-enterprise-2xl border border-slate-700/50 w-full max-w-2xl"
             >
               {/* Header */}
-              <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 text-white p-6 rounded-t-3xl shadow-lg">
+              <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 text-white p-6 rounded-t-3xl shadow-lg border-b border-purple-500/30">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <motion.div
                       initial={{ rotate: -180, scale: 0 }}
                       animate={{ rotate: 0, scale: 1 }}
                       transition={{ type: 'spring', stiffness: 200 }}
-                      className="bg-white/20 p-2 rounded-xl backdrop-blur-sm"
+                      className="bg-white/20 p-2 rounded-xl backdrop-blur-sm border border-white/30"
                     >
                       <BookOpen className="w-6 h-6" />
                     </motion.div>
@@ -173,7 +173,7 @@ export default function SubjectModal({
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-300 mb-2">
                     <Hash className="w-4 h-4 inline mr-1" />
                     Subject Code *
                   </label>
@@ -183,17 +183,17 @@ export default function SubjectModal({
                     onChange={(e) => handleChange('subjectCode', e.target.value.toUpperCase())}
                     placeholder="e.g., CS101, MATH201"
                     disabled={!!subject}
-                    className={`h-12 rounded-xl border-2 transition-all ${
+                    className={`h-12 rounded-xl border-2 transition-all bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
                       errors.subjectCode
                         ? 'border-red-500 focus:border-red-600'
-                        : 'border-gray-200 focus:border-purple-500'
+                        : 'border-slate-600 focus:border-purple-500'
                     }`}
                   />
                   {errors.subjectCode && (
                     <motion.p
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-red-500 text-sm mt-2 flex items-center gap-1"
+                      className="text-red-400 text-sm mt-2 flex items-center gap-1"
                     >
                       ⚠️ {errors.subjectCode}
                     </motion.p>
@@ -202,7 +202,7 @@ export default function SubjectModal({
 
                 {/* Subject Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     <BookOpen className="w-4 h-4 inline mr-1" />
                     Subject Name *
                   </label>
@@ -211,17 +211,21 @@ export default function SubjectModal({
                     value={formData.subjectName}
                     onChange={(e) => handleChange('subjectName', e.target.value)}
                     placeholder="e.g., Introduction to Computer Science"
-                    className={errors.subjectName ? 'border-red-500' : ''}
+                    className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                      errors.subjectName
+                        ? 'border-red-500 focus:border-red-600'
+                        : 'border-slate-600 focus:border-purple-500'
+                    }`}
                   />
                   {errors.subjectName && (
-                    <p className="text-red-500 text-sm mt-1">{errors.subjectName}</p>
+                    <p className="text-red-400 text-sm mt-1">{errors.subjectName}</p>
                   )}
                 </div>
 
                 {/* Year Level and Section */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
                       <GraduationCap className="w-4 h-4 inline mr-1" />
                       Year Level *
                     </label>
@@ -232,15 +236,19 @@ export default function SubjectModal({
                       value={formData.yearLevel}
                       onChange={(e) => handleChange('yearLevel', parseInt(e.target.value))}
                       placeholder="1-12"
-                      className={errors.yearLevel ? 'border-red-500' : ''}
+                      className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                        errors.yearLevel
+                          ? 'border-red-500 focus:border-red-600'
+                          : 'border-slate-600 focus:border-purple-500'
+                      }`}
                     />
                     {errors.yearLevel && (
-                      <p className="text-red-500 text-sm mt-1">{errors.yearLevel}</p>
+                      <p className="text-red-400 text-sm mt-1">{errors.yearLevel}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
                       <Users className="w-4 h-4 inline mr-1" />
                       Section *
                     </label>
@@ -249,28 +257,32 @@ export default function SubjectModal({
                       value={formData.section}
                       onChange={(e) => handleChange('section', e.target.value.toUpperCase())}
                       placeholder="e.g., A, B, 1-A"
-                      className={errors.section ? 'border-red-500' : ''}
+                      className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                        errors.section
+                          ? 'border-red-500 focus:border-red-600'
+                          : 'border-slate-600 focus:border-purple-500'
+                      }`}
                     />
                     {errors.section && (
-                      <p className="text-red-500 text-sm mt-1">{errors.section}</p>
+                      <p className="text-red-400 text-sm mt-1">{errors.section}</p>
                     )}
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-3 pt-6 border-t">
+                <div className="flex gap-3 pt-6 border-t border-slate-700/50">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handleClose}
-                    className="flex-1"
+                    className="flex-1 h-12 rounded-xl bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
                     disabled={isLoading}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    className="flex-1 shadow-neumorphic bg-purple-600 hover:bg-purple-700"
+                    className="flex-1 h-12 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg border-0"
                     disabled={isLoading}
                   >
                     {isLoading ? 'Saving...' : subject ? 'Update Subject' : 'Add Subject'}

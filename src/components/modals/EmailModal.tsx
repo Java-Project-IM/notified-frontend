@@ -196,7 +196,7 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4"
           onClick={onClose}
           onKeyDown={handleKeyDown}
         >
@@ -205,18 +205,18 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden"
+            className="relative w-full max-w-2xl bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-enterprise-2xl border border-slate-700/50 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header with Gradient */}
-            <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-8 py-6">
+            <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-8 py-6 border-b border-blue-500/30">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <motion.div
                     initial={{ rotate: -10, scale: 0.9 }}
                     animate={{ rotate: 0, scale: 1 }}
                     transition={{ type: 'spring', damping: 15 }}
-                    className="p-3 bg-white/20 backdrop-blur-sm rounded-xl"
+                    className="p-3 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30"
                   >
                     <Mail className="w-6 h-6 text-white" />
                   </motion.div>
@@ -246,12 +246,12 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl"
+                    className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl"
                   >
-                    <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                    <ShieldAlert className="w-5 h-5 text-amber-400 flex-shrink-0" />
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-amber-900">Permission Required</p>
-                      <p className="text-xs text-amber-700 mt-1">
+                      <p className="text-sm font-medium text-amber-300">Permission Required</p>
+                      <p className="text-xs text-amber-400 mt-1">
                         Bulk email requires admin or staff role. You can only send to one recipient
                         at a time.
                       </p>
@@ -267,10 +267,10 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl"
+                    className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl"
                   >
-                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                    <p className="text-sm text-red-700">{error}</p>
+                    <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                    <p className="text-sm text-red-300">{error}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -282,7 +282,7 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
                 transition={{ delay: 0.1 }}
                 className="space-y-2"
               >
-                <Label htmlFor="to" className="text-gray-700 font-medium">
+                <Label htmlFor="to" className="text-slate-300 font-medium">
                   To
                 </Label>
                 <Input
@@ -291,12 +291,12 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
                   value={to}
                   onChange={(e) => setTo(e.target.value)}
                   placeholder="recipient@example.com"
-                  className="h-12 rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  className="h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 border-slate-600 focus:border-blue-500"
                   disabled={isMultipleRecipients || isSending}
                   readOnly={isMultipleRecipients}
                 />
                 {isMultipleRecipients && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-slate-400">
                     Multiple recipients - email will be sent to all
                   </p>
                 )}
@@ -309,7 +309,7 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
                 transition={{ delay: 0.2 }}
                 className="space-y-2"
               >
-                <Label htmlFor="subject" className="text-gray-700 font-medium">
+                <Label htmlFor="subject" className="text-slate-300 font-medium">
                   Subject
                 </Label>
                 <Input
@@ -318,11 +318,11 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="Enter email subject"
-                  className="h-12 rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  className="h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 border-slate-600 focus:border-blue-500"
                   disabled={isSending}
                   maxLength={VALIDATION.SUBJECT_MAX}
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-400">
                   {subject.length}/{VALIDATION.SUBJECT_MAX} characters (min {VALIDATION.SUBJECT_MIN}
                   )
                 </p>
@@ -335,7 +335,7 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
                 transition={{ delay: 0.3 }}
                 className="space-y-2"
               >
-                <Label htmlFor="message" className="text-gray-700 font-medium">
+                <Label htmlFor="message" className="text-slate-300 font-medium">
                   Message
                 </Label>
                 <textarea
@@ -344,11 +344,11 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Type your message here..."
                   rows={8}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  className="w-full px-4 py-3 border-2 border-slate-600 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
                   disabled={isSending}
                   maxLength={VALIDATION.MESSAGE_MAX}
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-400">
                   {message.length}/{VALIDATION.MESSAGE_MAX} characters (min {VALIDATION.MESSAGE_MIN}
                   )
                 </p>
@@ -361,13 +361,13 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
                 transition={{ delay: 0.4 }}
                 className="space-y-2"
               >
-                <Label htmlFor="attachments" className="text-gray-700 font-medium">
+                <Label htmlFor="attachments" className="text-slate-300 font-medium">
                   Attachments (Optional)
                 </Label>
                 <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
-                    <Paperclip className="w-4 h-4 text-gray-600" />
-                    <span className="text-sm text-gray-700">Add Files</span>
+                  <label className="flex items-center gap-2 px-4 py-2 border border-slate-600 bg-slate-900/50 rounded-xl hover:bg-slate-800/50 cursor-pointer transition-colors">
+                    <Paperclip className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm text-slate-300">Add Files</span>
                     <input
                       id="attachments"
                       type="file"
@@ -378,7 +378,7 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
                     />
                   </label>
                   {attachments.length > 0 && (
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-slate-400">
                       {attachments.length} file{attachments.length > 1 ? 's' : ''} selected
                     </span>
                   )}
@@ -388,21 +388,21 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
                     {attachments.map((file, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                        className="flex items-center justify-between p-3 bg-slate-900/50 border border-slate-700/50 rounded-lg"
                       >
                         <div className="flex items-center gap-2">
-                          <Paperclip className="w-4 h-4 text-gray-500" />
-                          <span className="text-sm text-gray-700">{file.name}</span>
-                          <span className="text-xs text-gray-500">
+                          <Paperclip className="w-4 h-4 text-slate-400" />
+                          <span className="text-sm text-slate-300">{file.name}</span>
+                          <span className="text-xs text-slate-500">
                             ({(file.size / 1024).toFixed(1)} KB)
                           </span>
                         </div>
                         <button
                           onClick={() => removeAttachment(index)}
-                          className="p-1 hover:bg-gray-200 rounded transition-colors"
+                          className="p-1 hover:bg-slate-800 rounded transition-colors"
                           disabled={isSending}
                         >
-                          <X className="w-4 h-4 text-gray-600" />
+                          <X className="w-4 h-4 text-slate-400" />
                         </button>
                       </div>
                     ))}
@@ -412,19 +412,20 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
             </div>
 
             {/* Footer with Actions */}
-            <div className="px-8 py-6 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3">
+            {/* Footer with Actions */}
+            <div className="px-8 py-6 bg-slate-900/50 border-t border-slate-700/50 flex items-center justify-end gap-3">
               <Button
                 variant="outline"
                 onClick={onClose}
                 disabled={isSending}
-                className="px-6 h-11 rounded-xl"
+                className="px-6 h-11 rounded-xl bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSend}
                 disabled={isSending || hasPermissionIssue}
-                className="px-6 h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border-0"
                 title={hasPermissionIssue ? 'You do not have permission to send bulk emails' : ''}
               >
                 {isSending ? (
