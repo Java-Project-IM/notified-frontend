@@ -9,6 +9,7 @@ import {
   ArrowRight,
   Activity,
   LayoutDashboard,
+  CheckCircle,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -111,9 +112,9 @@ export default function DashboardPage() {
         {/* Page Header */}
         <PageHeader
           title={`${getGreeting()}, ${user?.name}!`}
-          description="Here's an overview of your student management system"
+          description="Welcome to your command center. Here's your overview at a glance."
           icon={LayoutDashboard}
-          gradient="from-slate-600 via-blue-600 to-indigo-600"
+          gradient="from-blue-600 via-indigo-600 to-violet-600"
           stats={[
             {
               label: 'Total Students',
@@ -148,57 +149,61 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
         >
-          <Card className="border border-gray-200 shadow-sm bg-white">
+          <Card className="border border-gray-200 shadow-enterprise bg-white">
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <Activity className="w-6 h-6 text-slate-600" />
-                <CardTitle className="text-2xl text-gray-900">Quick Actions</CardTitle>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 rounded-lg">
+                  <Activity className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl text-gray-900">Quick Actions</CardTitle>
+                  <p className="text-gray-600 text-sm mt-0.5">
+                    Navigate to the most commonly used features
+                  </p>
+                </div>
               </div>
-              <p className="text-gray-600 text-sm mt-1">
-                Navigate to the most commonly used features
-              </p>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     onClick={() => navigate(ROUTES.STUDENTS)}
-                    className="w-full h-auto py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all group"
+                    className="w-full h-auto py-5 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-enterprise hover:shadow-enterprise-lg transition-all group border-0"
                   >
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3">
                         <Users className="w-5 h-5" />
-                        <span className="font-semibold">Manage Students</span>
+                        <span className="font-semibold text-base">Manage Students</span>
                       </div>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </Button>
                 </motion.div>
 
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     onClick={() => navigate(ROUTES.SUBJECTS)}
-                    className="w-full h-auto py-4 px-6 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 shadow-md hover:shadow-lg transition-all group"
+                    className="w-full h-auto py-5 px-6 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 shadow-enterprise hover:shadow-enterprise-lg transition-all group border-0"
                   >
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3">
                         <BookOpen className="w-5 h-5" />
-                        <span className="font-semibold">View Subjects</span>
+                        <span className="font-semibold text-base">View Subjects</span>
                       </div>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </Button>
                 </motion.div>
 
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     onClick={() => navigate(ROUTES.RECORDS)}
-                    className="w-full h-auto py-4 px-6 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md hover:shadow-lg transition-all group"
+                    className="w-full h-auto py-5 px-6 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-enterprise hover:shadow-enterprise-lg transition-all group border-0"
                   >
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3">
                         <ClipboardList className="w-5 h-5" />
-                        <span className="font-semibold">View Records</span>
+                        <span className="font-semibold text-base">View Records</span>
                       </div>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
@@ -215,19 +220,25 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          <Card className="border border-gray-200 shadow-sm bg-gradient-to-br from-emerald-50 to-white">
+          <Card className="border border-gray-200 shadow-enterprise bg-gradient-to-br from-emerald-50 via-white to-teal-50/50">
             <CardContent className="py-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
-                  <p className="text-sm font-medium text-gray-700">
-                    System Status:{' '}
-                    <span className="text-emerald-600 font-semibold">All systems operational</span>
-                  </p>
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-emerald-500 rounded-full blur-md opacity-30 animate-pulse" />
+                    <div className="relative w-3 h-3 bg-emerald-500 rounded-full shadow-lg" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700">
+                      System Status:{' '}
+                      <span className="text-emerald-600">All systems operational</span>
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Last updated: {new Date().toLocaleTimeString()}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-500">
-                  Last updated: {new Date().toLocaleTimeString()}
-                </p>
+                <CheckCircle className="w-6 h-6 text-emerald-500" />
               </div>
             </CardContent>
           </Card>

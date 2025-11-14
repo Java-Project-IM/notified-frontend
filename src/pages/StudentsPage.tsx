@@ -289,9 +289,9 @@ export default function StudentsPage() {
         {/* Page Header */}
         <PageHeader
           title="Students"
-          description="Manage student records and information"
+          description="Manage student records, track enrollment, and maintain student information"
           icon={Users}
-          gradient="from-blue-600 via-indigo-600 to-violet-600"
+          gradient="from-blue-600 via-indigo-600 to-purple-600"
           stats={[
             {
               label: 'Total Students',
@@ -342,7 +342,7 @@ export default function StudentsPage() {
         <div className="flex gap-3">
           <Button
             variant="outline"
-            className="border-gray-300 hover:bg-gray-50"
+            className="border-gray-300 hover:bg-gray-50 hover:border-blue-400 transition-all h-11"
             onClick={handleDownloadTemplate}
           >
             <Download className="w-4 h-4 mr-2" />
@@ -350,7 +350,7 @@ export default function StudentsPage() {
           </Button>
           <Button
             variant="outline"
-            className="border-gray-300 hover:bg-gray-50"
+            className="border-gray-300 hover:bg-gray-50 hover:border-blue-400 transition-all h-11"
             onClick={handleExportStudents}
             disabled={students.length === 0}
           >
@@ -367,22 +367,22 @@ export default function StudentsPage() {
         </div>
 
         {/* Search and Actions */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+        <div className="bg-white rounded-2xl p-6 shadow-enterprise border border-gray-200">
           <div className="flex items-center gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <Input
                 type="text"
                 placeholder="Search by name, student number, or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-gray-300"
+                className="pl-12 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
               />
             </div>
             {selectedStudents.size > 0 && (
               <Button
                 variant="outline"
-                className="border-gray-300 hover:bg-gray-50"
+                className="h-12 px-5 border-gray-300 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 transition-all"
                 onClick={() => setIsEmailModalOpen(true)}
               >
                 <Mail className="w-4 h-4 mr-2" />
@@ -396,13 +396,13 @@ export default function StudentsPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+          className="bg-white rounded-2xl shadow-enterprise border border-gray-200 overflow-hidden"
         >
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+              <thead className="bg-gradient-to-r from-blue-600 to-indigo-600">
                 <tr>
-                  <th className="text-left p-4">
+                  <th className="text-left p-5">
                     <div className="flex items-center">
                       <input
                         type="checkbox"
@@ -411,32 +411,57 @@ export default function StudentsPage() {
                           filteredStudents.length > 0
                         }
                         onChange={toggleSelectAll}
-                        className="w-5 h-5 rounded-md border-2 border-white/30 text-blue-600 focus:ring-2 focus:ring-white/50 focus:ring-offset-0 cursor-pointer transition-all hover:scale-110"
+                        className="w-5 h-5 rounded-md border-2 border-white/30 text-blue-600 focus:ring-2 focus:ring-white/50 focus:ring-offset-0 cursor-pointer transition-all hover:scale-110 bg-white/10"
                       />
                     </div>
                   </th>
-                  <th className="text-left p-4 font-semibold">Student Number</th>
-                  <th className="text-left p-4 font-semibold">First Name</th>
-                  <th className="text-left p-4 font-semibold">Last Name</th>
-                  <th className="text-left p-4 font-semibold">Email</th>
-                  <th className="text-left p-4 font-semibold">Section</th>
-                  <th className="text-left p-4 font-semibold">Guardian</th>
-                  <th className="text-center p-4 font-semibold">Actions</th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Student Number
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    First Name
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Last Name
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Email
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Section
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Guardian
+                  </th>
+                  <th className="text-center p-5 font-semibold text-white text-sm tracking-wide">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-12 text-gray-500">
-                      Loading students...
+                    <td colSpan={8} className="text-center py-16 text-gray-500">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+                        <p className="font-medium">Loading students...</p>
+                      </div>
                     </td>
                   </tr>
                 ) : filteredStudents.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-12 text-gray-500">
-                      {searchTerm
-                        ? 'No students found matching your search'
-                        : 'No students added yet'}
+                    <td colSpan={8} className="text-center py-16 text-gray-500">
+                      <div className="flex flex-col items-center gap-2">
+                        <Users className="w-16 h-16 text-gray-300" />
+                        <p className="font-medium text-lg">
+                          {searchTerm
+                            ? 'No students found matching your search'
+                            : 'No students added yet'}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          {!searchTerm && 'Get started by adding your first student'}
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -445,10 +470,10 @@ export default function StudentsPage() {
                       key={student.id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="border-b border-gray-100 hover:bg-blue-50 transition-colors"
+                      transition={{ delay: index * 0.03 }}
+                      className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors group"
                     >
-                      <td className="p-4">
+                      <td className="p-5">
                         <div className="flex items-center">
                           <input
                             type="checkbox"
@@ -458,24 +483,32 @@ export default function StudentsPage() {
                           />
                         </div>
                       </td>
-                      <td className="p-4 font-medium text-gray-900">{student.studentNumber}</td>
-                      <td className="p-4 text-gray-700">{student.firstName}</td>
-                      <td className="p-4 text-gray-700">{student.lastName}</td>
-                      <td className="p-4 text-gray-600">{student.email}</td>
-                      <td className="p-4 text-gray-600">{student.section || '-'}</td>
-                      <td className="p-4 text-gray-600">{student.guardianName || '-'}</td>
-                      <td className="p-4">
+                      <td className="p-5">
+                        <span className="font-semibold text-gray-900 text-sm">
+                          {student.studentNumber}
+                        </span>
+                      </td>
+                      <td className="p-5 text-gray-700 font-medium text-sm">{student.firstName}</td>
+                      <td className="p-5 text-gray-700 font-medium text-sm">{student.lastName}</td>
+                      <td className="p-5 text-gray-600 text-sm">{student.email}</td>
+                      <td className="p-5">
+                        <span className="inline-flex px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
+                          {student.section || '-'}
+                        </span>
+                      </td>
+                      <td className="p-5 text-gray-600 text-sm">{student.guardianName || '-'}</td>
+                      <td className="p-5">
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleEditStudent(student)}
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                            className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-blue-200"
                             title="Edit"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(student)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-red-200"
                             title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />

@@ -82,7 +82,7 @@ Date Range: ${selectedDate || 'All Time'}
         {/* Page Header */}
         <PageHeader
           title="Attendance Records"
-          description="Track and manage student attendance"
+          description="Monitor student attendance, track arrival and departure times"
           icon={ClipboardList}
           gradient="from-emerald-600 via-teal-600 to-cyan-600"
           stats={[
@@ -128,23 +128,23 @@ Date Range: ${selectedDate || 'All Time'}
         />
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+        <div className="bg-white rounded-2xl p-6 shadow-enterprise border border-gray-200">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <Input
                 type="text"
                 placeholder="Search by student number, name, or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-gray-300"
+                className="pl-12 h-12 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500/20"
               />
             </div>
             <div className="flex gap-3">
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value as 'all' | 'Arrival' | 'Departure')}
-                className="pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                className="pl-4 pr-10 py-3 h-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
               >
                 <option value="all">All Types</option>
                 <option value="Arrival">Arrival</option>
@@ -154,12 +154,12 @@ Date Range: ${selectedDate || 'All Time'}
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-48 border-gray-300"
+                className="w-48 h-12 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500/20"
               />
               {(filterType !== 'all' || selectedDate) && (
                 <Button
                   variant="outline"
-                  className="border-gray-300 hover:bg-gray-50"
+                  className="border-gray-300 hover:bg-gray-50 hover:border-emerald-400 transition-all h-12"
                   onClick={() => {
                     setFilterType('all')
                     setSelectedDate('')
@@ -176,18 +176,30 @@ Date Range: ${selectedDate || 'All Time'}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+          className="bg-white rounded-2xl shadow-enterprise border border-gray-200 overflow-hidden"
         >
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white">
+              <thead className="bg-gradient-to-r from-emerald-600 to-teal-600">
                 <tr>
-                  <th className="text-left p-4">Student Number</th>
-                  <th className="text-left p-4">First Name</th>
-                  <th className="text-left p-4">Last Name</th>
-                  <th className="text-left p-4">Email</th>
-                  <th className="text-left p-4">Type</th>
-                  <th className="text-left p-4">Date & Time</th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Student Number
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    First Name
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Last Name
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Email
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Type
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Date & Time
+                  </th>
                 </tr>
               </thead>
               <tbody>

@@ -4,60 +4,85 @@
 
 @layer base {
   :root {
-    /* Enterprise Color Palette */
-    --background: 0 0% 100%;
-    --foreground: 222.2 47.4% 11.2%;
+    /* Enterprise Color System - Premium Grade */
 
-    /* Primary - Slate Blue (Professional & Trustworthy) */
-    --primary: 217 91% 60%;
+    /* Background Layers - Sophisticated depth */
+    --background: 240 10% 98%;
+    --background-secondary: 240 8% 96%;
+    --foreground: 222 47% 11%;
+    --foreground-secondary: 215 16% 47%;
+
+    /* Primary Brand - Deep Professional Blue */
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 217 91% 95%;
-    --primary-dark: 217 91% 40%;
+    --primary-light: 221 83% 96%;
+    --primary-dark: 221 83% 38%;
+    --primary-hover: 221 83% 48%;
 
-    /* Secondary - Deep Indigo */
-    --secondary: 243 75% 59%;
+    /* Secondary - Refined Indigo */
+    --secondary: 243 47% 56%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-light: 243 75% 95%;
+    --secondary-light: 243 47% 95%;
+    --secondary-dark: 243 47% 42%;
 
-    /* Success - Emerald */
-    --success: 158 64% 52%;
+    /* Accent - Sophisticated Violet */
+    --accent: 262 52% 58%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 262 52% 96%;
+
+    /* Success - Professional Green */
+    --success: 152 57% 48%;
     --success-foreground: 0 0% 100%;
-    --success-light: 158 64% 95%;
+    --success-light: 152 57% 96%;
+    --success-dark: 152 57% 38%;
 
-    /* Warning - Amber */
-    --warning: 38 92% 50%;
+    /* Warning - Refined Amber */
+    --warning: 42 95% 58%;
     --warning-foreground: 0 0% 100%;
-    --warning-light: 38 92% 95%;
+    --warning-light: 42 95% 96%;
+    --warning-dark: 42 95% 48%;
 
-    /* Danger - Rose */
-    --destructive: 350 89% 60%;
+    /* Danger - Elegant Red */
+    --destructive: 0 72% 58%;
     --destructive-foreground: 0 0% 100%;
-    --destructive-light: 350 89% 95%;
+    --destructive-light: 0 72% 96%;
+    --destructive-dark: 0 72% 48%;
 
-    /* Info - Sky Blue */
-    --info: 199 89% 48%;
+    /* Info - Clean Cyan */
+    --info: 199 89% 51%;
     --info-foreground: 0 0% 100%;
-    --info-light: 199 89% 95%;
+    --info-light: 199 89% 96%;
 
-    /* Neutrals */
+    /* Neutral Palette - Enterprise Grade */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
+    --card-foreground: 222 47% 11%;
+    --card-border: 220 15% 92%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    --accent: 220 14% 96%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 217 91% 60%;
+    --popover-foreground: 222 47% 11%;
+
+    --muted: 220 15% 95%;
+    --muted-foreground: 215 16% 47%;
+
+    --border: 220 15% 90%;
+    --border-secondary: 220 15% 94%;
+    --input: 220 15% 90%;
+    --ring: 221 83% 53%;
+
+    /* Sidebar Colors */
+    --sidebar: 222 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-accent: 221 83% 53%;
+    --sidebar-border: 217 19% 20%;
 
     /* Enterprise Shadows */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+    --shadow: 0 2px 4px -1px rgb(0 0 0 / 0.06), 0 4px 6px -1px rgb(0 0 0 / 0.08);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.06);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.06);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.15);
 
     --radius: 0.75rem;
   }
@@ -90,18 +115,57 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-feature-settings:
       'rlig' 1,
       'calt' 1;
+    letter-spacing: -0.011em;
+  }
+
+  /* Professional Typography */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  /* Smooth Scrolling */
+  html {
+    scroll-behavior: smooth;
   }
 }
 
 @layer utilities {
-  .neumorphic-inset {
-    box-shadow:
-      inset 4px 4px 8px rgba(0, 0, 0, 0.1),
-      inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  /* Enterprise Shadow System */
+  .shadow-enterprise-xs {
+    box-shadow: var(--shadow-xs);
+  }
+
+  .shadow-enterprise-sm {
+    box-shadow: var(--shadow-sm);
+  }
+
+  .shadow-enterprise {
+    box-shadow: var(--shadow);
+  }
+
+  .shadow-enterprise-md {
+    box-shadow: var(--shadow-md);
+  }
+
+  .shadow-enterprise-lg {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .shadow-enterprise-xl {
+    box-shadow: var(--shadow-xl);
+  }
+
+  .shadow-enterprise-2xl {
+    box-shadow: var(--shadow-2xl);
   }
 
   /* Enterprise Gradient Utilities */
@@ -109,28 +173,71 @@
     background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
   }
 
+  .gradient-primary-soft {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary-light)) 0%,
+      hsl(var(--secondary-light)) 100%
+    );
+  }
+
   .gradient-success {
-    background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(158 64% 42%) 100%);
+    background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(152 57% 38%) 100%);
   }
 
   .gradient-warning {
-    background: linear-gradient(135deg, hsl(var(--warning)) 0%, hsl(38 92% 40%) 100%);
+    background: linear-gradient(135deg, hsl(var(--warning)) 0%, hsl(42 95% 48%) 100%);
   }
 
   .gradient-danger {
-    background: linear-gradient(135deg, hsl(var(--destructive)) 0%, hsl(350 89% 50%) 100%);
+    background: linear-gradient(135deg, hsl(var(--destructive)) 0%, hsl(0 72% 48%) 100%);
   }
 
   .gradient-info {
-    background: linear-gradient(135deg, hsl(var(--info)) 0%, hsl(199 89% 38%) 100%);
+    background: linear-gradient(135deg, hsl(var(--info)) 0%, hsl(199 89% 41%) 100%);
+  }
+
+  .gradient-accent {
+    background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 100%);
   }
 
   /* Enterprise Card Styles */
   .card-enterprise {
-    @apply bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200;
+    @apply bg-white rounded-2xl border border-gray-200 shadow-enterprise-sm hover:shadow-enterprise-md transition-all duration-300;
   }
 
   .card-stat {
     @apply card-enterprise p-6;
+  }
+
+  /* Glass Morphism Effect */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Sidebar Styles */
+  .sidebar-nav-item {
+    @apply relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium;
+  }
+
+  .sidebar-nav-item::before {
+    content: '';
+    @apply absolute left-0 w-1 h-8 bg-current rounded-r-full opacity-0 transition-opacity duration-200;
+  }
+
+  .sidebar-nav-item.active::before {
+    @apply opacity-100;
+  }
+
+  /* Text Styles */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+  }
+
+  /* Focus Rings */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 transition-shadow;
   }
 }

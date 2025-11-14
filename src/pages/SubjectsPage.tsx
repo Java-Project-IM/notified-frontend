@@ -121,7 +121,7 @@ export default function SubjectsPage() {
         {/* Page Header */}
         <PageHeader
           title="Subjects"
-          description="Manage subjects and class sections"
+          description="Organize and manage academic subjects, sections, and year levels"
           icon={BookOpen}
           gradient="from-purple-600 via-violet-600 to-indigo-600"
           stats={[
@@ -161,15 +161,15 @@ export default function SubjectsPage() {
         />
 
         {/* Search */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+        <div className="bg-white rounded-2xl p-6 shadow-enterprise border border-gray-200">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <Input
               type="text"
               placeholder="Search by subject code, name, or section..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 border-gray-300"
+              className="pl-12 h-12 border-gray-300 focus:border-purple-500 focus:ring-purple-500/20"
             />
           </div>
         </div>
@@ -178,18 +178,30 @@ export default function SubjectsPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+          className="bg-white rounded-2xl shadow-enterprise border border-gray-200 overflow-hidden"
         >
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-purple-600 to-violet-600 text-white">
+              <thead className="bg-gradient-to-r from-purple-600 to-violet-600">
                 <tr>
-                  <th className="text-left p-4">Subject Code</th>
-                  <th className="text-left p-4">Subject Name</th>
-                  <th className="text-left p-4">Year Level</th>
-                  <th className="text-left p-4">Section</th>
-                  <th className="text-left p-4">Enrollment</th>
-                  <th className="text-center p-4">Actions</th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Subject Code
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Subject Name
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Year Level
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Section
+                  </th>
+                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                    Enrollment
+                  </th>
+                  <th className="text-center p-5 font-semibold text-white text-sm tracking-wide">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
