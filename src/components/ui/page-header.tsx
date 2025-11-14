@@ -31,40 +31,40 @@ interface PageHeaderProps {
 
 const colorClasses = {
   blue: {
-    bg: 'bg-blue-50',
-    icon: 'text-blue-600',
-    stat: 'text-blue-700',
-    border: 'border-blue-200',
+    bg: 'bg-blue-500/20',
+    icon: 'text-blue-400',
+    stat: 'text-blue-300',
+    border: 'border-blue-500/30',
   },
   green: {
-    bg: 'bg-emerald-50',
-    icon: 'text-emerald-600',
-    stat: 'text-emerald-700',
-    border: 'border-emerald-200',
+    bg: 'bg-emerald-500/20',
+    icon: 'text-emerald-400',
+    stat: 'text-emerald-300',
+    border: 'border-emerald-500/30',
   },
   purple: {
-    bg: 'bg-purple-50',
-    icon: 'text-purple-600',
-    stat: 'text-purple-700',
-    border: 'border-purple-200',
+    bg: 'bg-purple-500/20',
+    icon: 'text-purple-400',
+    stat: 'text-purple-300',
+    border: 'border-purple-500/30',
   },
   orange: {
-    bg: 'bg-orange-50',
-    icon: 'text-orange-600',
-    stat: 'text-orange-700',
-    border: 'border-orange-200',
+    bg: 'bg-orange-500/20',
+    icon: 'text-orange-400',
+    stat: 'text-orange-300',
+    border: 'border-orange-500/30',
   },
   red: {
-    bg: 'bg-red-50',
-    icon: 'text-red-600',
-    stat: 'text-red-700',
-    border: 'border-red-200',
+    bg: 'bg-red-500/20',
+    icon: 'text-red-400',
+    stat: 'text-red-300',
+    border: 'border-red-500/30',
   },
   indigo: {
-    bg: 'bg-indigo-50',
-    icon: 'text-indigo-600',
-    stat: 'text-indigo-700',
-    border: 'border-indigo-200',
+    bg: 'bg-indigo-500/20',
+    icon: 'text-indigo-400',
+    stat: 'text-indigo-300',
+    border: 'border-indigo-500/30',
   },
 }
 
@@ -89,17 +89,17 @@ export function PageHeader({
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-2 text-sm text-gray-600"
+          className="flex items-center gap-2 text-sm text-slate-400"
         >
           {breadcrumbs.map((crumb, index) => (
             <div key={index} className="flex items-center gap-2">
               {index > 0 && <span>/</span>}
               {crumb.href ? (
-                <a href={crumb.href} className="hover:text-gray-900 transition-colors">
+                <a href={crumb.href} className="hover:text-slate-200 transition-colors">
                   {crumb.label}
                 </a>
               ) : (
-                <span className="font-medium text-gray-900">{crumb.label}</span>
+                <span className="font-medium text-slate-200">{crumb.label}</span>
               )}
             </div>
           ))}
@@ -193,18 +193,18 @@ export function PageHeader({
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.15 + index * 0.05 }}
                 whileHover={{ scale: 1.02, y: -2 }}
-                className={`bg-white rounded-2xl p-6 shadow-enterprise border-l-4 ${colors.border} hover:shadow-enterprise-md transition-all duration-300`}
+                className={`bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 shadow-enterprise border-l-4 ${colors.border} hover:shadow-enterprise-md hover:bg-slate-800/70 transition-all duration-300`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+                    <p className="text-sm font-semibold text-slate-400 mb-2 uppercase tracking-wide">
                       {stat.label}
                     </p>
                     <p className={`text-4xl font-bold ${colors.stat} tracking-tight`}>
                       {stat.value}
                     </p>
                   </div>
-                  <div className={`p-4 ${colors.bg} rounded-xl shadow-sm`}>
+                  <div className={`p-4 ${colors.bg} rounded-xl shadow-sm border ${colors.border}`}>
                     <StatIcon className={`w-7 h-7 ${colors.icon}`} />
                   </div>
                 </div>

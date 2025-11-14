@@ -93,51 +93,57 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
+      <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl" />
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20">
+        <div className="bg-slate-800/50 backdrop-blur-xl rounded-3xl shadow-enterprise-2xl p-8 border border-slate-700/50">
           {/* Logo */}
           <div className="flex items-center justify-center mb-8">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="bg-gradient-to-br from-blue-500 to-indigo-600 p-3 rounded-2xl shadow-lg"
+              className="relative"
             >
-              <Bell className="w-8 h-8 text-white" />
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl blur-md opacity-50" />
+              <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 p-3 rounded-2xl shadow-lg">
+                <Bell className="w-8 h-8 text-white" />
+              </div>
             </motion.div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent ml-3">
-              {APP_NAME}
-            </h1>
+            <h1 className="text-3xl font-bold text-white ml-3">{APP_NAME}</h1>
           </div>
 
           {/* Title */}
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Create your account</h2>
-            <p className="text-gray-600 mt-2">Join us and start managing students</p>
+            <h2 className="text-2xl font-bold text-white">Create your account</h2>
+            <p className="text-slate-400 mt-2">Join us and start managing students</p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <Label htmlFor="name" className="text-gray-700 font-medium">
+              <Label htmlFor="name" className="text-slate-300 font-medium">
                 Full Name
               </Label>
               <div className="mt-2 relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <Input
                   id="name"
                   type="text"
                   placeholder="John Doe"
-                  className={`pl-10 h-12 rounded-xl border-2 transition-all ${
+                  className={`pl-10 h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 transition-all ${
                     errors.name
                       ? 'border-red-500 focus:border-red-600'
-                      : 'border-gray-200 focus:border-blue-500'
+                      : 'border-slate-600 focus:border-blue-500'
                   }`}
                   value={formData.name}
                   onChange={(e) => {
@@ -151,7 +157,7 @@ export default function SignupPage() {
                 <motion.p
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-sm text-red-600 mt-2 flex items-center gap-1"
+                  className="text-sm text-red-400 mt-2 flex items-center gap-1"
                 >
                   ⚠️ {errors.name}
                 </motion.p>
@@ -159,19 +165,19 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <Label htmlFor="email" className="text-gray-700 font-medium">
+              <Label htmlFor="email" className="text-slate-300 font-medium">
                 Email Address
               </Label>
               <div className="mt-2 relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
-                  className={`pl-10 h-12 rounded-xl border-2 transition-all ${
+                  className={`pl-10 h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 transition-all ${
                     errors.email
                       ? 'border-red-500 focus:border-red-600'
-                      : 'border-gray-200 focus:border-blue-500'
+                      : 'border-slate-600 focus:border-blue-500'
                   }`}
                   value={formData.email}
                   onChange={(e) => {
@@ -185,7 +191,7 @@ export default function SignupPage() {
                 <motion.p
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-sm text-red-600 mt-2 flex items-center gap-1"
+                  className="text-sm text-red-400 mt-2 flex items-center gap-1"
                 >
                   ⚠️ {errors.email}
                 </motion.p>
@@ -193,19 +199,19 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <Label htmlFor="password" className="text-gray-700 font-medium">
+              <Label htmlFor="password" className="text-slate-300 font-medium">
                 Password
               </Label>
               <div className="mt-2 relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <Input
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  className={`pl-10 h-12 rounded-xl border-2 transition-all ${
+                  className={`pl-10 h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 transition-all ${
                     errors.password
                       ? 'border-red-500 focus:border-red-600'
-                      : 'border-gray-200 focus:border-blue-500'
+                      : 'border-slate-600 focus:border-blue-500'
                   }`}
                   value={formData.password}
                   onChange={(e) => {
@@ -219,13 +225,13 @@ export default function SignupPage() {
                 <motion.p
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-xs text-red-600 mt-2 flex items-start gap-1"
+                  className="text-xs text-red-400 mt-2 flex items-start gap-1"
                 >
                   ⚠️ <span>{errors.password}</span>
                 </motion.p>
               )}
               {!errors.password && formData.password.length > 0 && (
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-slate-500 mt-2">
                   Must contain uppercase, lowercase, and number
                 </p>
               )}
@@ -233,7 +239,7 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 border-0"
               disabled={signupMutation.isPending}
             >
               {signupMutation.isPending ? (
@@ -253,11 +259,11 @@ export default function SignupPage() {
 
           {/* Footer */}
           <div className="mt-8 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-slate-400">
               Already have an account?{' '}
               <Link
                 to={ROUTES.LOGIN}
-                className="text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors"
+                className="text-blue-400 font-semibold hover:text-blue-300 hover:underline transition-colors"
               >
                 Sign in here
               </Link>
@@ -270,7 +276,7 @@ export default function SignupPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="text-center text-sm text-gray-600 mt-6"
+          className="text-center text-sm text-slate-500 mt-6"
         >
           © 2025 {APP_NAME}. All rights reserved.
         </motion.p>
