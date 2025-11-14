@@ -84,7 +84,7 @@ Date Range: ${selectedDate || 'All Time'}
           title="Attendance Records"
           description="Track and manage student attendance"
           icon={ClipboardList}
-          gradient="from-green-600 via-emerald-600 to-teal-600"
+          gradient="from-emerald-600 via-teal-600 to-cyan-600"
           stats={[
             {
               label: 'Total Records',
@@ -127,77 +127,8 @@ Date Range: ${selectedDate || 'All Time'}
           ]}
         />
 
-        <div className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-teal-500"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Total Records</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{records.length}</p>
-              </div>
-              <div className="bg-teal-50 p-4 rounded-xl">
-                <FileText className="w-8 h-8 text-teal-500" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-green-500"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Arrivals</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">{arrivals}</p>
-              </div>
-              <div className="bg-green-50 p-4 rounded-xl">
-                <CheckCircle className="w-8 h-8 text-green-500" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-orange-500"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Departures</p>
-                <p className="text-3xl font-bold text-orange-600 mt-2">{departures}</p>
-              </div>
-              <div className="bg-orange-50 p-4 rounded-xl">
-                <DoorOpen className="w-8 h-8 text-orange-500" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-blue-500"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Today's Records</p>
-                <p className="text-3xl font-bold text-blue-600 mt-2">{todayRecords.length}</p>
-              </div>
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <Calendar className="w-8 h-8 text-blue-500" />
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
         {/* Filters */}
-        <div className="bg-white rounded-xl p-6 shadow-neumorphic">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -206,14 +137,14 @@ Date Range: ${selectedDate || 'All Time'}
                 placeholder="Search by student number, name, or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 border-gray-300"
               />
             </div>
             <div className="flex gap-3">
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value as 'all' | 'Arrival' | 'Departure')}
-                className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                className="pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
               >
                 <option value="all">All Types</option>
                 <option value="Arrival">Arrival</option>
@@ -223,11 +154,12 @@ Date Range: ${selectedDate || 'All Time'}
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-48"
+                className="w-48 border-gray-300"
               />
               {(filterType !== 'all' || selectedDate) && (
                 <Button
                   variant="outline"
+                  className="border-gray-300 hover:bg-gray-50"
                   onClick={() => {
                     setFilterType('all')
                     setSelectedDate('')
@@ -244,11 +176,11 @@ Date Range: ${selectedDate || 'All Time'}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-neumorphic overflow-hidden"
+          className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
         >
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-teal-600 to-teal-700 text-white">
+              <thead className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white">
                 <tr>
                   <th className="text-left p-4">Student Number</th>
                   <th className="text-left p-4">First Name</th>
@@ -280,7 +212,7 @@ Date Range: ${selectedDate || 'All Time'}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className="border-b border-gray-100 hover:bg-teal-50 transition-colors"
+                      className="border-b border-gray-100 hover:bg-emerald-50 transition-colors"
                     >
                       <td className="p-4 font-medium text-gray-900">{record.studentNumber}</td>
                       <td className="p-4 text-gray-700">{record.firstName}</td>

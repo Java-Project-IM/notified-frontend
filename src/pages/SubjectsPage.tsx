@@ -132,10 +132,22 @@ export default function SubjectsPage() {
               color: 'purple',
             },
             {
-              label: 'Active',
-              value: filteredSubjects.length,
-              icon: Eye,
+              label: 'Year Levels',
+              value: new Set(subjects.map((s) => s.yearLevel)).size,
+              icon: BookOpen,
+              color: 'blue',
+            },
+            {
+              label: 'Sections',
+              value: new Set(subjects.map((s) => s.section)).size,
+              icon: Users,
               color: 'green',
+            },
+            {
+              label: 'Active Classes',
+              value: subjects.length,
+              icon: Eye,
+              color: 'orange',
             },
           ]}
           actions={[
@@ -148,81 +160,8 @@ export default function SubjectsPage() {
           ]}
         />
 
-        <div className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-purple-500"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Total Subjects</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{subjects.length}</p>
-              </div>
-              <div className="bg-purple-50 p-4 rounded-xl">
-                <BookOpen className="w-8 h-8 text-purple-500" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-blue-500"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Year Levels</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {new Set(subjects.map((s) => s.yearLevel)).size}
-                </p>
-              </div>
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <BookOpen className="w-8 h-8 text-blue-500" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-green-500"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Sections</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {new Set(subjects.map((s) => s.section)).size}
-                </p>
-              </div>
-              <div className="bg-green-50 p-4 rounded-xl">
-                <Users className="w-8 h-8 text-green-500" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-orange-500"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Active Classes</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{subjects.length}</p>
-              </div>
-              <div className="bg-orange-50 p-4 rounded-xl">
-                <Users className="w-8 h-8 text-orange-500" />
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
         {/* Search */}
-        <div className="bg-white rounded-xl p-6 shadow-neumorphic">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <Input
@@ -230,7 +169,7 @@ export default function SubjectsPage() {
               placeholder="Search by subject code, name, or section..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 border-gray-300"
             />
           </div>
         </div>
@@ -239,11 +178,11 @@ export default function SubjectsPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-neumorphic overflow-hidden"
+          className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
         >
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-purple-600 to-purple-700 text-white">
+              <thead className="bg-gradient-to-r from-purple-600 to-violet-600 text-white">
                 <tr>
                   <th className="text-left p-4">Subject Code</th>
                   <th className="text-left p-4">Subject Name</th>

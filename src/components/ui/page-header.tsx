@@ -70,7 +70,7 @@ export function PageHeader({
   title,
   description,
   icon: Icon,
-  gradient = 'from-indigo-600 via-purple-600 to-pink-600',
+  gradient = 'from-slate-600 via-indigo-600 to-violet-600',
   actions = [],
   stats = [],
   breadcrumbs = [],
@@ -104,7 +104,7 @@ export function PageHeader({
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`bg-gradient-to-r ${gradient} rounded-3xl p-8 shadow-xl relative overflow-hidden`}
+        className={`bg-gradient-to-r ${gradient} rounded-2xl p-8 shadow-lg relative overflow-hidden`}
       >
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
@@ -114,16 +114,16 @@ export function PageHeader({
           <div className="flex items-start justify-between">
             <div className="flex-1">
               {/* Title with icon */}
-              <div className="flex items-center gap-4 mb-3">
+              <div className="flex items-center gap-4 mb-2">
                 {Icon && (
-                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                    <Icon className="w-8 h-8 text-white" />
+                  <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Icon className="w-7 h-7 text-white" />
                   </div>
                 )}
                 <div>
-                  <h1 className="text-4xl font-bold text-white tracking-tight">{title}</h1>
+                  <h1 className="text-3xl font-bold text-white tracking-tight">{title}</h1>
                   {description && (
-                    <p className="text-white/90 text-lg mt-2 max-w-3xl">{description}</p>
+                    <p className="text-white/90 text-base mt-1 max-w-3xl">{description}</p>
                   )}
                 </div>
               </div>
@@ -140,17 +140,17 @@ export function PageHeader({
                       onClick={action.onClick}
                       disabled={action.disabled}
                       className={`
-                        h-12 px-6 rounded-xl font-semibold shadow-lg transition-all duration-200
+                        h-11 px-5 rounded-xl font-semibold shadow-md transition-all duration-200
                         ${
                           action.variant === 'secondary'
-                            ? 'bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm'
+                            ? 'bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm border-0'
                             : action.variant === 'outline'
-                              ? 'bg-transparent border-2 border-white/50 hover:border-white text-white'
-                              : 'bg-white hover:bg-gray-50 text-gray-900'
+                              ? 'bg-transparent border-2 border-white/50 hover:border-white hover:bg-white/10 text-white'
+                              : 'bg-white hover:bg-gray-50 text-gray-900 border-0'
                         }
                       `}
                     >
-                      {ActionIcon && <ActionIcon className="w-5 h-5 mr-2" />}
+                      {ActionIcon && <ActionIcon className="w-4 h-4 mr-2" />}
                       {action.label}
                     </Button>
                   )
@@ -181,15 +181,15 @@ export function PageHeader({
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1 + index * 0.05 }}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200"
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600 mb-1">{stat.label}</p>
                     <p className={`text-3xl font-bold ${colors.stat}`}>{stat.value}</p>
                   </div>
-                  <div className={`p-4 ${colors.bg} rounded-2xl`}>
-                    <StatIcon className={`w-7 h-7 ${colors.icon}`} />
+                  <div className={`p-4 ${colors.bg} rounded-xl`}>
+                    <StatIcon className={`w-6 h-6 ${colors.icon}`} />
                   </div>
                 </div>
               </motion.div>

@@ -113,100 +113,46 @@ export default function DashboardPage() {
           title={`${getGreeting()}, ${user?.name}!`}
           description="Here's an overview of your student management system"
           icon={LayoutDashboard}
-          gradient="from-indigo-600 via-purple-600 to-pink-600"
+          gradient="from-slate-600 via-blue-600 to-indigo-600"
           stats={[
             {
               label: 'Total Students',
-              value: stats?.totalStudents || 0,
+              value: isLoading ? '...' : stats?.totalStudents || 0,
               icon: Users,
               color: 'blue',
             },
             {
               label: 'Total Subjects',
-              value: stats?.totalSubjects || 0,
+              value: isLoading ? '...' : stats?.totalSubjects || 0,
               icon: BookOpen,
               color: 'green',
             },
             {
               label: 'Total Records',
-              value: stats?.totalRecords || 0,
+              value: isLoading ? '...' : stats?.totalRecords || 0,
               icon: ClipboardList,
               color: 'purple',
             },
             {
               label: "Today's Activity",
-              value: stats?.todayRecords || 0,
+              value: isLoading ? '...' : stats?.todayRecords || 0,
               icon: Activity,
               color: 'orange',
             },
           ]}
         />
 
-        {/* Stats Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid gap-6 md:grid-cols-2 lg:grid-cols-4"
-        >
-          {statCards.map((stat, index) => (
-            <motion.div
-              key={stat.title}
-              variants={itemVariants}
-              whileHover={{ scale: 1.05, y: -5 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Card
-                className="cursor-pointer hover:shadow-2xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm overflow-hidden group"
-                onClick={stat.action}
-              >
-                <div
-                  className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${stat.gradient}`}
-                />
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">{stat.title}</CardTitle>
-                  <div
-                    className={`p-3 rounded-xl ${stat.bgColor} group-hover:scale-110 transition-transform`}
-                  >
-                    <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold text-gray-900 mb-1">
-                    {isLoading ? (
-                      <motion.div
-                        animate={{ opacity: [0.5, 1, 0.5] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                        className="h-10 w-16 bg-gray-200 rounded"
-                      />
-                    ) : (
-                      <motion.span
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.1 + 0.3 }}
-                      >
-                        {stat.value}
-                      </motion.span>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-500">{stat.description}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </motion.div>
-
         {/* Quick Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
         >
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-blue-50/30 backdrop-blur-sm">
+          <Card className="border border-gray-200 shadow-sm bg-white">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Activity className="w-6 h-6 text-blue-600" />
-                <CardTitle className="text-2xl">Quick Actions</CardTitle>
+                <Activity className="w-6 h-6 text-slate-600" />
+                <CardTitle className="text-2xl text-gray-900">Quick Actions</CardTitle>
               </div>
               <p className="text-gray-600 text-sm mt-1">
                 Navigate to the most commonly used features
@@ -217,7 +163,7 @@ export default function DashboardPage() {
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     onClick={() => navigate(ROUTES.STUDENTS)}
-                    className="w-full h-auto py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all group"
+                    className="w-full h-auto py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all group"
                   >
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3">
@@ -232,7 +178,7 @@ export default function DashboardPage() {
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     onClick={() => navigate(ROUTES.SUBJECTS)}
-                    className="w-full h-auto py-4 px-6 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg hover:shadow-xl transition-all group"
+                    className="w-full h-auto py-4 px-6 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 shadow-md hover:shadow-lg transition-all group"
                   >
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3">
@@ -247,7 +193,7 @@ export default function DashboardPage() {
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     onClick={() => navigate(ROUTES.RECORDS)}
-                    className="w-full h-auto py-4 px-6 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 shadow-lg hover:shadow-xl transition-all group"
+                    className="w-full h-auto py-4 px-6 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md hover:shadow-lg transition-all group"
                   >
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3">
@@ -267,16 +213,16 @@ export default function DashboardPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.6 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
         >
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-white">
+          <Card className="border border-gray-200 shadow-sm bg-gradient-to-br from-emerald-50 to-white">
             <CardContent className="py-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
                   <p className="text-sm font-medium text-gray-700">
                     System Status:{' '}
-                    <span className="text-green-600 font-semibold">All systems operational</span>
+                    <span className="text-emerald-600 font-semibold">All systems operational</span>
                   </p>
                 </div>
                 <p className="text-xs text-gray-500">

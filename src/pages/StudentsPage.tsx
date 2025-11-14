@@ -291,7 +291,7 @@ export default function StudentsPage() {
           title="Students"
           description="Manage student records and information"
           icon={Users}
-          gradient="from-blue-600 via-indigo-600 to-purple-600"
+          gradient="from-blue-600 via-indigo-600 to-violet-600"
           stats={[
             {
               label: 'Total Students',
@@ -300,10 +300,22 @@ export default function StudentsPage() {
               color: 'blue',
             },
             {
-              label: 'Active Students',
-              value: filteredStudents.length,
+              label: 'Selected',
+              value: selectedStudents.size,
               icon: CheckCircle,
               color: 'green',
+            },
+            {
+              label: 'With Guardians',
+              value: students.filter((s) => s.guardianName).length,
+              icon: Users,
+              color: 'purple',
+            },
+            {
+              label: 'Active Today',
+              value: 0,
+              icon: Users,
+              color: 'orange',
             },
           ]}
           actions={[
@@ -326,125 +338,36 @@ export default function StudentsPage() {
           ]}
         />
 
-        <div className="space-y-6">
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              className="shadow-neumorphic"
-              onClick={handleDownloadTemplate}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Template
-            </Button>
-            <Button
-              variant="outline"
-              className="shadow-neumorphic"
-              onClick={handleExportStudents}
-              disabled={students.length === 0}
-            >
-              <FileSpreadsheet className="w-4 h-4 mr-2" />
-              Export
-            </Button>
-            <Button
-              variant="outline"
-              className="shadow-neumorphic"
-              onClick={handleImportClick}
-              disabled={isImporting}
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              {isImporting ? 'Importing...' : 'Import'}
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            <Button
-              className="shadow-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-              onClick={handleAddStudent}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Student
-            </Button>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-blue-500"
+        {/* Toolbar */}
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            className="border-gray-300 hover:bg-gray-50"
+            onClick={handleDownloadTemplate}
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Total Students</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{students.length}</p>
-              </div>
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <Users className="w-8 h-8 text-blue-500" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-green-500"
+            <Download className="w-4 h-4 mr-2" />
+            Template
+          </Button>
+          <Button
+            variant="outline"
+            className="border-gray-300 hover:bg-gray-50"
+            onClick={handleExportStudents}
+            disabled={students.length === 0}
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Selected</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{selectedStudents.size}</p>
-              </div>
-              <div className="bg-green-50 p-4 rounded-xl">
-                <Users className="w-8 h-8 text-green-500" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-orange-500"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Active Today</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
-              </div>
-              <div className="bg-orange-50 p-4 rounded-xl">
-                <Users className="w-8 h-8 text-orange-500" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-purple-500"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">With Guardians</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {students.filter((s) => s.guardianName).length}
-                </p>
-              </div>
-              <div className="bg-purple-50 p-4 rounded-xl">
-                <Users className="w-8 h-8 text-purple-500" />
-              </div>
-            </div>
-          </motion.div>
+            <FileSpreadsheet className="w-4 h-4 mr-2" />
+            Export
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleFileChange}
+            className="hidden"
+          />
         </div>
 
         {/* Search and Actions */}
-        <div className="bg-white rounded-xl p-6 shadow-neumorphic">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
           <div className="flex items-center gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -453,13 +376,13 @@ export default function StudentsPage() {
                 placeholder="Search by name, student number, or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 border-gray-300"
               />
             </div>
             {selectedStudents.size > 0 && (
               <Button
                 variant="outline"
-                className="shadow-neumorphic"
+                className="border-gray-300 hover:bg-gray-50"
                 onClick={() => setIsEmailModalOpen(true)}
               >
                 <Mail className="w-4 h-4 mr-2" />
@@ -473,11 +396,11 @@ export default function StudentsPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-neumorphic overflow-hidden"
+          className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
         >
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+              <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
                 <tr>
                   <th className="text-left p-4">
                     <div className="flex items-center">

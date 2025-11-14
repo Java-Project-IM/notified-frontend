@@ -4,26 +4,62 @@
 
 @layer base {
   :root {
+    /* Enterprise Color Palette */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 222.2 47.4% 11.2%;
+
+    /* Primary - Slate Blue (Professional & Trustworthy) */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 217 91% 95%;
+    --primary-dark: 217 91% 40%;
+
+    /* Secondary - Deep Indigo */
+    --secondary: 243 75% 59%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-light: 243 75% 95%;
+
+    /* Success - Emerald */
+    --success: 158 64% 52%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 158 64% 95%;
+
+    /* Warning - Amber */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-light: 38 92% 95%;
+
+    /* Danger - Rose */
+    --destructive: 350 89% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-light: 350 89% 95%;
+
+    /* Info - Sky Blue */
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+    --info-light: 199 89% 95%;
+
+    /* Neutrals */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222.2 47.4% 11.2%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 207 90% 54%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 14% 96%;
     --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 207 90% 54%;
-    --radius: 0.5rem;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%;
+
+    /* Enterprise Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -33,7 +69,7 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 207 90% 54%;
+    --primary: 217 91% 60%;
     --primary-foreground: 222.2 47.4% 11.2%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -66,5 +102,35 @@
     box-shadow:
       inset 4px 4px 8px rgba(0, 0, 0, 0.1),
       inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  }
+
+  /* Enterprise Gradient Utilities */
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+  }
+
+  .gradient-success {
+    background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(158 64% 42%) 100%);
+  }
+
+  .gradient-warning {
+    background: linear-gradient(135deg, hsl(var(--warning)) 0%, hsl(38 92% 40%) 100%);
+  }
+
+  .gradient-danger {
+    background: linear-gradient(135deg, hsl(var(--destructive)) 0%, hsl(350 89% 50%) 100%);
+  }
+
+  .gradient-info {
+    background: linear-gradient(135deg, hsl(var(--info)) 0%, hsl(199 89% 38%) 100%);
+  }
+
+  /* Enterprise Card Styles */
+  .card-enterprise {
+    @apply bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200;
+  }
+
+  .card-stat {
+    @apply card-enterprise p-6;
   }
 }

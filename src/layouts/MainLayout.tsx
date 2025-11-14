@@ -28,41 +28,41 @@ export default function MainLayout({ children }: MainLayoutProps) {
       label: 'Dashboard',
       icon: Home,
       path: ROUTES.DASHBOARD,
-      colorClass: 'bg-gradient-to-r from-indigo-600 to-purple-600',
-      hoverClass: 'hover:bg-indigo-50',
-      textClass: 'text-indigo-700',
+      gradient: 'from-slate-600 to-indigo-600',
+      hoverClass: 'hover:bg-slate-50',
+      activeClass: 'bg-gradient-to-r from-slate-600 to-indigo-600',
     },
     {
       label: 'Students',
       icon: Users,
       path: ROUTES.STUDENTS,
-      colorClass: 'bg-gradient-to-r from-blue-600 to-indigo-600',
+      gradient: 'from-blue-600 to-indigo-600',
       hoverClass: 'hover:bg-blue-50',
-      textClass: 'text-blue-700',
+      activeClass: 'bg-gradient-to-r from-blue-600 to-indigo-600',
     },
     {
       label: 'Subjects',
       icon: BookOpen,
       path: ROUTES.SUBJECTS,
-      colorClass: 'bg-gradient-to-r from-purple-600 to-violet-600',
+      gradient: 'from-purple-600 to-violet-600',
       hoverClass: 'hover:bg-purple-50',
-      textClass: 'text-purple-700',
+      activeClass: 'bg-gradient-to-r from-purple-600 to-violet-600',
     },
     {
       label: 'Records',
       icon: ClipboardList,
       path: ROUTES.RECORDS,
-      colorClass: 'bg-gradient-to-r from-green-600 to-emerald-600',
-      hoverClass: 'hover:bg-green-50',
-      textClass: 'text-green-700',
+      gradient: 'from-emerald-600 to-teal-600',
+      hoverClass: 'hover:bg-emerald-50',
+      activeClass: 'bg-gradient-to-r from-emerald-600 to-teal-600',
     },
     {
       label: 'Email History',
       icon: Mail,
       path: ROUTES.EMAIL_HISTORY,
-      colorClass: 'bg-gradient-to-r from-orange-600 to-amber-600',
-      hoverClass: 'hover:bg-orange-50',
-      textClass: 'text-orange-700',
+      gradient: 'from-amber-600 to-orange-600',
+      hoverClass: 'hover:bg-amber-50',
+      activeClass: 'bg-gradient-to-r from-amber-600 to-orange-600',
     },
   ]
 
@@ -71,11 +71,13 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-40">
+      <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 shadow-sm z-40">
         <div className="p-6">
-          <div className="flex items-center gap-2 mb-8">
-            <Bell className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl font-bold">{APP_NAME}</h1>
+          <div className="flex items-center gap-3 mb-8">
+            <div className="p-2 bg-gradient-to-br from-slate-600 to-indigo-600 rounded-xl">
+              <Bell className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">{APP_NAME}</h1>
           </div>
 
           <nav className="space-y-2">
@@ -84,26 +86,30 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 className={cn(
-                  'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200',
+                  'w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium',
                   currentPath === item.path
-                    ? `${item.colorClass} text-white shadow-lg transform scale-105`
+                    ? `${item.activeClass} text-white shadow-md`
                     : `text-gray-700 ${item.hoverClass}`
                 )}
               >
                 <item.icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
+                <span>{item.label}</span>
               </button>
             ))}
           </nav>
         </div>
 
         {/* User Section */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 border-t">
+        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-200 bg-white">
           <div className="mb-3">
-            <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+            <p className="text-sm font-semibold text-gray-900">{user?.name}</p>
             <p className="text-xs text-gray-500">{user?.email}</p>
           </div>
-          <Button variant="outline" className="w-full" onClick={handleLogout}>
+          <Button
+            variant="outline"
+            className="w-full border-gray-300 hover:bg-gray-50"
+            onClick={handleLogout}
+          >
             <LogOut className="w-4 h-4 mr-2" />
             Logout
           </Button>
@@ -111,7 +117,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="ml-64 p-8">{children}</main>
+      <main className="ml-64 p-8 min-h-screen">{children}</main>
     </div>
   )
 }
