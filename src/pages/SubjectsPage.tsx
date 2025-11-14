@@ -161,15 +161,15 @@ export default function SubjectsPage() {
         />
 
         {/* Search */}
-        <div className="bg-white rounded-2xl p-6 shadow-enterprise border border-gray-200">
+        <div className="bg-slate-800/50 rounded-2xl p-6 shadow-enterprise border border-slate-700/50 backdrop-blur-sm">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <Input
               type="text"
               placeholder="Search by subject code, name, or section..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-12 h-12 border-gray-300 focus:border-purple-500 focus:ring-purple-500/20"
+              className="pl-12 h-12 border-slate-600 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 focus:border-purple-500 focus:ring-purple-500/20"
             />
           </div>
         </div>
@@ -178,7 +178,7 @@ export default function SubjectsPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-enterprise border border-gray-200 overflow-hidden"
+          className="bg-slate-800/50 rounded-2xl shadow-enterprise-lg border border-slate-700/50 backdrop-blur-sm overflow-hidden"
         >
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -204,19 +204,30 @@ export default function SubjectsPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-slate-900/50">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-gray-500">
-                      Loading subjects...
+                    <td colSpan={6} className="text-center py-16 text-slate-400">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-12 h-12 border-4 border-purple-900 border-t-purple-500 rounded-full animate-spin" />
+                        <p className="font-medium">Loading subjects...</p>
+                      </div>
                     </td>
                   </tr>
                 ) : filteredSubjects.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-gray-500">
-                      {searchTerm
-                        ? 'No subjects found matching your search'
-                        : 'No subjects added yet'}
+                    <td colSpan={6} className="text-center py-16 text-slate-400">
+                      <div className="flex flex-col items-center gap-2">
+                        <BookOpen className="w-16 h-16 text-slate-600" />
+                        <p className="font-medium text-lg">
+                          {searchTerm
+                            ? 'No subjects found matching your search'
+                            : 'No subjects added yet'}
+                        </p>
+                        <p className="text-sm text-slate-500">
+                          {!searchTerm && 'Get started by adding your first subject'}
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -226,36 +237,44 @@ export default function SubjectsPage() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className="border-b border-gray-100 hover:bg-purple-50 transition-colors"
+                      className="border-b border-slate-700/30 hover:bg-slate-800/60 transition-colors group"
                     >
-                      <td className="p-4 font-medium text-purple-700">{subject.subjectCode}</td>
-                      <td className="p-4 text-gray-900">{subject.subjectName}</td>
-                      <td className="p-4 text-gray-700">Year {subject.yearLevel}</td>
-                      <td className="p-4 text-gray-700">{subject.section}</td>
-                      <td className="p-4 text-gray-600">
+                      <td className="p-5 font-semibold text-purple-400 text-sm">
+                        {subject.subjectCode}
+                      </td>
+                      <td className="p-5 text-slate-200 font-medium text-sm">
+                        {subject.subjectName}
+                      </td>
+                      <td className="p-5 text-slate-300 text-sm">Year {subject.yearLevel}</td>
+                      <td className="p-5">
+                        <span className="inline-flex px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs font-medium border border-purple-500/30">
+                          {subject.section}
+                        </span>
+                      </td>
+                      <td className="p-5 text-slate-400 text-sm">
                         <span className="inline-flex items-center gap-1">
                           <Users className="w-4 h-4" />0 students
                         </span>
                       </td>
-                      <td className="p-4">
+                      <td className="p-5">
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleViewDetails(subject)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-2.5 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-blue-500/30"
                             title="View Details"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleEditSubject(subject)}
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                            className="p-2.5 text-emerald-400 hover:bg-emerald-500/20 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-emerald-500/30"
                             title="Edit"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(subject)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2.5 text-red-400 hover:bg-red-500/20 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-red-500/30"
                             title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />

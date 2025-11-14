@@ -59,7 +59,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const currentPath = window.location.pathname
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/30">
+    <div className="min-h-screen bg-slate-900">
       {/* Enterprise Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 shadow-enterprise-2xl z-40">
         {/* Logo Section */}

@@ -149,21 +149,21 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
         >
-          <Card className="border border-gray-200 shadow-enterprise bg-white">
-            <CardHeader>
+          <div className="bg-slate-800/50 rounded-2xl shadow-enterprise-lg border border-slate-700/50 backdrop-blur-sm overflow-hidden">
+            <div className="p-6 border-b border-slate-700/50">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <Activity className="w-6 h-6 text-blue-600" />
+                <div className="p-2.5 bg-blue-500/20 rounded-xl border border-blue-500/30">
+                  <Activity className="w-6 h-6 text-blue-400" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl text-gray-900">Quick Actions</CardTitle>
-                  <p className="text-gray-600 text-sm mt-0.5">
+                  <h2 className="text-2xl font-bold text-slate-100">Quick Actions</h2>
+                  <p className="text-slate-400 text-sm mt-0.5">
                     Navigate to the most commonly used features
                   </p>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
@@ -210,8 +210,8 @@ export default function DashboardPage() {
                   </Button>
                 </motion.div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </motion.div>
 
         {/* System Status */}
@@ -220,28 +220,28 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          <Card className="border border-gray-200 shadow-enterprise bg-gradient-to-br from-emerald-50 via-white to-teal-50/50">
-            <CardContent className="py-6">
+          <div className="bg-slate-800/50 rounded-2xl shadow-enterprise border border-slate-700/50 backdrop-blur-sm overflow-hidden">
+            <div className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <div className="absolute inset-0 bg-emerald-500 rounded-full blur-md opacity-30 animate-pulse" />
-                    <div className="relative w-3 h-3 bg-emerald-500 rounded-full shadow-lg" />
+                    <div className="relative w-3 h-3 bg-emerald-500 rounded-full shadow-lg ring-4 ring-emerald-500/20" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-700">
+                    <p className="text-sm font-semibold text-slate-200">
                       System Status:{' '}
-                      <span className="text-emerald-600">All systems operational</span>
+                      <span className="text-emerald-400">All systems operational</span>
                     </p>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-slate-500 mt-0.5">
                       Last updated: {new Date().toLocaleTimeString()}
                     </p>
                   </div>
                 </div>
-                <CheckCircle className="w-6 h-6 text-emerald-500" />
+                <CheckCircle className="w-6 h-6 text-emerald-400" />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </motion.div>
       </div>
     </MainLayout>

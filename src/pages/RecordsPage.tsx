@@ -127,39 +127,45 @@ Date Range: ${selectedDate || 'All Time'}
           ]}
         />
 
-        {/* Filters */}
-        <div className="bg-white rounded-2xl p-6 shadow-enterprise border border-gray-200">
-          <div className="flex flex-col md:flex-row gap-4">
+        {/* Filters - Enterprise Grade */}
+        <div className="bg-slate-800/50 rounded-2xl p-6 shadow-enterprise border border-slate-700/50 backdrop-blur-sm">
+          <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <Input
                 type="text"
                 placeholder="Search by student number, name, or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 h-12 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500/20"
+                className="pl-12 h-12 border-slate-600 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 focus:border-emerald-500 focus:ring-emerald-500/20"
               />
             </div>
-            <div className="flex gap-3">
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value as 'all' | 'Arrival' | 'Departure')}
-                className="pl-4 pr-10 py-3 h-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-              >
-                <option value="all">All Types</option>
-                <option value="Arrival">Arrival</option>
-                <option value="Departure">Departure</option>
-              </select>
-              <Input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-48 h-12 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500/20"
-              />
+            <div className="flex flex-wrap gap-3">
+              <div className="relative">
+                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value as 'all' | 'Arrival' | 'Departure')}
+                  className="appearance-none pl-10 pr-10 py-3 h-12 border border-slate-600 bg-slate-900/50 text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer min-w-[160px]"
+                >
+                  <option value="all">All Types</option>
+                  <option value="Arrival">Arrival Only</option>
+                  <option value="Departure">Departure Only</option>
+                </select>
+              </div>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
+                <Input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="pl-10 w-52 h-12 border-slate-600 bg-slate-900/50 text-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20"
+                />
+              </div>
               {(filterType !== 'all' || selectedDate) && (
                 <Button
                   variant="outline"
-                  className="border-gray-300 hover:bg-gray-50 hover:border-emerald-400 transition-all h-12"
+                  className="border-slate-600 bg-slate-800/80 hover:bg-slate-700 hover:border-red-500 text-slate-200 hover:text-white transition-all h-12 px-5"
                   onClick={() => {
                     setFilterType('all')
                     setSelectedDate('')
@@ -176,7 +182,7 @@ Date Range: ${selectedDate || 'All Time'}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-enterprise border border-gray-200 overflow-hidden"
+          className="bg-slate-800/50 rounded-2xl shadow-enterprise-lg border border-slate-700/50 backdrop-blur-sm overflow-hidden"
         >
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -202,19 +208,30 @@ Date Range: ${selectedDate || 'All Time'}
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-slate-900/50">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-gray-500">
-                      Loading records...
+                    <td colSpan={6} className="text-center py-16 text-slate-400">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-12 h-12 border-4 border-emerald-900 border-t-emerald-500 rounded-full animate-spin" />
+                        <p className="font-medium">Loading records...</p>
+                      </div>
                     </td>
                   </tr>
                 ) : filteredRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-gray-500">
-                      {searchTerm || filterType !== 'all' || selectedDate
-                        ? 'No records found matching your filters'
-                        : 'No records yet'}
+                    <td colSpan={6} className="text-center py-16 text-slate-400">
+                      <div className="flex flex-col items-center gap-2">
+                        <FileText className="w-16 h-16 text-slate-600" />
+                        <p className="font-medium text-lg">
+                          {searchTerm || filterType !== 'all' || selectedDate
+                            ? 'No records found matching your filters'
+                            : 'No attendance records yet'}
+                        </p>
+                        <p className="text-sm text-slate-500">
+                          Records will appear here as students check in and out
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -224,29 +241,31 @@ Date Range: ${selectedDate || 'All Time'}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className="border-b border-gray-100 hover:bg-emerald-50 transition-colors"
+                      className="border-b border-slate-700/30 hover:bg-slate-800/60 transition-colors group"
                     >
-                      <td className="p-4 font-medium text-gray-900">{record.studentNumber}</td>
-                      <td className="p-4 text-gray-700">{record.firstName}</td>
-                      <td className="p-4 text-gray-700">{record.lastName}</td>
-                      <td className="p-4 text-gray-600">{record.email}</td>
-                      <td className="p-4">
+                      <td className="p-5 font-semibold text-slate-100 text-sm">
+                        {record.studentNumber}
+                      </td>
+                      <td className="p-5 text-slate-200 font-medium text-sm">{record.firstName}</td>
+                      <td className="p-5 text-slate-200 font-medium text-sm">{record.lastName}</td>
+                      <td className="p-5 text-slate-400 text-sm">{record.email}</td>
+                      <td className="p-5">
                         <span
-                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
                             record.recordType === 'Arrival'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-orange-100 text-orange-700'
+                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                              : 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
                           }`}
                         >
                           {record.recordType === 'Arrival' ? (
-                            <CheckCircle className="w-4 h-4" />
+                            <CheckCircle className="w-3.5 h-3.5" />
                           ) : (
-                            <DoorOpen className="w-4 h-4" />
+                            <DoorOpen className="w-3.5 h-3.5" />
                           )}
                           {record.recordType}
                         </span>
                       </td>
-                      <td className="p-4 text-gray-600">
+                      <td className="p-5 text-slate-300 text-sm">
                         {format(new Date(record.createdAt), 'MMM dd, yyyy - hh:mm a')}
                       </td>
                     </motion.tr>

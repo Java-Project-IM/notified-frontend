@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Info,
   BookOpen,
+  FileText,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import MainLayout from '@/layouts/MainLayout'
@@ -338,25 +339,33 @@ export default function StudentsPage() {
           ]}
         />
 
-        {/* Toolbar */}
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            className="border-gray-300 hover:bg-gray-50 hover:border-blue-400 transition-all h-11"
-            onClick={handleDownloadTemplate}
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Template
-          </Button>
-          <Button
-            variant="outline"
-            className="border-gray-300 hover:bg-gray-50 hover:border-blue-400 transition-all h-11"
-            onClick={handleExportStudents}
-            disabled={students.length === 0}
-          >
-            <FileSpreadsheet className="w-4 h-4 mr-2" />
-            Export
-          </Button>
+        {/* Toolbar - Enterprise Grade */}
+        <div className="bg-slate-800/50 rounded-2xl p-6 shadow-enterprise border border-slate-700/50 backdrop-blur-sm">
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              variant="outline"
+              className="border-slate-600 bg-slate-800/80 hover:bg-slate-700 hover:border-blue-500 text-slate-200 hover:text-white transition-all h-11 px-5 shadow-enterprise-sm"
+              onClick={handleDownloadTemplate}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download Template
+            </Button>
+            <Button
+              variant="outline"
+              className="border-slate-600 bg-slate-800/80 hover:bg-slate-700 hover:border-emerald-500 text-slate-200 hover:text-white transition-all h-11 px-5 shadow-enterprise-sm"
+              onClick={handleExportStudents}
+              disabled={students.length === 0}
+            >
+              <FileSpreadsheet className="w-4 h-4 mr-2" />
+              Export Students
+            </Button>
+            <div className="ml-auto flex items-center gap-2 text-slate-400 text-sm">
+              <FileText className="w-4 h-4" />
+              <span className="font-medium">
+                Showing {filteredStudents.length} of {students.length} students
+              </span>
+            </div>
+          </div>
           <input
             ref={fileInputRef}
             type="file"
@@ -366,29 +375,17 @@ export default function StudentsPage() {
           />
         </div>
 
-        {/* Search and Actions */}
-        <div className="bg-white rounded-2xl p-6 shadow-enterprise border border-gray-200">
-          <div className="flex items-center gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search by name, student number, or email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500/20"
-              />
-            </div>
-            {selectedStudents.size > 0 && (
-              <Button
-                variant="outline"
-                className="h-12 px-5 border-gray-300 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 transition-all"
-                onClick={() => setIsEmailModalOpen(true)}
-              >
-                <Mail className="w-4 h-4 mr-2" />
-                Email Selected ({selectedStudents.size})
-              </Button>
-            )}
+        {/* Search */}
+        <div className="bg-slate-800/50 rounded-2xl p-6 shadow-enterprise border border-slate-700/50 backdrop-blur-sm">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Input
+              type="text"
+              placeholder="Search by name, student number, or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-12 h-12 border-slate-600 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500/20"
+            />
           </div>
         </div>
 
@@ -396,7 +393,7 @@ export default function StudentsPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-enterprise border border-gray-200 overflow-hidden"
+          className="bg-slate-800/50 rounded-2xl shadow-enterprise-lg border border-slate-700/50 backdrop-blur-sm overflow-hidden"
         >
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -438,27 +435,27 @@ export default function StudentsPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-slate-900/50">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-16 text-gray-500">
+                    <td colSpan={8} className="text-center py-16 text-slate-400">
                       <div className="flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+                        <div className="w-12 h-12 border-4 border-blue-900 border-t-blue-500 rounded-full animate-spin" />
                         <p className="font-medium">Loading students...</p>
                       </div>
                     </td>
                   </tr>
                 ) : filteredStudents.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-16 text-gray-500">
+                    <td colSpan={8} className="text-center py-16 text-slate-400">
                       <div className="flex flex-col items-center gap-2">
-                        <Users className="w-16 h-16 text-gray-300" />
+                        <Users className="w-16 h-16 text-slate-600" />
                         <p className="font-medium text-lg">
                           {searchTerm
                             ? 'No students found matching your search'
                             : 'No students added yet'}
                         </p>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-slate-500">
                           {!searchTerm && 'Get started by adding your first student'}
                         </p>
                       </div>
@@ -471,7 +468,7 @@ export default function StudentsPage() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors group"
+                      className="border-b border-slate-700/30 hover:bg-slate-800/60 transition-colors group"
                     >
                       <td className="p-5">
                         <div className="flex items-center">
@@ -479,36 +476,38 @@ export default function StudentsPage() {
                             type="checkbox"
                             checked={selectedStudents.has(student.id)}
                             onChange={() => toggleSelection(student.id)}
-                            className="w-5 h-5 rounded-md border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer transition-all hover:scale-110 hover:border-blue-400"
+                            className="w-5 h-5 rounded-md border-2 border-slate-600 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer transition-all hover:scale-110 hover:border-blue-400 bg-slate-800"
                           />
                         </div>
                       </td>
                       <td className="p-5">
-                        <span className="font-semibold text-gray-900 text-sm">
+                        <span className="font-semibold text-slate-100 text-sm">
                           {student.studentNumber}
                         </span>
                       </td>
-                      <td className="p-5 text-gray-700 font-medium text-sm">{student.firstName}</td>
-                      <td className="p-5 text-gray-700 font-medium text-sm">{student.lastName}</td>
-                      <td className="p-5 text-gray-600 text-sm">{student.email}</td>
+                      <td className="p-5 text-slate-200 font-medium text-sm">
+                        {student.firstName}
+                      </td>
+                      <td className="p-5 text-slate-200 font-medium text-sm">{student.lastName}</td>
+                      <td className="p-5 text-slate-400 text-sm">{student.email}</td>
                       <td className="p-5">
-                        <span className="inline-flex px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
+                        <span className="inline-flex px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs font-medium border border-blue-500/30">
                           {student.section || '-'}
                         </span>
                       </td>
-                      <td className="p-5 text-gray-600 text-sm">{student.guardianName || '-'}</td>
+                      <td className="p-5 text-slate-400 text-sm">{student.guardianName || '-'}</td>
                       <td className="p-5">
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleEditStudent(student)}
-                            className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-blue-200"
+                            className="p-2.5 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-blue-500/30"
                             title="Edit"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(student)}
-                            className="p-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-red-200"
+                            className="p-2.5 text-red-400 hover:bg-red-500/20 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-red-500/30"
                             title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -522,6 +521,34 @@ export default function StudentsPage() {
             </table>
           </div>
         </motion.div>
+
+        {/* Floating Email Button - Enterprise Style */}
+        {selectedStudents.size > 0 && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="fixed bottom-8 right-8 z-50"
+          >
+            <button onClick={() => setIsEmailModalOpen(true)} className="relative group">
+              {/* Glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity animate-pulse" />
+
+              {/* Button */}
+              <div className="relative flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-enterprise-2xl hover:shadow-enterprise-2xl hover:scale-105 transition-all duration-300">
+                <Mail className="w-5 h-5 text-white" />
+                <span className="font-semibold text-white">
+                  Email Selected ({selectedStudents.size})
+                </span>
+
+                {/* Badge */}
+                <div className="absolute -top-2 -right-2 w-7 h-7 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg border-2 border-slate-900 animate-bounce">
+                  {selectedStudents.size}
+                </div>
+              </div>
+            </button>
+          </motion.div>
+        )}
       </div>
 
       {/* Student Modal */}
