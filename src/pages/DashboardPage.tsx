@@ -19,14 +19,14 @@ export default function DashboardPage() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      console.log('📊 Fetching dashboard stats...')
+      console.log('[Dashboard] Fetching dashboard stats...')
       try {
         const data = await recordService.getStats()
-        console.log('✅ Dashboard stats loaded:', data)
+        console.log('[Dashboard] Dashboard stats loaded:', data)
         return data
       } catch (err) {
-        console.error('❌ Failed to load dashboard stats:', err)
-        addToast('Failed to load dashboard statistics', 'error', '❌ Error')
+        console.error('[Dashboard] Failed to load dashboard stats:', err)
+        addToast('Failed to load dashboard statistics', 'error')
         throw err
       }
     },

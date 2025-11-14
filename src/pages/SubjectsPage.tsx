@@ -21,9 +21,9 @@ export default function SubjectsPage() {
   const { data: subjects = [], isLoading } = useQuery({
     queryKey: ['subjects'],
     queryFn: async () => {
-      console.log('📚 Fetching all subjects...')
+      console.log('[Subjects] Fetching all subjects...')
       const data = await subjectService.getAll()
-      console.log('✅ Loaded subjects:', data.length)
+      console.log('[Subjects] Loaded subjects:', data.length)
       return data
     },
   })
@@ -33,11 +33,11 @@ export default function SubjectsPage() {
     mutationFn: subjectService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] })
-      addToast('Subject added successfully', 'success', '✅ Success')
+      addToast('Subject added successfully', 'success')
       setIsModalOpen(false)
     },
     onError: (error: any) => {
-      addToast(error?.message || 'Failed to add subject', 'error', '❌ Error')
+      addToast(error?.message || 'Failed to add subject', 'error')
     },
   })
 
@@ -47,12 +47,12 @@ export default function SubjectsPage() {
       subjectService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] })
-      addToast('Subject updated successfully', 'success', '✅ Success')
+      addToast('Subject updated successfully', 'success')
       setIsModalOpen(false)
       setEditingSubject(null)
     },
     onError: (error: any) => {
-      addToast(error?.message || 'Failed to update subject', 'error', '❌ Error')
+      addToast(error?.message || 'Failed to update subject', 'error')
     },
   })
 
@@ -61,10 +61,10 @@ export default function SubjectsPage() {
     mutationFn: subjectService.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] })
-      addToast('Subject deleted successfully', 'success', '✅ Success')
+      addToast('Subject deleted successfully', 'success')
     },
     onError: (error: any) => {
-      addToast(error?.message || 'Failed to delete subject', 'error', '❌ Error')
+      addToast(error?.message || 'Failed to delete subject', 'error')
     },
   })
 

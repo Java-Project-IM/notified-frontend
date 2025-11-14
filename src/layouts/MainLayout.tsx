@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Home, Users, BookOpen, ClipboardList, LogOut, Bell } from 'lucide-react'
+import { Home, Users, BookOpen, ClipboardList, LogOut, Bell, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/store/toastStore'
@@ -19,15 +19,43 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const handleLogout = () => {
     console.log('Logging out user...')
     clearAuth()
-    toast.success(TOAST_MESSAGES.LOGOUT_SUCCESS, '👋 Goodbye')
+    toast.success(TOAST_MESSAGES.LOGOUT_SUCCESS, 'Goodbye')
     setTimeout(() => navigate(ROUTES.LOGIN), 500)
   }
 
   const navItems = [
-    { label: 'Dashboard', icon: Home, path: ROUTES.DASHBOARD },
-    { label: 'Students', icon: Users, path: ROUTES.STUDENTS },
-    { label: 'Subjects', icon: BookOpen, path: ROUTES.SUBJECTS },
-    { label: 'Records', icon: ClipboardList, path: ROUTES.RECORDS },
+    {
+      label: 'Dashboard',
+      icon: Home,
+      path: ROUTES.DASHBOARD,
+      colorClass: 'bg-gradient-to-r from-indigo-600 to-purple-600',
+      hoverClass: 'hover:bg-indigo-50',
+      textClass: 'text-indigo-700',
+    },
+    {
+      label: 'Students',
+      icon: Users,
+      path: ROUTES.STUDENTS,
+      colorClass: 'bg-gradient-to-r from-blue-600 to-indigo-600',
+      hoverClass: 'hover:bg-blue-50',
+      textClass: 'text-blue-700',
+    },
+    {
+      label: 'Subjects',
+      icon: BookOpen,
+      path: ROUTES.SUBJECTS,
+      colorClass: 'bg-gradient-to-r from-purple-600 to-violet-600',
+      hoverClass: 'hover:bg-purple-50',
+      textClass: 'text-purple-700',
+    },
+    {
+      label: 'Records',
+      icon: ClipboardList,
+      path: ROUTES.RECORDS,
+      colorClass: 'bg-gradient-to-r from-green-600 to-emerald-600',
+      hoverClass: 'hover:bg-green-50',
+      textClass: 'text-green-700',
+    },
   ]
 
   const currentPath = window.location.pathname
@@ -48,10 +76,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 className={cn(
-                  'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+                  'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200',
                   currentPath === item.path
-                    ? 'bg-primary text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? `${item.colorClass} text-white shadow-lg transform scale-105`
+                    : `text-gray-700 ${item.hoverClass}`
                 )}
               >
                 <item.icon className="w-5 h-5" />

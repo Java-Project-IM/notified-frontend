@@ -35,9 +35,9 @@ export const studentService = {
   },
 
   async delete(id: number): Promise<void> {
-    console.log('🗑️ Deleting student with ID:', id)
+    console.log('[StudentService] Deleting student with ID:', id)
     const response = await apiClient.delete(`/students/${id}`)
-    console.log('✅ Student deleted successfully:', response.data)
+    console.log('[StudentService] Student deleted successfully:', response.data)
     return response.data
   },
 

@@ -27,23 +27,23 @@ export default function LoginPage() {
   const loginMutation = useMutation({
     mutationFn: authService.login,
     onSuccess: (data: AuthResponse) => {
-      console.log('🎉 Login success, full data:', data)
+      console.log('[Login] Login success, full data:', data)
       const token = data.accessToken || data.token
-      console.log('🔑 Extracted token:', token ? token.substring(0, 30) + '...' : 'NO TOKEN!')
+      console.log('[Login] Extracted token:', token ? token.substring(0, 30) + '...' : 'NO TOKEN!')
       if (!token) {
-        console.error('❌ No token in response!')
-        addToast('Login failed: No authentication token received', 'error', '❌ Error')
+        console.error('[Login] No token in response!')
+        addToast('Login failed: No authentication token received', 'error')
         return
       }
       setAuth(data.user, token)
-      addToast('Login successful! Redirecting to dashboard...', 'success', '✅ Success')
+      addToast('Login successful! Redirecting to dashboard...', 'success')
       console.log('Toast added, navigating to dashboard')
       setTimeout(() => navigate(ROUTES.DASHBOARD), 500)
     },
     onError: (error: unknown) => {
       console.error('Login error:', error)
       const message = (error as { message?: string })?.message || TOAST_MESSAGES.ERROR
-      addToast(message, 'error', '❌ Login Failed')
+      addToast(message, 'error')
     },
   })
 
@@ -68,12 +68,12 @@ export default function LoginPage() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
-      addToast('Please fix the form errors', 'error', '⚠️ Validation Error')
+      addToast('Please fix the form errors', 'error')
       return
     }
 
     setErrors({})
-    addToast('Signing in...', 'info', '🔄 Processing')
+    addToast('Signing in...', 'info')
     console.log('Calling login mutation...')
     loginMutation.mutate(formData)
   }

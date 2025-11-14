@@ -10,6 +10,11 @@ import {
   FileSpreadsheet,
   Download,
   Upload,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Info,
+  BookOpen,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import MainLayout from '@/layouts/MainLayout'
@@ -19,12 +24,15 @@ import { useToast } from '@/store/toastStore'
 import { studentService } from '@/services/student.service'
 import { Student, StudentFormData } from '@/types'
 import StudentModal from '@/components/modals/StudentModal'
+import EmailModal, { EmailData } from '@/components/modals/EmailModal'
 import { parseExcelFile, generateStudentTemplate, exportStudentsToExcel } from '@/utils/excelUtils'
+import { sendEmail } from '@/services/email.service'
 
 export default function StudentsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStudents, setSelectedStudents] = useState<Set<number>>(new Set())
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
   const [editingStudent, setEditingStudent] = useState<Student | null>(null)
   const [generatedNumber, setGeneratedNumber] = useState('')
   const [isImporting, setIsImporting] = useState(false)
@@ -36,9 +44,9 @@ export default function StudentsPage() {
   const { data: students = [], isLoading } = useQuery({
     queryKey: ['students'],
     queryFn: async () => {
-      console.log('📚 Fetching all students...')
+      console.log('[Students] Fetching all students...')
       const data = await studentService.getAll()
-      console.log('✅ Loaded students:', data.length)
+      console.log('[Students] Loaded students:', data.length)
       return data
     },
   })
@@ -49,12 +57,12 @@ export default function StudentsPage() {
       studentService
         .generateStudentNumber()
         .then((res) => {
-          console.log('✅ Generated student number:', res.studentNumber)
+          console.log('[Students] Generated student number:', res.studentNumber)
           setGeneratedNumber(res.studentNumber)
         })
         .catch((err) => {
-          console.error('❌ Failed to generate student number:', err)
-          addToast('Failed to generate student number', 'error', '❌ Error')
+          console.error('[Students] Failed to generate student number:', err)
+          addToast('Failed to generate student number', 'error')
         })
     }
   }, [isModalOpen, editingStudent])
@@ -64,12 +72,12 @@ export default function StudentsPage() {
     mutationFn: studentService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['students'] })
-      addToast('Student added successfully', 'success', '✅ Success')
+      addToast('Student added successfully', 'success')
       setIsModalOpen(false)
       setGeneratedNumber('')
     },
     onError: (error: any) => {
-      addToast(error?.message || 'Failed to add student', 'error', '❌ Error')
+      addToast(error?.message || 'Failed to add student', 'error')
     },
   })
 
@@ -79,12 +87,12 @@ export default function StudentsPage() {
       studentService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['students'] })
-      addToast('Student updated successfully', 'success', '✅ Success')
+      addToast('Student updated successfully', 'success')
       setIsModalOpen(false)
       setEditingStudent(null)
     },
     onError: (error: any) => {
-      addToast(error?.message || 'Failed to update student', 'error', '❌ Error')
+      addToast(error?.message || 'Failed to update student', 'error')
     },
   })
 
@@ -96,12 +104,12 @@ export default function StudentsPage() {
       queryClient.invalidateQueries({ queryKey: ['students'] })
       queryClient.refetchQueries({ queryKey: ['students'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
-      addToast('Student deleted successfully', 'success', '✅ Success')
-      console.log('✅ Student deleted and queries invalidated')
+      addToast('Student deleted successfully', 'success')
+      console.log('[Students] Student deleted and queries invalidated')
     },
     onError: (error: any) => {
-      console.error('❌ Failed to delete student:', error)
-      addToast(error?.message || 'Failed to delete student', 'error', '❌ Error')
+      console.error('[Students] Failed to delete student:', error)
+      addToast(error?.message || 'Failed to delete student', 'error')
     },
   })
 
@@ -166,25 +174,47 @@ export default function StudentsPage() {
     setGeneratedNumber('')
   }
 
+  const handleEmailSend = async (emailData: EmailData): Promise<boolean> => {
+    try {
+      const success = await sendEmail(emailData)
+      if (success) {
+        // Clear selection after successful send
+        setSelectedStudents(new Set())
+      }
+      return success
+    } catch (error: any) {
+      console.error('Failed to send email:', error)
+      addToast(error.message || 'Failed to send email', 'error')
+      return false
+    }
+  }
+
+  // Get email addresses for selected students
+  const getSelectedEmails = (): string[] => {
+    return filteredStudents
+      .filter((student) => selectedStudents.has(student.id))
+      .map((student) => student.email)
+  }
+
   const handleDownloadTemplate = () => {
     try {
       generateStudentTemplate()
-      addToast('Template downloaded successfully', 'success', '✅ Success')
+      addToast('Template downloaded successfully', 'success')
     } catch (error) {
-      addToast('Failed to download template', 'error', '❌ Error')
+      addToast('Failed to download template', 'error')
     }
   }
 
   const handleExportStudents = () => {
     try {
       if (students.length === 0) {
-        addToast('No students to export', 'info', 'ℹ️ Info')
+        addToast('No students to export', 'info')
         return
       }
       exportStudentsToExcel(students)
-      addToast(`Exported ${students.length} students successfully`, 'success', '✅ Success')
+      addToast(`Exported ${students.length} students successfully`, 'success')
     } catch (error) {
-      addToast('Failed to export students', 'error', '❌ Error')
+      addToast('Failed to export students', 'error')
     }
   }
 
@@ -198,18 +228,18 @@ export default function StudentsPage() {
 
     // Validate file type
     if (!file.name.match(/\.(xlsx|xls)$/)) {
-      addToast('Please select a valid Excel file (.xlsx or .xls)', 'error', '❌ Invalid File')
+      addToast('Please select a valid Excel file (.xlsx or .xls)', 'error')
       return
     }
 
     setIsImporting(true)
-    addToast('Importing students from Excel...', 'info', '📥 Importing')
+    addToast('Importing students from Excel...', 'info')
 
     try {
       const studentsData = await parseExcelFile(file)
 
       if (studentsData.length === 0) {
-        addToast('No valid student data found in the file', 'error', '❌ Error')
+        addToast('No valid student data found in the file', 'error')
         setIsImporting(false)
         return
       }
@@ -236,14 +266,13 @@ export default function StudentsPage() {
       if (successCount > 0) {
         addToast(
           `Successfully imported ${successCount} student${successCount > 1 ? 's' : ''}${failCount > 0 ? `, ${failCount} failed` : ''}`,
-          failCount > 0 ? 'info' : 'success',
-          failCount > 0 ? '⚠️ Partial Success' : '✅ Success'
+          failCount > 0 ? 'info' : 'success'
         )
       } else {
-        addToast('Failed to import any students', 'error', '❌ Import Failed')
+        addToast('Failed to import any students', 'error')
       }
     } catch (error: any) {
-      addToast(error.message || 'Failed to import students', 'error', '❌ Error')
+      addToast(error.message || 'Failed to import students', 'error')
     } finally {
       setIsImporting(false)
       // Reset file input
@@ -398,7 +427,7 @@ export default function StudentsPage() {
               <Button
                 variant="outline"
                 className="shadow-neumorphic"
-                onClick={() => addToast(`Send email to ${selectedStudents.size} students`, 'info')}
+                onClick={() => setIsEmailModalOpen(true)}
               >
                 <Mail className="w-4 h-4 mr-2" />
                 Email Selected ({selectedStudents.size})
@@ -514,6 +543,14 @@ export default function StudentsPage() {
         student={editingStudent}
         isLoading={createMutation.isPending || updateMutation.isPending}
         generatedNumber={generatedNumber}
+      />
+
+      {/* Email Modal */}
+      <EmailModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        recipients={getSelectedEmails()}
+        onSend={handleEmailSend}
       />
     </MainLayout>
   )

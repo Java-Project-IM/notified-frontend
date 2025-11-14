@@ -1,6 +1,15 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { FileText, Search, Calendar, Filter, BarChart3, Download } from 'lucide-react'
+import {
+  FileText,
+  Search,
+  Calendar,
+  Filter,
+  BarChart3,
+  Download,
+  CheckCircle,
+  DoorOpen,
+} from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import MainLayout from '@/layouts/MainLayout'
 import { Button } from '@/components/ui/button'
@@ -20,9 +29,9 @@ export default function RecordsPage() {
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['records'],
     queryFn: async () => {
-      console.log('📋 Fetching all records...')
+      console.log('[Records] Fetching all records...')
       const data = await recordService.getAll()
-      console.log('✅ Loaded records:', data.length)
+      console.log('[Records] Loaded records:', data.length)
       return data
     },
   })
@@ -52,17 +61,17 @@ export default function RecordsPage() {
 
   const handleShowSummary = () => {
     const summary = `
-📊 Records Summary
+Records Summary
 
 Total Records: ${filteredRecords.length}
-✅ Arrivals: ${arrivals}
-🚪 Departures: ${departures}
-📅 Today's Records: ${todayRecords.length}
+Arrivals: ${arrivals}
+Departures: ${departures}
+Today's Records: ${todayRecords.length}
 
 Date Range: ${selectedDate || 'All Time'}
     `.trim()
 
-    addToast(summary, 'info', '📊 Summary')
+    addToast(summary, 'info')
   }
 
   return (
@@ -122,7 +131,9 @@ Date Range: ${selectedDate || 'All Time'}
                 <p className="text-gray-600 text-sm font-medium">Arrivals</p>
                 <p className="text-3xl font-bold text-green-600 mt-2">{arrivals}</p>
               </div>
-              <div className="bg-green-50 p-4 rounded-xl text-green-500 text-4xl">✅</div>
+              <div className="bg-green-50 p-4 rounded-xl">
+                <CheckCircle className="w-8 h-8 text-green-500" />
+              </div>
             </div>
           </motion.div>
 
@@ -137,7 +148,9 @@ Date Range: ${selectedDate || 'All Time'}
                 <p className="text-gray-600 text-sm font-medium">Departures</p>
                 <p className="text-3xl font-bold text-orange-600 mt-2">{departures}</p>
               </div>
-              <div className="bg-orange-50 p-4 rounded-xl text-orange-500 text-4xl">🚪</div>
+              <div className="bg-orange-50 p-4 rounded-xl">
+                <DoorOpen className="w-8 h-8 text-orange-500" />
+              </div>
             </div>
           </motion.div>
 
@@ -251,13 +264,18 @@ Date Range: ${selectedDate || 'All Time'}
                       <td className="p-4 text-gray-600">{record.email}</td>
                       <td className="p-4">
                         <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
                             record.recordType === 'Arrival'
                               ? 'bg-green-100 text-green-700'
                               : 'bg-orange-100 text-orange-700'
                           }`}
                         >
-                          {record.recordType === 'Arrival' ? '✅' : '🚪'} {record.recordType}
+                          {record.recordType === 'Arrival' ? (
+                            <CheckCircle className="w-4 h-4" />
+                          ) : (
+                            <DoorOpen className="w-4 h-4" />
+                          )}
+                          {record.recordType}
                         </span>
                       </td>
                       <td className="p-4 text-gray-600">
