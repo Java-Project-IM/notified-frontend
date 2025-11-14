@@ -53,23 +53,59 @@ export default function StudentModal({
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof StudentFormData, string>> = {}
 
+    // Student Number validation
     if (!formData.studentNumber.trim()) {
       newErrors.studentNumber = 'Student number is required'
+    } else if (formData.studentNumber.trim().length < 3) {
+      newErrors.studentNumber = 'Student number must be at least 3 characters'
     }
+
+    // First Name validation
     if (!formData.firstName.trim()) {
       newErrors.firstName = 'First name is required'
+    } else if (formData.firstName.trim().length < 2) {
+      newErrors.firstName = 'First name must be at least 2 characters'
+    } else if (!/^[a-zA-Z\s-]+$/.test(formData.firstName.trim())) {
+      newErrors.firstName = 'First name can only contain letters, spaces, and hyphens'
     }
+
+    // Last Name validation
     if (!formData.lastName.trim()) {
       newErrors.lastName = 'Last name is required'
+    } else if (formData.lastName.trim().length < 2) {
+      newErrors.lastName = 'Last name must be at least 2 characters'
+    } else if (!/^[a-zA-Z\s-]+$/.test(formData.lastName.trim())) {
+      newErrors.lastName = 'Last name can only contain letters, spaces, and hyphens'
     }
+
+    // Email validation
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required'
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format'
+      newErrors.email = 'Please enter a valid email address'
     }
 
-    if (formData.guardianEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.guardianEmail)) {
-      newErrors.guardianEmail = 'Invalid guardian email format'
+    // Section validation (optional but if provided, validate format)
+    if (formData.section && formData.section.trim().length > 0) {
+      if (formData.section.trim().length > 10) {
+        newErrors.section = 'Section must be 10 characters or less'
+      }
+    }
+
+    // Guardian Name validation (optional but if provided, validate)
+    if (formData.guardianName && formData.guardianName.trim().length > 0) {
+      if (formData.guardianName.trim().length < 2) {
+        newErrors.guardianName = 'Guardian name must be at least 2 characters'
+      } else if (!/^[a-zA-Z\s-]+$/.test(formData.guardianName.trim())) {
+        newErrors.guardianName = 'Guardian name can only contain letters, spaces, and hyphens'
+      }
+    }
+
+    // Guardian Email validation (optional but if provided, validate)
+    if (formData.guardianEmail && formData.guardianEmail.trim().length > 0) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.guardianEmail)) {
+        newErrors.guardianEmail = 'Please enter a valid guardian email address'
+      }
     }
 
     setErrors(newErrors)

@@ -43,16 +43,40 @@ export default function SubjectModal({
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof SubjectFormData, string>> = {}
 
+    // Subject Code validation
     if (!formData.subjectCode.trim()) {
       newErrors.subjectCode = 'Subject code is required'
+    } else if (formData.subjectCode.trim().length < 2) {
+      newErrors.subjectCode = 'Subject code must be at least 2 characters'
+    } else if (formData.subjectCode.trim().length > 20) {
+      newErrors.subjectCode = 'Subject code must be 20 characters or less'
+    } else if (!/^[A-Z0-9-]+$/.test(formData.subjectCode.trim())) {
+      newErrors.subjectCode =
+        'Subject code can only contain uppercase letters, numbers, and hyphens'
     }
+
+    // Subject Name validation
     if (!formData.subjectName.trim()) {
       newErrors.subjectName = 'Subject name is required'
+    } else if (formData.subjectName.trim().length < 3) {
+      newErrors.subjectName = 'Subject name must be at least 3 characters'
+    } else if (formData.subjectName.trim().length > 100) {
+      newErrors.subjectName = 'Subject name must be 100 characters or less'
     }
+
+    // Section validation
     if (!formData.section.trim()) {
       newErrors.section = 'Section is required'
+    } else if (formData.section.trim().length > 10) {
+      newErrors.section = 'Section must be 10 characters or less'
+    } else if (!/^[A-Z0-9-]+$/.test(formData.section.trim())) {
+      newErrors.section = 'Section can only contain uppercase letters, numbers, and hyphens'
     }
-    if (!formData.yearLevel || formData.yearLevel < 1 || formData.yearLevel > 12) {
+
+    // Year Level validation
+    if (!formData.yearLevel || isNaN(formData.yearLevel)) {
+      newErrors.yearLevel = 'Year level is required'
+    } else if (formData.yearLevel < 1 || formData.yearLevel > 12) {
       newErrors.yearLevel = 'Year level must be between 1 and 12'
     }
 

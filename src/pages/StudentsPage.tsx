@@ -79,10 +79,15 @@ export default function StudentsPage() {
   const deleteMutation = useMutation({
     mutationFn: studentService.delete,
     onSuccess: () => {
+      // Force refetch to ensure we get the latest data from the server
       queryClient.invalidateQueries({ queryKey: ['students'] })
+      queryClient.refetchQueries({ queryKey: ['students'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
       addToast('Student deleted successfully', 'success', '✅ Success')
+      console.log('✅ Student deleted and queries invalidated')
     },
     onError: (error: any) => {
+      console.error('❌ Failed to delete student:', error)
       addToast(error?.message || 'Failed to delete student', 'error', '❌ Error')
     },
   })
@@ -177,7 +182,10 @@ export default function StudentsPage() {
               <FileSpreadsheet className="w-4 h-4 mr-2" />
               Import
             </Button>
-            <Button className="shadow-neumorphic" onClick={handleAddStudent}>
+            <Button
+              className="shadow-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+              onClick={handleAddStudent}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Add Student
             </Button>
@@ -189,14 +197,16 @@ export default function StudentsPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl p-6 shadow-neumorphic"
+            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-blue-500"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Total Students</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{students.length}</p>
+                <p className="text-gray-600 text-sm font-medium">Total Students</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">{students.length}</p>
               </div>
-              <Users className="w-12 h-12 text-blue-500 opacity-20" />
+              <div className="bg-blue-50 p-4 rounded-xl">
+                <Users className="w-8 h-8 text-blue-500" />
+              </div>
             </div>
           </motion.div>
 
@@ -204,14 +214,16 @@ export default function StudentsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl p-6 shadow-neumorphic"
+            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-green-500"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Selected</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{selectedStudents.size}</p>
+                <p className="text-gray-600 text-sm font-medium">Selected</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">{selectedStudents.size}</p>
               </div>
-              <Users className="w-12 h-12 text-green-500 opacity-20" />
+              <div className="bg-green-50 p-4 rounded-xl">
+                <Users className="w-8 h-8 text-green-500" />
+              </div>
             </div>
           </motion.div>
 
@@ -219,14 +231,16 @@ export default function StudentsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl p-6 shadow-neumorphic"
+            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-orange-500"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Active Today</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">0</p>
+                <p className="text-gray-600 text-sm font-medium">Active Today</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
               </div>
-              <Users className="w-12 h-12 text-orange-500 opacity-20" />
+              <div className="bg-orange-50 p-4 rounded-xl">
+                <Users className="w-8 h-8 text-orange-500" />
+              </div>
             </div>
           </motion.div>
 
@@ -234,16 +248,18 @@ export default function StudentsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl p-6 shadow-neumorphic"
+            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-purple-500"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">With Guardians</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">
+                <p className="text-gray-600 text-sm font-medium">With Guardians</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">
                   {students.filter((s) => s.guardianName).length}
                 </p>
               </div>
-              <Users className="w-12 h-12 text-purple-500 opacity-20" />
+              <div className="bg-purple-50 p-4 rounded-xl">
+                <Users className="w-8 h-8 text-purple-500" />
+              </div>
             </div>
           </motion.div>
         </div>

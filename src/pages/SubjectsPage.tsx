@@ -127,7 +127,7 @@ export default function SubjectsPage() {
             <p className="text-gray-600 mt-1">Manage subjects and class sections</p>
           </div>
           <Button
-            className="shadow-neumorphic bg-purple-600 hover:bg-purple-700"
+            className="shadow-lg bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
             onClick={handleAddSubject}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -140,14 +140,16 @@ export default function SubjectsPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl p-6 shadow-neumorphic"
+            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-purple-500"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Total Subjects</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{subjects.length}</p>
+                <p className="text-gray-600 text-sm font-medium">Total Subjects</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">{subjects.length}</p>
               </div>
-              <BookOpen className="w-12 h-12 text-purple-500 opacity-20" />
+              <div className="bg-purple-50 p-4 rounded-xl">
+                <BookOpen className="w-8 h-8 text-purple-500" />
+              </div>
             </div>
           </motion.div>
 
@@ -155,16 +157,18 @@ export default function SubjectsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl p-6 shadow-neumorphic"
+            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-blue-500"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Year Levels</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">
+                <p className="text-gray-600 text-sm font-medium">Year Levels</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">
                   {new Set(subjects.map((s) => s.yearLevel)).size}
                 </p>
               </div>
-              <BookOpen className="w-12 h-12 text-blue-500 opacity-20" />
+              <div className="bg-blue-50 p-4 rounded-xl">
+                <BookOpen className="w-8 h-8 text-blue-500" />
+              </div>
             </div>
           </motion.div>
 
@@ -172,16 +176,18 @@ export default function SubjectsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl p-6 shadow-neumorphic"
+            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-green-500"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Sections</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">
+                <p className="text-gray-600 text-sm font-medium">Sections</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">
                   {new Set(subjects.map((s) => s.section)).size}
                 </p>
               </div>
-              <Users className="w-12 h-12 text-green-500 opacity-20" />
+              <div className="bg-green-50 p-4 rounded-xl">
+                <Users className="w-8 h-8 text-green-500" />
+              </div>
             </div>
           </motion.div>
 
@@ -189,14 +195,16 @@ export default function SubjectsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl p-6 shadow-neumorphic"
+            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-orange-500"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Active Classes</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{subjects.length}</p>
+                <p className="text-gray-600 text-sm font-medium">Active Classes</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">{subjects.length}</p>
               </div>
-              <Users className="w-12 h-12 text-orange-500 opacity-20" />
+              <div className="bg-orange-50 p-4 rounded-xl">
+                <Users className="w-8 h-8 text-orange-500" />
+              </div>
             </div>
           </motion.div>
         </div>

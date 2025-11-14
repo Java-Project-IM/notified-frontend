@@ -35,7 +35,10 @@ export const studentService = {
   },
 
   async delete(id: number): Promise<void> {
-    await apiClient.delete(`/students/${id}`)
+    console.log('🗑️ Deleting student with ID:', id)
+    const response = await apiClient.delete(`/students/${id}`)
+    console.log('✅ Student deleted successfully:', response.data)
+    return response.data
   },
 
   async search(query: string): Promise<Student[]> {

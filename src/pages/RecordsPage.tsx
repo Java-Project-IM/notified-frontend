@@ -98,14 +98,16 @@ Date Range: ${selectedDate || 'All Time'}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl p-6 shadow-neumorphic"
+            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-teal-500"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Total Records</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{records.length}</p>
+                <p className="text-gray-600 text-sm font-medium">Total Records</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">{records.length}</p>
               </div>
-              <FileText className="w-12 h-12 text-teal-500 opacity-20" />
+              <div className="bg-teal-50 p-4 rounded-xl">
+                <FileText className="w-8 h-8 text-teal-500" />
+              </div>
             </div>
           </motion.div>
 
@@ -113,14 +115,14 @@ Date Range: ${selectedDate || 'All Time'}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl p-6 shadow-neumorphic"
+            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-green-500"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Arrivals</p>
-                <p className="text-3xl font-bold text-green-600 mt-1">{arrivals}</p>
+                <p className="text-gray-600 text-sm font-medium">Arrivals</p>
+                <p className="text-3xl font-bold text-green-600 mt-2">{arrivals}</p>
               </div>
-              <div className="text-green-500 text-5xl">✅</div>
+              <div className="bg-green-50 p-4 rounded-xl text-green-500 text-4xl">✅</div>
             </div>
           </motion.div>
 
@@ -128,14 +130,14 @@ Date Range: ${selectedDate || 'All Time'}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl p-6 shadow-neumorphic"
+            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-orange-500"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Departures</p>
-                <p className="text-3xl font-bold text-orange-600 mt-1">{departures}</p>
+                <p className="text-gray-600 text-sm font-medium">Departures</p>
+                <p className="text-3xl font-bold text-orange-600 mt-2">{departures}</p>
               </div>
-              <div className="text-orange-500 text-5xl">🚪</div>
+              <div className="bg-orange-50 p-4 rounded-xl text-orange-500 text-4xl">🚪</div>
             </div>
           </motion.div>
 
@@ -143,14 +145,16 @@ Date Range: ${selectedDate || 'All Time'}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl p-6 shadow-neumorphic"
+            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-t-4 border-blue-500"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Today's Records</p>
-                <p className="text-3xl font-bold text-blue-600 mt-1">{todayRecords.length}</p>
+                <p className="text-gray-600 text-sm font-medium">Today's Records</p>
+                <p className="text-3xl font-bold text-blue-600 mt-2">{todayRecords.length}</p>
               </div>
-              <Calendar className="w-12 h-12 text-blue-500 opacity-20" />
+              <div className="bg-blue-50 p-4 rounded-xl">
+                <Calendar className="w-8 h-8 text-blue-500" />
+              </div>
             </div>
           </motion.div>
         </div>
