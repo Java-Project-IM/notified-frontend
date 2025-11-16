@@ -34,7 +34,31 @@ export const enhancedAttendanceService = {
    * @returns Created attendance record
    */
   async markAttendance(data: AttendanceFormData): Promise<AttendanceRecord> {
-    const response = await api.post<ApiResponse<AttendanceRecord>>('/attendance/mark', data)
+    // Normalize field names coming from UI and ensure date is ISO string
+    const studentId = (data as any).studentId || (data as any).student || (data as any).student_id
+    const subjectId = (data as any).subjectId || (data as any).subject || (data as any).subject_id
+
+    // Ensure date is an ISO string (fallback to now)
+    let dateIso: string
+    if ((data as any).date) {
+      const parsed = new Date((data as any).date)
+      dateIso = isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString()
+    } else {
+      dateIso = new Date().toISOString()
+    }
+
+    const body: any = {
+      studentId,
+      date: dateIso,
+      status: (data as any).status,
+      remarks: (data as any).remarks ?? (data as any).notes ?? '',
+    }
+
+    if (typeof subjectId !== 'undefined' && subjectId !== null && subjectId !== '') {
+      body.subjectId = String(subjectId)
+    }
+
+    const response = await api.post<ApiResponse<AttendanceRecord>>('/attendance/mark', body)
     return response.data.data
   },
 

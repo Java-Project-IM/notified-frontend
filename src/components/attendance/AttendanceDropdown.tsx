@@ -50,19 +50,23 @@ export const AttendanceDropdown = ({
     try {
       // Build payload defensively to satisfy backend validation
       const payload: any = {
-        studentId: student.id,
+        studentId: student.id || (student.id as unknown as string), // ensure an ID string
         status,
-        timeSlot,
-        timestamp: new Date().toISOString(),
-        notes:
+        date: new Date().toISOString(), // backend expects `date` ISO string
+        remarks:
           status === 'late'
             ? 'Arrived late'
             : status === 'excused'
-              ? 'Excused absence'
-              : `${timeSlot} marked on time`,
+            ? 'Excused absence'
+            : `${timeSlot} marked on time`,
+        // Optional: keep timeSlot for frontend purposes; backend will ignore unknown fields
+        timeSlot,
       }
 
-      if (typeof subjectId === 'number') payload.subjectId = subjectId
+      if (typeof subjectId === 'number' || typeof subjectId === 'string') {
+        // ensure subjectId is string (Mongo _id strings are expected by backend)
+        payload.subjectId = String(subjectId)
+      }
 
       // Mark attendance
       await enhancedAttendanceService.markAttendance(payload)
