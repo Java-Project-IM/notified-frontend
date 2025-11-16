@@ -90,11 +90,70 @@ export const AttendanceSummary = ({
   }
 
   if (isLoading) {
+    // Show skeleton cards and table placeholders for enterprise loading state
     return (
-      <div className={`flex items-center justify-center py-12 ${className}`}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-900 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-400 font-medium">Loading attendance summary...</p>
+      <div className={`space-y-6 ${className}`}>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="w-56 h-6 bg-slate-700/40 rounded-md animate-pulse mb-2" />
+            <div className="w-40 h-4 bg-slate-700/40 rounded-md animate-pulse" />
+          </div>
+          <div className="w-36 h-10 bg-slate-700/40 rounded-lg animate-pulse" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="p-4 bg-slate-800/50 border-slate-700/50 rounded-2xl shadow-enterprise-lg"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-lg bg-slate-700/40" />
+                <div className="flex-1">
+                  <div className="w-24 h-5 bg-slate-700/40 rounded-md mb-2" />
+                  <div className="w-12 h-6 bg-slate-700/40 rounded-md" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 bg-slate-800/50 rounded-2xl shadow-enterprise-lg">
+            <div className="w-full h-20 bg-slate-700/40 rounded-md" />
+          </div>
+          <div className="p-4 bg-slate-800/50 rounded-2xl shadow-enterprise-lg">
+            <div className="w-full h-20 bg-slate-700/40 rounded-md" />
+          </div>
+        </div>
+
+        <div className="bg-slate-800/50 border-slate-700/50 rounded-2xl shadow-enterprise-lg p-4">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className="p-3" />
+                  <th className="p-3" />
+                  <th className="p-3" />
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="p-3">
+                      <div className="w-36 h-4 bg-slate-700/40 rounded-md" />
+                    </td>
+                    <td className="p-3">
+                      <div className="w-24 h-4 bg-slate-700/40 rounded-md" />
+                    </td>
+                    <td className="p-3">
+                      <div className="w-12 h-4 bg-slate-700/40 rounded-md" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     )

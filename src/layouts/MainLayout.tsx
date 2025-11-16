@@ -17,7 +17,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const toast = useToast()
 
   const handleLogout = () => {
-    console.log('Logging out user...')
+    // logging out
     clearAuth()
     toast.success(TOAST_MESSAGES.LOGOUT_SUCCESS, 'Goodbye')
     setTimeout(() => navigate(ROUTES.LOGIN), 500)

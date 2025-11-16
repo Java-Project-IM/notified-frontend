@@ -18,29 +18,15 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       setAuth: (user, token) => {
-        console.log('🔐 Setting auth:', { user, token: token?.substring(0, 30) + '...' })
+        // persist auth to localStorage
         localStorage.setItem('token', token)
         localStorage.setItem('user', JSON.stringify(user))
         set({ user, token, isAuthenticated: true })
-        console.log('✅ Auth state updated, isAuthenticated:', true)
-
-        // Verify localStorage was set
-        const storedToken = localStorage.getItem('token')
-        console.log(
-          '🔍 Verifying localStorage - token exists:',
-          !!storedToken,
-          'length:',
-          storedToken?.length,
-          'preview:',
-          storedToken?.substring(0, 30) + '...'
-        )
       },
       clearAuth: () => {
-        console.log('🚪 Clearing auth...')
         localStorage.removeItem('token')
         localStorage.removeItem('user')
         set({ user: null, token: null, isAuthenticated: false })
-        console.log('✅ Auth cleared, isAuthenticated:', false)
       },
       updateUser: (updatedUser) =>
         set((state) => ({

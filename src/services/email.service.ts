@@ -1,5 +1,6 @@
 import api from './api'
 import type { EmailData } from '@/components/modals/EmailModal'
+import { logError } from '@/utils/errorHandling'
 
 /**
  * Email Service
@@ -23,11 +24,7 @@ export interface EmailResponse {
  */
 export async function sendEmail(emailData: EmailData): Promise<boolean> {
   try {
-    console.log('[EmailService] Sending email:', {
-      to: emailData.to,
-      subject: emailData.subject,
-      hasAttachments: !!emailData.attachments?.length,
-    })
+    // sending email (metadata omitted from console for production)
 
     // For multiple recipients, split and send individually
     const recipients = emailData.to.split(',').map((e) => e.trim())
@@ -40,8 +37,7 @@ export async function sendEmail(emailData: EmailData): Promise<boolean> {
         message: emailData.message,
         attachments: emailData.attachments,
       })
-
-      console.log('[EmailService] Email sent successfully:', response.data)
+      // email sent successfully
       return response.data.success
     } else {
       // Multiple recipients - batch send
@@ -51,12 +47,11 @@ export async function sendEmail(emailData: EmailData): Promise<boolean> {
         message: emailData.message,
         attachments: emailData.attachments,
       })
-
-      console.log('[EmailService] Bulk email sent:', response.data)
+      // bulk email sent successfully
       return response.data.success
     }
   } catch (error: any) {
-    console.error('[EmailService] Failed to send email:', error)
+    logError('EmailService', 'sendEmail', error)
 
     // Provide helpful error messages synced with backend
     if (error.response?.status === 404) {
@@ -104,8 +99,7 @@ export async function sendGuardianEmail(
   message: string
 ): Promise<boolean> {
   try {
-    console.log(`[EmailService] Sending guardian email for student ${studentId}`)
-
+    // sending guardian email
     const response = await api.post<EmailResponse>('/emails/send-guardian', {
       studentId,
       guardianEmail,
@@ -113,10 +107,9 @@ export async function sendGuardianEmail(
       message,
     })
 
-    console.log('[EmailService] Guardian email sent successfully')
     return response.data.success
   } catch (error: any) {
-    console.error('[EmailService] Failed to send guardian email:', error)
+    logError('EmailService', 'sendGuardianEmail', error)
 
     if (error.response?.status === 404) {
       throw new Error('Email service not available - Backend endpoints not configured')
@@ -145,7 +138,7 @@ export async function getEmailConfig(): Promise<{
     const response = await api.get<{ configured: boolean; provider?: string }>('/emails/config')
     return response.data
   } catch (error) {
-    console.error('[EmailService] Failed to get email config:', error)
+    logError('EmailService', 'getEmailConfig', error)
     return { configured: false }
   }
 }
@@ -160,7 +153,7 @@ export async function testEmailConfig(testEmail: string): Promise<boolean> {
     const response = await api.post<EmailResponse>('/emails/test', { email: testEmail })
     return response.data.success
   } catch (error) {
-    console.error('[EmailService] Email configuration test failed:', error)
+    logError('EmailService', 'testEmailConfig', error)
     return false
   }
 }

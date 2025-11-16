@@ -2,13 +2,23 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('rounded-lg border bg-card text-card-foreground shadow-sm', className)}
-      {...props}
-    />
-  )
+  ({ className, ...props }, ref) => {
+    // allow callers to pass style while ensuring we apply the enterprise radius token
+    const incomingStyle = (props as any).style as React.CSSProperties | undefined
+    const mergedStyle: React.CSSProperties = {
+      ...(incomingStyle || {}),
+      borderRadius: 'var(--radius)',
+    }
+
+    return (
+      <div
+        ref={ref}
+        className={cn('card-enterprise bg-card text-card-foreground', className)}
+        style={mergedStyle}
+        {...props}
+      />
+    )
+  }
 )
 Card.displayName = 'Card'
 

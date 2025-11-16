@@ -61,10 +61,10 @@ export const parseAttendanceExcel = (file: File): Promise<ExcelAttendanceRecord[
         const worksheet = workbook.Sheets[sheetName]
         const jsonData = XLSX.utils.sheet_to_json<ExcelAttendanceRecord>(worksheet)
 
-        console.log('[AttendanceExcel] Parsed records:', jsonData.length)
+        // parsed records count: jsonData.length
         resolve(jsonData)
       } catch (error) {
-        console.error('[AttendanceExcel] Parse error:', error)
+        // parse error
         reject(new Error('Failed to parse Excel file. Please check the format.'))
       }
     }
@@ -255,7 +255,7 @@ export const exportAttendanceToExcel = (records: AttendanceRecord[], filename?: 
   const finalFilename = filename || `attendance_export_${format(new Date(), 'yyyy-MM-dd')}.xlsx`
   XLSX.writeFile(workbook, finalFilename)
 
-  console.log(`[AttendanceExcel] Exported ${records.length} records to ${finalFilename}`)
+  // Exported attendance file: finalFilename
 }
 
 /**
@@ -376,7 +376,7 @@ export const generateAttendanceTemplate = (includeInstructions: boolean = true):
   const filename = `attendance_import_template_${format(new Date(), 'yyyy-MM-dd')}.xlsx`
   XLSX.writeFile(workbook, filename)
 
-  console.log(`[AttendanceExcel] Generated template: ${filename}`)
+  // Generated template: filename
 }
 
 /**
@@ -451,5 +451,5 @@ export const exportAttendanceSummaryReport = (
   const filename = `attendance_summary_${date}.xlsx`
   XLSX.writeFile(workbook, filename)
 
-  console.log(`[AttendanceExcel] Generated summary report: ${filename}`)
+  // Generated summary report: filename
 }

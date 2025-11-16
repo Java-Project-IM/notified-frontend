@@ -105,7 +105,7 @@ export default function AttendancePage() {
       )
 
       if (result.errors.length > 0) {
-        console.log('[Attendance] Import errors:', result.errors)
+        // import errors available in result.errors for debugging
       }
 
       refetch()
@@ -277,14 +277,30 @@ export default function AttendancePage() {
               </thead>
               <tbody className="bg-slate-900/50 divide-y divide-slate-700/30">
                 {isLoading ? (
-                  <tr>
-                    <td colSpan={6} className="text-center py-16 text-slate-400">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 border-4 border-purple-900 border-t-purple-500 rounded-full animate-spin" />
-                        <p className="font-medium">Loading students...</p>
-                      </div>
-                    </td>
-                  </tr>
+                  <>
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <tr key={`skeleton-${i}`} className="animate-pulse">
+                        <td className="p-5 font-semibold text-slate-100 text-sm">
+                          <div className="w-28 h-4 bg-slate-700/40 rounded-md" />
+                        </td>
+                        <td className="p-5 text-slate-200 font-medium text-sm">
+                          <div className="w-40 h-4 bg-slate-700/40 rounded-md" />
+                        </td>
+                        <td className="p-5 text-slate-400 text-sm">
+                          <div className="w-36 h-4 bg-slate-700/40 rounded-md" />
+                        </td>
+                        <td className="p-5 text-slate-400 text-sm">
+                          <div className="w-20 h-4 bg-slate-700/40 rounded-md" />
+                        </td>
+                        <td className="p-5 text-slate-400 text-sm">
+                          <div className="w-32 h-4 bg-slate-700/40 rounded-md" />
+                        </td>
+                        <td className="p-5 text-center">
+                          <div className="w-28 h-8 bg-slate-700/40 rounded-lg mx-auto" />
+                        </td>
+                      </tr>
+                    ))}
+                  </>
                 ) : filteredStudents.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-16 text-slate-400">

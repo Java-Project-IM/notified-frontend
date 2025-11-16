@@ -14,7 +14,7 @@ export const authService = {
    * @throws {Error} When validation fails or API request fails
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    console.log('[AuthService] Login attempt for:', credentials.email)
+    // login attempt for credentials.email
 
     // Validate email format
     const emailValidation = validateEmail(credentials.email)
@@ -34,11 +34,7 @@ export const authService = {
         'Login request timeout - Please try again'
       )
 
-      console.log(
-        '[AuthService] Login successful, token received:',
-        response.data.token ? `${response.data.token.substring(0, 10)}...` : 'none'
-      )
-      console.log('[AuthService] User:', response.data.user.email)
+      // login successful
 
       return response.data
     } catch (error) {
@@ -54,7 +50,7 @@ export const authService = {
    * @throws {Error} When validation fails or API request fails
    */
   async signup(data: SignupData): Promise<AuthResponse> {
-    console.log('[AuthService] Signup attempt for:', data.email)
+    // signup attempt
 
     // Validate and sanitize inputs
     const emailValidation = validateEmail(data.email)
@@ -85,7 +81,7 @@ export const authService = {
         'Signup request timeout - Please try again'
       )
 
-      console.log('[AuthService] Signup successful for:', response.data.user.email)
+      // signup successful
       return response.data
     } catch (error) {
       logError('AuthService', 'signup', error)
@@ -98,10 +94,8 @@ export const authService = {
    * @throws {Error} When API request fails
    */
   async logout(): Promise<void> {
-    console.log('[AuthService] Logging out user')
     try {
       await withTimeout(apiClient.post('/auth/logout'), 10000, 'Logout request timeout')
-      console.log('[AuthService] Logout successful')
     } catch (error) {
       logError('AuthService', 'logout', error)
       throw error
@@ -114,14 +108,12 @@ export const authService = {
    * @throws {Error} When API request fails
    */
   async getCurrentUser(): Promise<User> {
-    console.log('[AuthService] Fetching current user')
     try {
       const response = await withTimeout(
         fetchWithRetry(() => apiClient.get<User>('/auth/me')),
         10000,
         'Get user request timeout'
       )
-      console.log('[AuthService] Current user:', response.data.email)
       return response.data
     } catch (error) {
       logError('AuthService', 'getCurrentUser', error)
@@ -135,14 +127,12 @@ export const authService = {
    * @throws {Error} When API request fails
    */
   async refreshToken(): Promise<{ token: string }> {
-    console.log('[AuthService] Refreshing token')
     try {
       const response = await withTimeout(
         fetchWithRetry(() => apiClient.post<{ token: string }>('/auth/refresh-token')),
         10000,
         'Token refresh timeout'
       )
-      console.log('[AuthService] Token refreshed successfully')
       return response.data
     } catch (error) {
       logError('AuthService', 'refreshToken', error)
@@ -156,7 +146,7 @@ export const authService = {
    * @throws {Error} When validation fails or API request fails
    */
   async updatePassword(data: { currentPassword: string; newPassword: string }): Promise<void> {
-    console.log('[AuthService] Updating password')
+    // updating password
 
     // Validate new password
     const passwordValidation = validatePassword(data.newPassword)
@@ -174,7 +164,7 @@ export const authService = {
         10000,
         'Update password timeout'
       )
-      console.log('[AuthService] Password updated successfully')
+      // password updated successfully
     } catch (error) {
       logError('AuthService', 'updatePassword', error)
       throw error
@@ -188,7 +178,7 @@ export const authService = {
    * @throws {Error} When API request fails
    */
   async updateProfile(data: Partial<User>): Promise<User> {
-    console.log('[AuthService] Updating profile')
+    // updating profile
 
     // Sanitize name if provided
     const sanitizedData = data.name ? { ...data, name: sanitizeString(data.name) } : data
@@ -199,7 +189,7 @@ export const authService = {
         10000,
         'Update profile timeout'
       )
-      console.log('[AuthService] Profile updated successfully')
+      // profile updated successfully
       return response.data
     } catch (error) {
       logError('AuthService', 'updateProfile', error)

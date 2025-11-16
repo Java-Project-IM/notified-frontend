@@ -20,14 +20,12 @@ export const studentService = {
    * @throws {Error} When API request fails
    */
   async getAll(): Promise<Student[]> {
-    console.log('[StudentService] Fetching all students')
     try {
       const response = await withTimeout(
         fetchWithRetry(() => apiClient.get<Student[]>('/students')),
         15000,
         'Failed to load students - Request timeout'
       )
-      console.log('[StudentService] Loaded students:', response.data.length)
       return response.data
     } catch (error) {
       logError('StudentService', 'getAll', error)
@@ -42,14 +40,12 @@ export const studentService = {
    * @throws {Error} When API request fails
    */
   async getById(id: number): Promise<Student> {
-    console.log('[StudentService] Fetching student ID:', id)
     try {
       const response = await withTimeout(
         fetchWithRetry(() => apiClient.get<Student>(`/students/${id}`)),
         10000,
         'Failed to load student - Request timeout'
       )
-      console.log('[StudentService] Loaded student:', response.data.studentNumber)
       return response.data
     } catch (error) {
       logError('StudentService', 'getById', error)
@@ -64,7 +60,7 @@ export const studentService = {
    * @throws {Error} When API request fails
    */
   async getByStudentNumber(studentNumber: string): Promise<Student> {
-    console.log('[StudentService] Fetching student number:', studentNumber)
+    // fetching student by student number
 
     // Validate student number format
     const validation = validateStudentNumber(studentNumber)
@@ -78,7 +74,6 @@ export const studentService = {
         10000,
         'Failed to load student - Request timeout'
       )
-      console.log('[StudentService] Loaded student:', response.data.studentNumber)
       return response.data
     } catch (error) {
       logError('StudentService', 'getByStudentNumber', error)
@@ -92,7 +87,7 @@ export const studentService = {
    * @throws {Error} When API request fails
    */
   async generateStudentNumber(): Promise<{ studentNumber: string }> {
-    console.log('[StudentService] Generating student number')
+    // generating student number
     try {
       const response = await withTimeout(
         fetchWithRetry(() =>
@@ -101,7 +96,6 @@ export const studentService = {
         10000,
         'Failed to generate student number - Request timeout'
       )
-      console.log('[StudentService] Generated student number:', response.data.studentNumber)
       return response.data
     } catch (error) {
       logError('StudentService', 'generateStudentNumber', error)
@@ -116,7 +110,7 @@ export const studentService = {
    * @throws {Error} When validation fails or API request fails
    */
   async create(data: StudentFormData): Promise<Student> {
-    console.log('[StudentService] Creating student:', data.studentNumber)
+    // creating student
 
     // Validate required fields
     const studentNumberValidation = validateStudentNumber(data.studentNumber)
@@ -178,7 +172,6 @@ export const studentService = {
         15000,
         'Failed to create student - Request timeout'
       )
-      console.log('[StudentService] Student created:', response.data.studentNumber)
       return response.data
     } catch (error) {
       logError('StudentService', 'create', error)
@@ -194,7 +187,7 @@ export const studentService = {
    * @throws {Error} When validation fails or API request fails
    */
   async update(id: number, data: Partial<StudentFormData>): Promise<Student> {
-    console.log('[StudentService] Updating student ID:', id)
+    // updating student
 
     // Validate provided fields
     if (data.studentNumber) {
@@ -262,7 +255,7 @@ export const studentService = {
         15000,
         'Failed to update student - Request timeout'
       )
-      console.log('[StudentService] Student updated:', response.data.studentNumber)
+      // Student updated: response.data.studentNumber
       return response.data
     } catch (error) {
       logError('StudentService', 'update', error)
@@ -276,14 +269,14 @@ export const studentService = {
    * @throws {Error} When API request fails
    */
   async delete(id: number): Promise<void> {
-    console.log('[StudentService] Deleting student ID:', id)
+    // deleting student id
     try {
       const response = await withTimeout(
         apiClient.delete(`/students/${id}`),
         10000,
         'Failed to delete student - Request timeout'
       )
-      console.log('[StudentService] Student deleted successfully')
+      // student deleted successfully
       return response.data
     } catch (error) {
       logError('StudentService', 'delete', error)
@@ -298,7 +291,7 @@ export const studentService = {
    * @throws {Error} When API request fails
    */
   async search(query: string): Promise<Student[]> {
-    console.log('[StudentService] Searching students:', query)
+    // searching students
 
     // Sanitize search query
     const sanitizedQuery = sanitizeString(query)
@@ -317,7 +310,7 @@ export const studentService = {
         10000,
         'Search request timeout'
       )
-      console.log('[StudentService] Found students:', response.data.length)
+      // found students: response.data.length
       return response.data
     } catch (error) {
       logError('StudentService', 'search', error)

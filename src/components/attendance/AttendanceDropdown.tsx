@@ -10,7 +10,7 @@
  * Integration: Drop into any page needing attendance marking
  */
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle, DoorOpen, Clock, AlertCircle, Mail, ChevronDown, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -58,8 +58,8 @@ export const AttendanceDropdown = ({
           status === 'late'
             ? 'Arrived late'
             : status === 'excused'
-            ? 'Excused absence'
-            : `${timeSlot} marked on time`,
+              ? 'Excused absence'
+              : `${timeSlot} marked on time`,
       }
 
       if (typeof subjectId === 'number') payload.subjectId = subjectId
@@ -73,7 +73,10 @@ export const AttendanceDropdown = ({
         status: status.charAt(0).toUpperCase() + status.slice(1),
       })
 
-      toast.success(`${timeSlot === 'arrival' ? 'Arrival' : 'Departure'} marked successfully!`, 'Attendance Recorded')
+      toast.success(
+        `${timeSlot === 'arrival' ? 'Arrival' : 'Departure'} marked successfully!`,
+        'Attendance Recorded'
+      )
 
       // Show the predefined notification message (informational)
       setTimeout(() => {
@@ -105,8 +108,8 @@ export const AttendanceDropdown = ({
         const messages = Array.isArray(errors)
           ? errors.flat().slice(0, 5)
           : typeof errors === 'object'
-          ? Object.values(errors).flat().slice(0, 5)
-          : []
+            ? Object.values(errors).flat().slice(0, 5)
+            : []
         if (messages.length > 0) {
           toast.error(messages.join('; '), 'Validation failed')
         } else {
@@ -157,13 +160,42 @@ export const AttendanceDropdown = ({
     },
   ]
 
+  // refs for keyboard navigation of menu items
+  const menuId = `attendance-dropdown-menu-${student.id}`
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
+
+  useEffect(() => {
+    if (!isOpen) return
+    // focus first focusable element inside menu when opened
+    const menu = document.getElementById(menuId)
+    const first = menu?.querySelector('[role="menuitem"]') as HTMLElement | null
+    first?.focus()
+  }, [isOpen, menuId])
+
   return (
     <div className={`relative ${className}`}>
       {/* Dropdown Trigger */}
       <Button
+        ref={triggerRef}
         onClick={() => setIsOpen(!isOpen)}
         disabled={isLoading}
-        className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg transition-all"
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        aria-controls={menuId}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            setIsOpen(true)
+          }
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            setIsOpen((s) => !s)
+          }
+          if (e.key === 'Escape') {
+            setIsOpen(false)
+          }
+        }}
+        className="flex items-center gap-2 bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-800 hover:to-indigo-900 text-white shadow-enterprise-lg transition-all"
       >
         {isLoading ? (
           <>
@@ -187,7 +219,10 @@ export const AttendanceDropdown = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 mt-2 w-80 bg-slate-800 rounded-xl shadow-2xl border border-slate-700 overflow-hidden z-50"
+            id={menuId}
+            role="menu"
+            aria-label={`Attendance actions for ${student.firstName} ${student.lastName}`}
+            className="absolute top-full left-0 mt-2 w-80 bg-slate-800 rounded-xl shadow-enterprise-lg border border-slate-700 overflow-hidden z-50"
           >
             {/* Header */}
             <div className="px-4 py-3 bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600">
@@ -204,10 +239,30 @@ export const AttendanceDropdown = ({
                 return (
                   <motion.button
                     key={index}
+                    role="menuitem"
+                    tabIndex={0}
                     onClick={() => handleMark(option.timeSlot, option.status)}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-700/50 transition-all text-left group`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleMark(option.timeSlot, option.status)
+                      }
+                      if (e.key === 'ArrowDown') {
+                        e.preventDefault()
+                        ;(e.currentTarget.nextElementSibling as HTMLElement | null)?.focus()
+                      }
+                      if (e.key === 'ArrowUp') {
+                        e.preventDefault()
+                        ;(e.currentTarget.previousElementSibling as HTMLElement | null)?.focus()
+                      }
+                      if (e.key === 'Escape') {
+                        setIsOpen(false)
+                        triggerRef.current?.focus()
+                      }
+                    }}
+                    className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-700/50 transition-all text-left group focus:outline-none focus:ring-2 focus:ring-purple-500/30`}
                   >
                     <div
                       className={`flex-shrink-0 w-8 h-8 rounded-lg bg-${option.color}-500/20 flex items-center justify-center group-hover:bg-${option.color}-500/30 transition-colors`}
