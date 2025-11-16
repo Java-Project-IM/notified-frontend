@@ -67,7 +67,7 @@ export default function StudentsPage() {
           addToast('Failed to generate student number', 'error')
         })
     }
-  }, [isModalOpen, editingStudent])
+  }, [isModalOpen, editingStudent, addToast])
 
   // Create mutation
   const createMutation = useMutation({

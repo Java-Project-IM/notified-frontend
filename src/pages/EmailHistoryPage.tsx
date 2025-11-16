@@ -57,7 +57,7 @@ export default function EmailHistoryPage() {
   })
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'single' | 'bulk'>('all')
-  const { addToast } = useToast()
+  const toast = useToast()
 
   const fetchEmailHistory = useCallback(
     async (page = 1) => {
@@ -96,15 +96,15 @@ export default function EmailHistoryPage() {
         console.error('[EmailHistory] Failed to fetch email history:', error)
 
         if (error.response?.status === 404) {
-          addToast('Email history endpoint not available', 'error')
+          toast.error('Email history endpoint not available')
         } else {
-          addToast(error.response?.data?.message || 'Failed to load email history', 'error')
+          toast.error(error.response?.data?.message || 'Failed to load email history')
         }
       } finally {
         setIsLoading(false)
       }
     },
-    [searchTerm, addToast]
+    [searchTerm, toast]
   )
 
   useEffect(() => {

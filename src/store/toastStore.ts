@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { useMemo } from 'react'
 
 interface ToastMessage {
   id: string
@@ -46,14 +47,19 @@ export const useToastStore = create<ToastState>((set) => ({
 
 // Helper hook for toast notifications
 export const useToast = () => {
-  const { addToast } = useToastStore()
+  // Select the base addToast directly from the store so it's stable across renders
+  const addToast = useToastStore((s) => s.addToast)
 
-  return {
-    addToast: (message: string, type: 'success' | 'error' | 'warning' | 'info', title?: string) =>
-      addToast({ message, title, type }),
-    success: (message: string, title?: string) => addToast({ message, title, type: 'success' }),
-    error: (message: string, title?: string) => addToast({ message, title, type: 'error' }),
-    warning: (message: string, title?: string) => addToast({ message, title, type: 'warning' }),
-    info: (message: string, title?: string) => addToast({ message, title, type: 'info' }),
-  }
+  // Memoize wrapper functions so they keep the same identity between renders
+  return useMemo(
+    () => ({
+      addToast: (message: string, type: 'success' | 'error' | 'warning' | 'info', title?: string) =>
+        addToast({ message, title, type }),
+      success: (message: string, title?: string) => addToast({ message, title, type: 'success' }),
+      error: (message: string, title?: string) => addToast({ message, title, type: 'error' }),
+      warning: (message: string, title?: string) => addToast({ message, title, type: 'warning' }),
+      info: (message: string, title?: string) => addToast({ message, title, type: 'info' }),
+    }),
+    [addToast]
+  )
 }
