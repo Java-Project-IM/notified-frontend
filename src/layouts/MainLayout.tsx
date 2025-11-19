@@ -1,6 +1,17 @@
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Home, Users, BookOpen, ClipboardList, Mail, LogOut, Bell, CheckCircle } from 'lucide-react'
+import {
+  Home,
+  Users,
+  BookOpen,
+  ClipboardList,
+  Mail,
+  LogOut,
+  Bell,
+  CheckCircle,
+  Menu,
+  X,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/store/toastStore'
@@ -15,6 +26,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate()
   const { user, clearAuth } = useAuthStore()
   const toast = useToast()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const handleLogout = () => {
     // logging out
@@ -64,12 +76,54 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   const currentPath = window.location.pathname
 
+  const handleNavigation = (path: string) => {
+    navigate(path)
+    setIsMobileMenuOpen(false)
+  }
+
   return (
     <div className="min-h-screen bg-slate-900">
-      {/* Enterprise Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 shadow-enterprise-2xl z-40">
-        {/* Logo Section */}
-        <div className="p-6 border-b border-slate-700/50">
+      {/* Mobile Header */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700/50 shadow-enterprise-lg z-50 px-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg blur-md opacity-50" />
+            <div className="relative p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg shadow-lg">
+              <Bell className="w-5 h-5 text-white" />
+            </div>
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-white tracking-tight">{APP_NAME}</h1>
+            <p className="text-xs text-slate-400 font-medium">Enterprise Edition</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all"
+          aria-label="Toggle menu"
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Desktop & Mobile */}
+      <aside
+        className={cn(
+          'fixed top-0 h-full w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 shadow-enterprise-2xl z-50 transition-transform duration-300 ease-in-out',
+          'lg:translate-x-0',
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        )}
+      >
+        {/* Logo Section - Desktop Only */}
+        <div className="hidden lg:block p-6 border-b border-slate-700/50">
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl blur-md opacity-50" />
@@ -84,14 +138,17 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </div>
         </div>
 
+        {/* Mobile spacing for header */}
+        <div className="lg:hidden h-16" />
+
         {/* Navigation */}
-        <nav className="p-4 space-y-1">
+        <nav className="p-4 space-y-1 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
           {navItems.map((item) => {
             const isActive = currentPath === item.path
             return (
               <button
                 key={item.path}
-                onClick={() => navigate(item.path)}
+                onClick={() => handleNavigation(item.path)}
                 className={cn(
                   'sidebar-nav-item w-full group',
                   isActive
@@ -127,7 +184,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
           <div className="mb-3 p-3 bg-slate-800/50 rounded-xl border border-slate-700/30">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg flex-shrink-0">
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
@@ -148,8 +205,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
       </aside>
 
       {/* Main Content Area */}
-      <main className="ml-72 min-h-screen">
-        <div className="p-8">{children}</div>
+      <main className="lg:ml-72 min-h-screen pt-16 lg:pt-0">
+        <div className="p-4 sm:p-6 lg:p-8">{children}</div>
       </main>
     </div>
   )

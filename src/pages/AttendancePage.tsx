@@ -10,6 +10,8 @@
  * ✅ Guardian notifications
  * ✅ Responsive design for all screen sizes
  * ✅ Production-ready UI/UX
+ * ✅ Hidden scrollbars
+ * ✅ Fixed dropdown positioning
  */
 
 import { useState } from 'react'
@@ -153,7 +155,7 @@ export default function AttendancePage() {
 
   return (
     <MainLayout>
-      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+      <div className="space-y-6">
         {/* Page Header */}
         <PageHeader
           title="Attendance Management"
@@ -270,11 +272,11 @@ export default function AttendancePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-slate-800/50 rounded-2xl shadow-enterprise-lg border border-slate-700/50 backdrop-blur-sm overflow-hidden"
+          className="bg-slate-800/50 rounded-2xl shadow-enterprise-lg border border-slate-700/50 backdrop-blur-sm"
         >
           {/* Mobile Card View */}
           <div className="block lg:hidden">
-            <div className="divide-y divide-slate-700/30">
+            <div className="divide-y divide-slate-700/30 max-h-[600px] overflow-y-auto">
               {isLoading ? (
                 <>
                   {Array.from({ length: 4 }).map((_, i) => (
@@ -316,7 +318,7 @@ export default function AttendancePage() {
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1 min-w-0 pr-3">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <span className="text-xs font-semibold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">
                             {student.studentNumber}
                           </span>
@@ -363,10 +365,10 @@ export default function AttendancePage() {
             </div>
           </div>
 
-          {/* Desktop Table View */}
+          {/* Desktop Table View - NO overflow-hidden to prevent dropdown cutoff */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="w-full min-w-[1200px]">
-              <thead className="bg-gradient-to-r from-purple-600 to-indigo-600">
+              <thead className="bg-gradient-to-r from-purple-600 to-indigo-600 sticky top-0 z-10">
                 <tr>
                   <th className="text-left px-4 py-4 font-semibold text-white text-sm tracking-wide whitespace-nowrap w-[140px]">
                     Student Number
@@ -507,10 +509,10 @@ export default function AttendancePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="flex items-center justify-between text-sm text-slate-400 px-2"
+            className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm text-slate-400 px-2"
           >
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" />
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>
                 Showing {filteredStudents.length} of {students.length} student
                 {students.length !== 1 ? 's' : ''}

@@ -6,11 +6,13 @@
  * - Status selection (Present/Late/Excused)
  * - Automatic message generation
  * - Guardian notification option
+ * - Fixed positioning to prevent cutoff issues
  *
  * Integration: Drop into any page needing attendance marking
  */
 
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle, DoorOpen, Clock, AlertCircle, Mail, ChevronDown, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -40,7 +42,44 @@ export const AttendanceDropdown = ({
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [sendNotification, setSendNotification] = useState(true)
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 })
   const toast = useToast()
+
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
+  const menuId = `attendance-dropdown-menu-${student.id}`
+
+  /**
+   * Calculate dropdown position to prevent cutoff
+   */
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      const viewportHeight = window.innerHeight
+      const viewportWidth = window.innerWidth
+      const dropdownWidth = 320 // w-80 = 320px
+      const dropdownHeight = 400 // estimated height
+
+      let top = rect.bottom + 8
+      let left = rect.left
+
+      // Check if dropdown would overflow bottom
+      if (top + dropdownHeight > viewportHeight) {
+        top = rect.top - dropdownHeight - 8
+      }
+
+      // Check if dropdown would overflow right
+      if (left + dropdownWidth > viewportWidth) {
+        left = viewportWidth - dropdownWidth - 16
+      }
+
+      // Check if dropdown would overflow left
+      if (left < 16) {
+        left = 16
+      }
+
+      setDropdownPosition({ top, left })
+    }
+  }, [isOpen])
 
   /**
    * Handle attendance marking
@@ -50,21 +89,19 @@ export const AttendanceDropdown = ({
     try {
       // Build payload defensively to satisfy backend validation
       const payload: any = {
-        studentId: student.id || (student.id as unknown as string), // ensure an ID string
+        studentId: student.id || (student.id as unknown as string),
         status,
-        date: new Date().toISOString(), // backend expects `date` ISO string
+        date: new Date().toISOString(),
         remarks:
           status === 'late'
             ? 'Arrived late'
             : status === 'excused'
               ? 'Excused absence'
               : `${timeSlot} marked on time`,
-        // Optional: keep timeSlot for frontend purposes; backend will ignore unknown fields
         timeSlot,
       }
 
       if (typeof subjectId === 'number' || typeof subjectId === 'string') {
-        // ensure subjectId is string (Mongo _id strings are expected by backend)
         payload.subjectId = String(subjectId)
       }
 
@@ -97,7 +134,6 @@ export const AttendanceDropdown = ({
           })
           toast.success('Guardian notified via email', 'Email Sent')
         } catch (emailError) {
-          // Don't spam console; surface a user-level warning instead
           toast.warning('Attendance marked, but email notification failed', 'Partial Success')
         }
       }
@@ -105,7 +141,6 @@ export const AttendanceDropdown = ({
       onSuccess?.(timeSlot, status)
       setIsOpen(false)
     } catch (err) {
-      // Try to surface validation messages from backend (422)
       const errorAny = err as any
       if (errorAny?.status === 422 || errorAny?.response?.status === 422) {
         const errors = errorAny?.response?.data?.errors || errorAny?.errors
@@ -164,17 +199,24 @@ export const AttendanceDropdown = ({
     },
   ]
 
-  // refs for keyboard navigation of menu items
-  const menuId = `attendance-dropdown-menu-${student.id}`
-  const triggerRef = useRef<HTMLButtonElement | null>(null)
-
   useEffect(() => {
     if (!isOpen) return
-    // focus first focusable element inside menu when opened
     const menu = document.getElementById(menuId)
     const first = menu?.querySelector('[role="menuitem"]') as HTMLElement | null
     first?.focus()
   }, [isOpen, menuId])
+
+  // Close on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false)
+        triggerRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [isOpen])
 
   return (
     <div className={`relative ${className}`}>
@@ -199,7 +241,7 @@ export const AttendanceDropdown = ({
             setIsOpen(false)
           }
         }}
-        className="flex items-center gap-2 bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-800 hover:to-indigo-900 text-white shadow-enterprise-lg transition-all"
+        className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-enterprise-lg transition-all"
       >
         {isLoading ? (
           <>
@@ -215,109 +257,138 @@ export const AttendanceDropdown = ({
         )}
       </Button>
 
-      {/* Dropdown Menu */}
-      <AnimatePresence>
-        {isOpen && !isLoading && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            id={menuId}
-            role="menu"
-            aria-label={`Attendance actions for ${student.firstName} ${student.lastName}`}
-            className="absolute top-full left-0 mt-2 w-80 bg-slate-800 rounded-xl shadow-enterprise-lg border border-slate-700 overflow-hidden z-50"
-          >
-            {/* Header */}
-            <div className="px-4 py-3 bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600">
-              <p className="text-sm font-semibold text-white">
-                {student.firstName} {student.lastName}
-              </p>
-              <p className="text-xs text-slate-400">{student.studentNumber}</p>
-            </div>
-
-            {/* Options */}
-            <div className="p-2">
-              {attendanceOptions.map((option, index) => {
-                const Icon = option.icon
-                return (
-                  <motion.button
-                    key={index}
-                    role="menuitem"
-                    tabIndex={0}
-                    onClick={() => handleMark(option.timeSlot, option.status)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        handleMark(option.timeSlot, option.status)
-                      }
-                      if (e.key === 'ArrowDown') {
-                        e.preventDefault()
-                        ;(e.currentTarget.nextElementSibling as HTMLElement | null)?.focus()
-                      }
-                      if (e.key === 'ArrowUp') {
-                        e.preventDefault()
-                        ;(e.currentTarget.previousElementSibling as HTMLElement | null)?.focus()
-                      }
-                      if (e.key === 'Escape') {
-                        setIsOpen(false)
-                        triggerRef.current?.focus()
-                      }
-                    }}
-                    className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-700/50 transition-all text-left group focus:outline-none focus:ring-2 focus:ring-purple-500/30`}
-                  >
-                    <div
-                      className={`flex-shrink-0 w-8 h-8 rounded-lg bg-${option.color}-500/20 flex items-center justify-center group-hover:bg-${option.color}-500/30 transition-colors`}
-                    >
-                      <Icon className={`w-4 h-4 text-${option.color}-400`} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-200 group-hover:text-white">
-                        {option.label}
-                      </p>
-                      <p className="text-xs text-slate-500 mt-0.5">{option.description}</p>
-                    </div>
-                  </motion.button>
-                )
-              })}
-            </div>
-
-            {/* Notification Option */}
-            {showNotifyOption && student.guardianEmail && (
-              <div className="px-4 py-3 bg-slate-900/50 border-t border-slate-700">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={sendNotification}
-                    onChange={(e) => setSendNotification(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
-                  />
-                  <Mail className="w-4 h-4 text-slate-400 group-hover:text-blue-400 transition-colors" />
-                  <span className="text-xs text-slate-400 group-hover:text-slate-300 transition-colors">
-                    Notify guardian via email
-                  </span>
-                </label>
-                <p className="text-xs text-slate-600 ml-6 mt-1">{student.guardianEmail}</p>
+      {/* Dropdown Menu - Using Portal for proper positioning */}
+      {isOpen &&
+        !isLoading &&
+        createPortal(
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              id={menuId}
+              role="menu"
+              aria-label={`Attendance actions for ${student.firstName} ${student.lastName}`}
+              style={{
+                position: 'fixed',
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`,
+                zIndex: 9999,
+              }}
+              className="w-80 bg-slate-800 rounded-xl shadow-2xl border border-slate-700 overflow-hidden"
+            >
+              {/* Header */}
+              <div className="px-4 py-3 bg-gradient-to-r from-slate-700 to-slate-800 border-b border-slate-600">
+                <p className="text-sm font-semibold text-white">
+                  {student.firstName} {student.lastName}
+                </p>
+                <p className="text-xs text-slate-400">{student.studentNumber}</p>
               </div>
-            )}
 
-            {/* Close button */}
-            <div className="px-4 py-2 bg-slate-900/50 border-t border-slate-700">
-              <button
-                onClick={() => setIsOpen(false)}
-                className="w-full text-xs text-slate-500 hover:text-slate-300 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </motion.div>
+              {/* Options */}
+              <div className="p-2 max-h-80 overflow-y-auto">
+                {attendanceOptions.map((option, index) => {
+                  const Icon = option.icon
+                  return (
+                    <motion.button
+                      key={index}
+                      role="menuitem"
+                      tabIndex={0}
+                      onClick={() => handleMark(option.timeSlot, option.status)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          handleMark(option.timeSlot, option.status)
+                        }
+                        if (e.key === 'ArrowDown') {
+                          e.preventDefault()
+                          ;(e.currentTarget.nextElementSibling as HTMLElement | null)?.focus()
+                        }
+                        if (e.key === 'ArrowUp') {
+                          e.preventDefault()
+                          ;(e.currentTarget.previousElementSibling as HTMLElement | null)?.focus()
+                        }
+                      }}
+                      className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-700/50 transition-all text-left group focus:outline-none focus:ring-2 focus:ring-purple-500/30`}
+                    >
+                      <div
+                        className={`flex-shrink-0 w-8 h-8 rounded-lg ${
+                          option.color === 'emerald'
+                            ? 'bg-emerald-500/20 group-hover:bg-emerald-500/30'
+                            : option.color === 'amber'
+                              ? 'bg-amber-500/20 group-hover:bg-amber-500/30'
+                              : option.color === 'blue'
+                                ? 'bg-blue-500/20 group-hover:bg-blue-500/30'
+                                : 'bg-purple-500/20 group-hover:bg-purple-500/30'
+                        } flex items-center justify-center transition-colors`}
+                      >
+                        <Icon
+                          className={`w-4 h-4 ${
+                            option.color === 'emerald'
+                              ? 'text-emerald-400'
+                              : option.color === 'amber'
+                                ? 'text-amber-400'
+                                : option.color === 'blue'
+                                  ? 'text-blue-400'
+                                  : 'text-purple-400'
+                          }`}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-200 group-hover:text-white">
+                          {option.label}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">{option.description}</p>
+                      </div>
+                    </motion.button>
+                  )
+                })}
+              </div>
+
+              {/* Notification Option */}
+              {showNotifyOption && student.guardianEmail && (
+                <div className="px-4 py-3 bg-slate-900/50 border-t border-slate-700">
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={sendNotification}
+                      onChange={(e) => setSendNotification(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
+                    />
+                    <Mail className="w-4 h-4 text-slate-400 group-hover:text-blue-400 transition-colors" />
+                    <span className="text-xs text-slate-400 group-hover:text-slate-300 transition-colors">
+                      Notify guardian via email
+                    </span>
+                  </label>
+                  <p className="text-xs text-slate-600 ml-6 mt-1">{student.guardianEmail}</p>
+                </div>
+              )}
+
+              {/* Close button */}
+              <div className="px-4 py-2 bg-slate-900/50 border-t border-slate-700">
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="w-full text-xs text-slate-500 hover:text-slate-300 transition-colors py-1"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
 
       {/* Backdrop */}
-      {isOpen && <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-[9998] bg-black/20"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
+      )}
     </div>
   )
 }
