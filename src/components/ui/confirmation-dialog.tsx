@@ -53,9 +53,7 @@ export function ConfirmationDialog({
             </div>
             <DialogTitle className="text-xl font-bold text-slate-100">{title}</DialogTitle>
           </div>
-          <DialogDescription className="text-slate-400 text-base">
-            {description}
-          </DialogDescription>
+          <DialogDescription className="text-slate-400 text-base">{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0">
           <Button

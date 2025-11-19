@@ -32,7 +32,7 @@ export function EmptyState({ icon: Icon, title, description, action, className }
       >
         {/* Glow effect */}
         <div className="absolute inset-0 bg-slate-600/20 rounded-full blur-2xl" />
-        
+
         {/* Icon container */}
         <div className="relative bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50 shadow-enterprise">
           <Icon className="w-16 h-16 text-slate-500" />

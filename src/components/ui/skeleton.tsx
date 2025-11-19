@@ -4,12 +4,7 @@ import { cn } from '@/lib/utils'
  * Skeleton loader component for better loading states
  */
 function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn('animate-pulse rounded-md bg-slate-700/40', className)}
-      {...props}
-    />
-  )
+  return <div className={cn('animate-pulse rounded-md bg-slate-700/40', className)} {...props} />
 }
 
 /**
