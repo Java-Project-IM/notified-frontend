@@ -2,7 +2,7 @@ import { useState, FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useMutation } from '@tanstack/react-query'
-import { Bell, Mail, Lock } from 'lucide-react'
+import { Bell, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -23,6 +23,7 @@ export default function LoginPage() {
     password: '',
   })
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [showPassword, setShowPassword] = useState(false)
 
   const loginMutation = useMutation({
     mutationFn: authService.login,
@@ -158,7 +159,7 @@ export default function LoginPage() {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   className={`pl-10 h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 transition-all ${
                     errors.password
@@ -172,6 +173,15 @@ export default function LoginPage() {
                   }}
                   disabled={loginMutation.isPending}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  disabled={loginMutation.isPending}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
               {errors.password && (
                 <motion.p
