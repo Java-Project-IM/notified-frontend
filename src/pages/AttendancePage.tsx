@@ -1,15 +1,15 @@
 /**
  * AttendancePage - Complete Attendance Management
  *
- * Full-featured attendance management page with:
+ * Enterprise-grade, fully responsive attendance management with:
  * ✅ Excel import/export
  * ✅ Attendance summary dashboard
  * ✅ Quick arrival/departure marking
  * ✅ Bulk actions
  * ✅ Predefined message templates
  * ✅ Guardian notifications
- *
- * Integration: Add to your routes and navigation
+ * ✅ Responsive design for all screen sizes
+ * ✅ Production-ready UI/UX
  */
 
 import { useState } from 'react'
@@ -23,6 +23,8 @@ import {
   Users,
   Search,
   Filter,
+  AlertCircle,
+  CheckCircle2,
 } from 'lucide-react'
 import MainLayout from '@/layouts/MainLayout'
 import { PageHeader } from '@/components/ui/page-header'
@@ -55,7 +57,6 @@ export default function AttendancePage() {
   } = useQuery({
     queryKey: ['students'],
     queryFn: async () => {
-      // Fetch students for attendance listing
       const data = await studentService.getAll()
       return data
     },
@@ -152,7 +153,7 @@ export default function AttendancePage() {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
         {/* Page Header */}
         <PageHeader
           title="Attendance Management"
@@ -182,22 +183,29 @@ export default function AttendancePage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-800/50 rounded-2xl p-6 shadow-enterprise border border-slate-700/50 backdrop-blur-sm"
+          className="bg-slate-800/50 rounded-2xl p-4 sm:p-6 shadow-enterprise border border-slate-700/50 backdrop-blur-sm"
         >
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-100 mb-1">Bulk Import</h3>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-slate-100 mb-1 flex items-center gap-2">
+                <Upload className="w-5 h-5 text-purple-400" />
+                Bulk Import
+              </h3>
               <p className="text-sm text-slate-400">
                 Import attendance records from Excel file. Download template for correct format.
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 w-full md:w-auto">
               <label
                 htmlFor="import-excel"
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-medium transition-all cursor-pointer shadow-lg"
+                className={`flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-medium transition-all cursor-pointer shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex-1 md:flex-initial ${
+                  isImporting ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
               >
                 <Upload className="w-4 h-4" />
-                {isImporting ? 'Importing...' : 'Import Excel'}
+                <span className="whitespace-nowrap">
+                  {isImporting ? 'Importing...' : 'Import Excel'}
+                </span>
               </label>
               <input
                 id="import-excel"
@@ -216,25 +224,28 @@ export default function AttendancePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-slate-800/50 rounded-2xl p-6 shadow-enterprise border border-slate-700/50 backdrop-blur-sm"
+          className="bg-slate-800/50 rounded-2xl p-4 sm:p-6 shadow-enterprise border border-slate-700/50 backdrop-blur-sm"
         >
           <div className="flex flex-col lg:flex-row gap-4">
+            {/* Search Input */}
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none z-10" />
               <Input
                 type="text"
                 placeholder="Search students by number, name, or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 h-12 border-slate-600 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 focus:border-purple-500 focus:ring-purple-500/20"
+                className="pl-12 h-12 border-slate-600 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 focus:border-purple-500 focus:ring-purple-500/20 w-full"
               />
             </div>
-            <div className="relative">
+
+            {/* Filter Dropdown */}
+            <div className="relative w-full lg:w-auto">
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value as any)}
-                className="appearance-none pl-10 pr-10 py-3 h-12 border border-slate-600 bg-slate-900/50 text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all cursor-pointer min-w-[180px]"
+                className="appearance-none pl-10 pr-10 py-3 h-12 border border-slate-600 bg-slate-900/50 text-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all cursor-pointer w-full lg:min-w-[200px]"
               >
                 <option value="all">All Students</option>
                 <option value="checked-in">Checked In</option>
@@ -242,6 +253,16 @@ export default function AttendancePage() {
               </select>
             </div>
           </div>
+
+          {/* Results Count */}
+          {searchTerm && (
+            <div className="mt-4 flex items-center gap-2 text-sm text-slate-400">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>
+                Found {filteredStudents.length} student{filteredStudents.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+          )}
         </motion.div>
 
         {/* Students List with Attendance Actions */}
@@ -251,26 +272,118 @@ export default function AttendancePage() {
           transition={{ delay: 0.2 }}
           className="bg-slate-800/50 rounded-2xl shadow-enterprise-lg border border-slate-700/50 backdrop-blur-sm overflow-hidden"
         >
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          {/* Mobile Card View */}
+          <div className="block lg:hidden">
+            <div className="divide-y divide-slate-700/30">
+              {isLoading ? (
+                <>
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={`mobile-skeleton-${i}`} className="p-4 animate-pulse">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="w-24 h-4 bg-slate-700/40 rounded-md mb-2" />
+                          <div className="w-32 h-5 bg-slate-700/40 rounded-md" />
+                        </div>
+                        <div className="w-32 h-9 bg-slate-700/40 rounded-lg" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="w-40 h-3 bg-slate-700/40 rounded-md" />
+                        <div className="w-36 h-3 bg-slate-700/40 rounded-md" />
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : filteredStudents.length === 0 ? (
+                <div className="text-center py-16 px-4 text-slate-400">
+                  <div className="flex flex-col items-center gap-3">
+                    <Users className="w-16 h-16 text-slate-600" />
+                    <p className="font-medium text-lg">
+                      {searchTerm ? 'No students found matching your search' : 'No students yet'}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      {searchTerm ? 'Try adjusting your search' : 'Add students to get started'}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                filteredStudents.map((student, index) => (
+                  <motion.div
+                    key={student.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="p-4 hover:bg-slate-800/60 transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1 min-w-0 pr-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-semibold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">
+                            {student.studentNumber}
+                          </span>
+                          {student.section && (
+                            <span className="text-xs text-slate-500 bg-slate-700/30 px-2 py-0.5 rounded">
+                              {student.section}
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="text-base font-semibold text-slate-100 truncate">
+                          {student.firstName} {student.lastName}
+                        </h4>
+                      </div>
+                      <AttendanceDropdown
+                        student={student}
+                        onSuccess={() => {
+                          refetch()
+                        }}
+                        showNotifyOption={true}
+                      />
+                    </div>
+                    <div className="space-y-1.5 text-sm">
+                      <div className="flex items-center gap-2 text-slate-400">
+                        <span className="w-16 text-slate-500 text-xs">Email:</span>
+                        <span className="truncate flex-1">{student.email}</span>
+                      </div>
+                      {student.guardianEmail && (
+                        <div className="flex items-start gap-2 text-slate-400">
+                          <span className="w-16 text-slate-500 text-xs flex-shrink-0">
+                            Guardian:
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-slate-300 truncate">{student.guardianName}</p>
+                            <p className="text-xs text-slate-500 truncate">
+                              {student.guardianEmail}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
+            <table className="w-full min-w-[1200px]">
               <thead className="bg-gradient-to-r from-purple-600 to-indigo-600">
                 <tr>
-                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                  <th className="text-left px-4 py-4 font-semibold text-white text-sm tracking-wide whitespace-nowrap w-[140px]">
                     Student Number
                   </th>
-                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                  <th className="text-left px-4 py-4 font-semibold text-white text-sm tracking-wide whitespace-nowrap min-w-[180px]">
                     Name
                   </th>
-                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                  <th className="text-left px-4 py-4 font-semibold text-white text-sm tracking-wide whitespace-nowrap min-w-[220px]">
                     Email
                   </th>
-                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                  <th className="text-left px-4 py-4 font-semibold text-white text-sm tracking-wide whitespace-nowrap w-[100px]">
                     Section
                   </th>
-                  <th className="text-left p-5 font-semibold text-white text-sm tracking-wide">
+                  <th className="text-left px-4 py-4 font-semibold text-white text-sm tracking-wide whitespace-nowrap min-w-[200px]">
                     Guardian
                   </th>
-                  <th className="text-center p-5 font-semibold text-white text-sm tracking-wide">
+                  <th className="text-center px-4 py-4 font-semibold text-white text-sm tracking-wide whitespace-nowrap w-[200px]">
                     Actions
                   </th>
                 </tr>
@@ -280,23 +393,24 @@ export default function AttendancePage() {
                   <>
                     {Array.from({ length: 6 }).map((_, i) => (
                       <tr key={`skeleton-${i}`} className="animate-pulse">
-                        <td className="p-5 font-semibold text-slate-100 text-sm">
-                          <div className="w-28 h-4 bg-slate-700/40 rounded-md" />
+                        <td className="px-4 py-3 font-semibold text-slate-100 text-sm">
+                          <div className="w-24 h-4 bg-slate-700/40 rounded-md" />
                         </td>
-                        <td className="p-5 text-slate-200 font-medium text-sm">
-                          <div className="w-40 h-4 bg-slate-700/40 rounded-md" />
-                        </td>
-                        <td className="p-5 text-slate-400 text-sm">
-                          <div className="w-36 h-4 bg-slate-700/40 rounded-md" />
-                        </td>
-                        <td className="p-5 text-slate-400 text-sm">
-                          <div className="w-20 h-4 bg-slate-700/40 rounded-md" />
-                        </td>
-                        <td className="p-5 text-slate-400 text-sm">
+                        <td className="px-4 py-3 text-slate-200 font-medium text-sm">
                           <div className="w-32 h-4 bg-slate-700/40 rounded-md" />
                         </td>
-                        <td className="p-5 text-center">
-                          <div className="w-28 h-8 bg-slate-700/40 rounded-lg mx-auto" />
+                        <td className="px-4 py-3 text-slate-400 text-sm">
+                          <div className="w-40 h-4 bg-slate-700/40 rounded-md" />
+                        </td>
+                        <td className="px-4 py-3 text-slate-400 text-sm">
+                          <div className="w-16 h-4 bg-slate-700/40 rounded-md" />
+                        </td>
+                        <td className="px-4 py-3 text-slate-400 text-sm">
+                          <div className="w-32 h-4 bg-slate-700/40 rounded-md" />
+                          <div className="w-40 h-3 bg-slate-700/40 rounded-md mt-1" />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <div className="w-40 h-9 bg-slate-700/40 rounded-lg mx-auto" />
                         </td>
                       </tr>
                     ))}
@@ -304,7 +418,7 @@ export default function AttendancePage() {
                 ) : filteredStudents.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-16 text-slate-400">
-                      <div className="flex flex-col items-center gap-2">
+                      <div className="flex flex-col items-center gap-3">
                         <Users className="w-16 h-16 text-slate-600" />
                         <p className="font-medium text-lg">
                           {searchTerm
@@ -324,34 +438,60 @@ export default function AttendancePage() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      className="hover:bg-slate-800/60 transition-colors"
+                      className="hover:bg-slate-800/60 transition-colors group"
                     >
-                      <td className="p-5 font-semibold text-slate-100 text-sm">
-                        {student.studentNumber}
+                      <td className="px-4 py-3 font-semibold text-slate-100 text-sm whitespace-nowrap">
+                        <span className="inline-flex items-center gap-2 bg-purple-500/10 px-2.5 py-1 rounded-lg group-hover:bg-purple-500/20 transition-colors">
+                          {student.studentNumber}
+                        </span>
                       </td>
-                      <td className="p-5 text-slate-200 font-medium text-sm">
+                      <td className="px-4 py-3 text-slate-200 font-medium text-sm">
                         {student.firstName} {student.lastName}
                       </td>
-                      <td className="p-5 text-slate-400 text-sm">{student.email}</td>
-                      <td className="p-5 text-slate-400 text-sm">{student.section || '-'}</td>
-                      <td className="p-5 text-slate-400 text-sm">
-                        {student.guardianEmail ? (
-                          <div>
-                            <p className="text-slate-300">{student.guardianName}</p>
-                            <p className="text-xs text-slate-500">{student.guardianEmail}</p>
-                          </div>
+                      <td className="px-4 py-3 text-slate-400 text-sm">
+                        <div className="max-w-[220px] truncate" title={student.email}>
+                          {student.email}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-slate-400 text-sm whitespace-nowrap">
+                        {student.section ? (
+                          <span className="inline-flex items-center bg-slate-700/30 px-2.5 py-1 rounded-lg text-slate-300">
+                            {student.section}
+                          </span>
                         ) : (
-                          <span className="text-slate-600">No guardian</span>
+                          <span className="text-slate-600">-</span>
                         )}
                       </td>
-                      <td className="p-5 text-center">
-                        <AttendanceDropdown
-                          student={student}
-                          onSuccess={() => {
-                            refetch()
-                          }}
-                          showNotifyOption={true}
-                        />
+                      <td className="px-4 py-3 text-slate-400 text-sm">
+                        {student.guardianEmail ? (
+                          <div className="max-w-[200px]">
+                            <p
+                              className="text-slate-300 truncate font-medium"
+                              title={student.guardianName}
+                            >
+                              {student.guardianName}
+                            </p>
+                            <p
+                              className="text-xs text-slate-500 truncate"
+                              title={student.guardianEmail}
+                            >
+                              {student.guardianEmail}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-slate-600 text-xs">No guardian</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-center">
+                          <AttendanceDropdown
+                            student={student}
+                            onSuccess={() => {
+                              refetch()
+                            }}
+                            showNotifyOption={true}
+                          />
+                        </div>
                       </td>
                     </motion.tr>
                   ))
@@ -360,6 +500,27 @@ export default function AttendancePage() {
             </table>
           </div>
         </motion.div>
+
+        {/* Footer Info */}
+        {!isLoading && filteredStudents.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="flex items-center justify-between text-sm text-slate-400 px-2"
+          >
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              <span>
+                Showing {filteredStudents.length} of {students.length} student
+                {students.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+            <div className="text-xs text-slate-500">
+              Last updated: {new Date().toLocaleTimeString()}
+            </div>
+          </motion.div>
+        )}
       </div>
     </MainLayout>
   )
