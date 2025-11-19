@@ -248,7 +248,9 @@ export default function SubjectsPage() {
                 ) : (
                   filteredSubjects.map((subject, index) => (
                     <motion.tr
-                      key={subject.id}
+                      // Use a stable unique key for list items. Prefer `id` or `subjectCode`,
+                      // fall back to index if neither is present.
+                      key={subject.id ?? subject.subjectCode ?? `subject-${index}`}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}

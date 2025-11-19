@@ -105,7 +105,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </div>
           <div>
             <h1 className="text-lg font-bold text-white tracking-tight">{APP_NAME}</h1>
-            <p className="text-xs text-slate-400 font-medium">Enterprise Edition</p>
+            <p className="text-xs text-slate-400 font-medium">Team Arpanet</p>
           </div>
         </div>
         <button
@@ -144,7 +144,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white tracking-tight">{APP_NAME}</h1>
-              <p className="text-xs text-slate-400 font-medium">Enterprise Edition</p>
+              <p className="text-xs text-slate-400 font-medium">Team Arpanet</p>
             </div>
           </div>
         </div>
