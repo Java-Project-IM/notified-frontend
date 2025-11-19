@@ -22,9 +22,16 @@ export default function SignupPage() {
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
   })
-  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({})
+  const [errors, setErrors] = useState<{
+    name?: string
+    email?: string
+    password?: string
+    confirmPassword?: string
+  }>({})
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const signupMutation = useMutation({
     mutationFn: authService.signup,
@@ -53,7 +60,12 @@ export default function SignupPage() {
     console.log('Signup form submitted with:', formData)
 
     // Validation
-    const newErrors: { name?: string; email?: string; password?: string } = {}
+    const newErrors: {
+      name?: string
+      email?: string
+      password?: string
+      confirmPassword?: string
+    } = {}
 
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required'
@@ -82,6 +94,16 @@ export default function SignupPage() {
         'Password must contain at least one uppercase letter, one lowercase letter, and one number'
     }
 
+    // Confirm password validation and explicit mismatch toast
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password'
+    } else if (formData.password !== formData.confirmPassword) {
+      // show specific toast for mismatch and set field error
+      setErrors({ ...newErrors, confirmPassword: 'Passwords do not match' })
+      addToast('Passwords do not match', 'error')
+      return
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       addToast('Please fix the form errors', 'error')
@@ -90,7 +112,12 @@ export default function SignupPage() {
 
     setErrors({})
     addToast('Creating your account...', 'info')
-    signupMutation.mutate(formData)
+    // Only send the required fields (exclude confirmPassword)
+    signupMutation.mutate({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+    })
   }
 
   return (
@@ -244,6 +271,54 @@ export default function SignupPage() {
                 <p className="text-xs text-slate-500 mt-2">
                   Must contain uppercase, lowercase, and number
                 </p>
+              )}
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <Label htmlFor="confirmPassword" className="text-slate-300 font-medium">
+                Confirm Password
+              </Label>
+              <div className="mt-2 relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  className={`pl-10 h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 transition-all ${
+                    errors.confirmPassword
+                      ? 'border-red-500 focus:border-red-600'
+                      : 'border-slate-600 focus:border-blue-500'
+                  }`}
+                  value={formData.confirmPassword}
+                  onChange={(e) => {
+                    setFormData({ ...formData, confirmPassword: e.target.value })
+                    if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined })
+                  }}
+                  disabled={signupMutation.isPending}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((s) => !s)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  disabled={signupMutation.isPending}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-sm text-red-400 mt-2 flex items-center gap-1"
+                >
+                  ⚠️ {errors.confirmPassword}
+                </motion.p>
               )}
             </div>
 
