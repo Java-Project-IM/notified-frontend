@@ -189,7 +189,34 @@ export const enhancedAttendanceService = {
         },
       }
     )
-    return response.data.data
+
+    // Normalize different possible response shapes to a stable ImportResult
+    const payload = response?.data?.data ?? response?.data ?? null
+
+    if (!payload) {
+      // Helpful error for debugging and to allow caller to show a nice message
+      throw new Error('Empty or unexpected import response from server')
+    }
+
+    // Ensure result contains the expected fields with safe defaults
+    const result: ImportResult = {
+      success:
+        typeof (payload as any).success === 'number'
+          ? (payload as any).success
+          : Array.isArray((payload as any).imported)
+            ? (payload as any).imported.length
+            : 0,
+      failed:
+        typeof (payload as any).failed === 'number'
+          ? (payload as any).failed
+          : Array.isArray((payload as any).errors)
+            ? (payload as any).errors.length
+            : 0,
+      errors: Array.isArray((payload as any).errors) ? (payload as any).errors : [],
+      imported: Array.isArray((payload as any).imported) ? (payload as any).imported : [],
+    }
+
+    return result
   },
 
   /**

@@ -40,10 +40,13 @@ import { studentService } from '@/services/student.service'
 import { enhancedAttendanceService } from '@/services/enhanced-attendance.service'
 import {
   parseAttendanceExcel,
+  parseAttendanceExcelWithDebug,
   validateAttendanceData,
+  transformExcelToAttendanceData,
   exportAttendanceToExcel,
   generateAttendanceTemplate,
 } from '@/utils/attendanceExcelUtils'
+import * as XLSX from 'xlsx'
 
 export default function AttendancePage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -84,8 +87,15 @@ export default function AttendancePage() {
 
     setIsImporting(true)
     try {
-      // Parse Excel file
-      const excelData = await parseAttendanceExcel(file)
+      // Parse Excel file and get debug info
+      const parsed = await parseAttendanceExcelWithDebug(file)
+      let excelData = parsed.records
+
+      // Debug logging: header / rows
+      console.debug('[Attendance] rawHeaders:', parsed.rawHeaders)
+      console.debug('[Attendance] normalizedHeaders:', parsed.normalizedHeaders)
+      console.debug('[Attendance] rawRows sample:', parsed.rawRows.slice(0, 4))
+      console.debug('[Attendance] parsed records sample:', excelData.slice(0, 4))
 
       // Validate data
       const validation = validateAttendanceData(excelData)
@@ -99,22 +109,227 @@ export default function AttendancePage() {
         toast.warning(`Warnings: ${validation.warnings.slice(0, 3).join(', ')}`, 'Import Warnings')
       }
 
-      // Import via API
-      const result = await enhancedAttendanceService.importFromExcel(file)
+      // Quick sanity check: ensure Status column does not contain emails (common symptom of misaligned columns)
+      const emailRegex = /\S+@\S+\.\S+/
+      const badRows = excelData
+        .map((r, i) => ({ row: i + 2, record: r }))
+        .filter(({ record }) => {
+          const status = String(record['Status'] ?? '')
+            .toLowerCase()
+            .trim()
+          return emailRegex.test(status) // status should not be an email
+        })
+
+      if (badRows.length > 0) {
+        console.warn(
+          '[Attendance] Parsed Excel sample rows show emails in Status — attempting auto-correction'
+        )
+
+        const sampleRows = parsed.rawRows.slice(1, 11) // up to 10 sample rows
+        const headers = parsed.normalizedHeaders
+
+        const validStatuses = ['present', 'absent', 'late', 'excused']
+
+        // Count occurrences of status-like values per column index
+        const statusCounts = headers.map(() => 0)
+        sampleRows.forEach((r) => {
+          headers.forEach((hdr, idx) => {
+            const cell = String(r[idx] ?? '')
+              .toLowerCase()
+              .trim()
+            if (validStatuses.includes(cell)) statusCounts[idx] = (statusCounts[idx] || 0) + 1
+          })
+        })
+
+        const statusIndex = headers.findIndex((h) => h === 'Status')
+        // Find candidate column index with max count of valid statuses (not current status index)
+        const candidate = statusCounts
+          .map((c, idx) => ({ idx, count: c }))
+          .filter((x) => x.idx !== statusIndex)
+          .sort((a, b) => b.count - a.count)[0]
+
+        const minNeeded = Math.max(1, Math.floor(sampleRows.length / 2))
+        if (candidate && candidate.count >= minNeeded && statusIndex !== -1) {
+          const candidateHeader = headers[candidate.idx]
+          const statusHeader = headers[statusIndex]
+          console.info(
+            `[Attendance] Auto-correcting: swapping '${statusHeader}' <-> '${candidateHeader}' (sample counts: ${candidate.count})`
+          )
+
+          excelData = excelData.map((rec) => {
+            const newRec = { ...rec }
+            newRec[statusHeader] = rec[candidateHeader]
+            newRec[candidateHeader] = rec[statusHeader]
+            return newRec
+          })
+
+          console.debug('[Attendance] Corrected parsed records sample:', excelData.slice(0, 4))
+        } else {
+          console.error(
+            '[Attendance] Parsed Excel sample rows (possible misaligned columns):',
+            badRows.slice(0, 6)
+          )
+          toast.error(
+            'Excel appears to have invalid/misaligned columns — ensure "Status" contains present/absent/late/excused and "Email" contains valid emails. See console for sample rows.',
+            'Import Error'
+          )
+          return
+        }
+      }
+
+      // Rebuild a normalized Excel file client-side to avoid server-side header/column mismatches
+      const canonicalHeaders = [
+        'Student Number',
+        'First Name',
+        'Last Name',
+        'Email',
+        'Subject Code',
+        'Subject Name',
+        'Status',
+        'Time Slot',
+        'Date',
+        'Time',
+        'Notes',
+      ]
+
+      const worksheet = XLSX.utils.json_to_sheet(excelData as any[], { header: canonicalHeaders })
+      const workbook = XLSX.utils.book_new()
+      // Use a canonical sheet name: prefer 'Attendance' to match backend expectations
+      const sheetName = 'Attendance'
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
+
+      const arrayBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+      const normalizedFile = new File([arrayBuffer], `normalized_${file.name}`, {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+
+      // Import via API using the rebuilt, normalized file
+      // Confirm rebuilt file rows for upload (sanity)
+      try {
+        const checkWB = XLSX.read(await normalizedFile.arrayBuffer(), { type: 'array' })
+        const checkWS = checkWB.Sheets[checkWB.SheetNames[0]]
+        const checkRows = XLSX.utils.sheet_to_json(checkWS, { header: 1, raw: false })
+        console.debug('[Attendance] Rebuilt workbook first rows (array):', checkRows.slice(0, 4))
+        // Log headers and the Status column of each sample row for easy inspection
+        const headerRow = (((checkRows as any[][])[0] || []) as any[]).map((h: any) =>
+          String(h || '').trim()
+        )
+        console.debug('[Attendance] Rebuilt workbook headerRow:', headerRow)
+        checkRows.slice(1, 4).forEach((r: any, idx: number) => {
+          const rowMap: Record<string, any> = {}
+          headerRow.forEach((h: any, i: number) => {
+            rowMap[h] = r[i]
+          })
+          console.debug(`[Attendance] Rebuilt row ${idx + 2} map:`, rowMap)
+        })
+      } catch (er) {
+        console.warn('[Attendance] Could not read back rebuilt file for sanity check:', er)
+      }
+
+      const result = await enhancedAttendanceService.importFromExcel(normalizedFile)
+
+      // Guard against undefined or unexpected responses
+      if (!result || typeof result !== 'object') {
+        console.error('[Attendance] Import returned unexpected response:', result)
+        toast.error('Import failed: unexpected server response', 'Import Error')
+        return
+      }
+
+      const successCount = typeof result.success === 'number' ? result.success : 0
+      const failedCount = typeof result.failed === 'number' ? result.failed : 0
 
       toast.success(
-        `Successfully imported ${result.success} records. ${result.failed} failed.`,
+        `Successfully imported ${successCount} records. ${failedCount} failed.`,
         'Import Complete'
       )
 
-      if (result.errors.length > 0) {
-        // import errors available in result.errors for debugging
+      if (Array.isArray(result.errors) && result.errors.length > 0) {
+        // Normalize error shape and provide helpful debugging details
+        const normalizedErrors = result.errors.map((e: any) => {
+          const message = e.message ?? e.error ?? String(e)
+          return { row: e.row, message }
+        })
+
+        console.warn('[Attendance] Import errors:', normalizedErrors)
+
+        // If server complains about an invalid status that looks like an email, show parsed row for easier debugging
+        const invalidStatusErrors = normalizedErrors.filter((e: any) =>
+          /invalid status:/i.test(e.message)
+        )
+        if (invalidStatusErrors.length > 0) {
+          invalidStatusErrors.forEach((err: any) => {
+            const rowIndex = Number(err.row) - 2 // header + zero-based
+            const parsedRow = excelData[rowIndex]
+            console.warn(`[Attendance] Parsed row ${err.row} sample:`, parsedRow)
+          })
+        }
+
+        toast.error(
+          `Import completed with ${normalizedErrors.length} errors. See console for details.`,
+          'Import Errors'
+        )
+
+        // If we failed due to invalid status values (often caused by header misalignment), attempt a fallback
+        if (invalidStatusErrors.length > 0) {
+          toast.info(
+            'Server Excel import failed due to status parsing. Trying a direct API import (JSON) instead...',
+            'Import Fallback'
+          )
+
+          // Convert parsed Excel data to attendance form data
+          const attendanceData = transformExcelToAttendanceData(excelData) as any[]
+
+          let success = 0
+          let failed = 0
+          const failures: any[] = []
+
+          // For each row, resolve studentId by studentNumber and call markAttendance
+          await Promise.all(
+            attendanceData.map(async (d) => {
+              try {
+                if (!d.studentNumber || !d.status || !d.timeSlot) {
+                  failed++
+                  failures.push({ reason: 'Missing required fields', data: d })
+                  return
+                }
+
+                const student = await studentService.getByStudentNumber(d.studentNumber)
+                if (!student || !student.id) {
+                  failed++
+                  failures.push({ reason: 'Student not found', studentNumber: d.studentNumber })
+                  return
+                }
+
+                // Build attendance payload
+                const payload: any = {
+                  studentId: Number(student.id),
+                  status: d.status,
+                  timeSlot: d.timeSlot,
+                  timestamp: d.timestamp || undefined,
+                  notes: d.notes || undefined,
+                }
+
+                await enhancedAttendanceService.markAttendance(payload)
+                success++
+              } catch (err: any) {
+                failed++
+                failures.push({ reason: err?.message || String(err), data: d })
+              }
+            })
+          )
+
+          console.warn('[Attendance] Fallback JSON import failures:', failures)
+          toast.success(
+            `Fallback import complete: ${success} success, ${failed} failed`,
+            'Import Fallback'
+          )
+        }
       }
 
       refetch()
     } catch (error: any) {
       console.error('[Attendance] Import failed:', error)
-      toast.error(error.message || 'Failed to import attendance records', 'Import Error')
+      toast.error(error?.message || 'Failed to import attendance records', 'Import Error')
     } finally {
       setIsImporting(false)
       // Reset input
@@ -162,64 +377,13 @@ export default function AttendancePage() {
           description="Mark attendance, track arrivals/departures, and generate reports"
           icon={ClipboardList}
           gradient="from-purple-600 via-indigo-600 to-blue-600"
-          actions={[
-            {
-              label: 'Download Template',
-              onClick: handleDownloadTemplate,
-              icon: FileSpreadsheet,
-              variant: 'outline',
-            },
-            {
-              label: 'Export Records',
-              onClick: handleExport,
-              icon: Download,
-              variant: 'outline',
-            },
-          ]}
+          actions={[]}
         />
 
         {/* Attendance Summary Dashboard */}
         <AttendanceSummary showStudentDetails={true} />
 
-        {/* Import Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-800/50 rounded-2xl p-4 sm:p-6 shadow-enterprise border border-slate-700/50 backdrop-blur-sm"
-        >
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-slate-100 mb-1 flex items-center gap-2">
-                <Upload className="w-5 h-5 text-purple-400" />
-                Bulk Import
-              </h3>
-              <p className="text-sm text-slate-400">
-                Import attendance records from Excel file. Download template for correct format.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2 w-full md:w-auto">
-              <label
-                htmlFor="import-excel"
-                className={`flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-medium transition-all cursor-pointer shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex-1 md:flex-initial ${
-                  isImporting ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
-              >
-                <Upload className="w-4 h-4" />
-                <span className="whitespace-nowrap">
-                  {isImporting ? 'Importing...' : 'Import Excel'}
-                </span>
-              </label>
-              <input
-                id="import-excel"
-                type="file"
-                accept=".xlsx,.xls"
-                onChange={handleImport}
-                disabled={isImporting}
-                className="hidden"
-              />
-            </div>
-          </div>
-        </motion.div>
+        {/* Import Section removed: Attendance import and template download now handled in Students page */}
 
         {/* Search and Filters */}
         <motion.div

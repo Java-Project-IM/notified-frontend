@@ -41,13 +41,29 @@ export interface ValidationResult {
 }
 
 /**
- * Parse Excel file and extract attendance data
- *
- * Expected Excel format:
- * - Student Number | First Name | Last Name | Email | Status | Time Slot | Date | Time | Notes
- *
- * @param file - Excel file to parse
- * @returns Promise resolving to array of parsed attendance data
+ * Normalize common header variants to canonical keys used by the system
+ */
+const HEADER_MAP: Record<string, string> = {
+  'student number': 'Student Number',
+  'student no': 'Student Number',
+  student_number: 'Student Number',
+  'first name': 'First Name',
+  lastname: 'Last Name',
+  'last name': 'Last Name',
+  email: 'Email',
+  'subject code': 'Subject Code',
+  'subject name': 'Subject Name',
+  status: 'Status',
+  'time slot': 'Time Slot',
+  timeslot: 'Time Slot',
+  date: 'Date',
+  time: 'Time',
+  notes: 'Notes',
+  // add more variants if needed
+}
+
+/**
+ * Parse attendance Excel file with header normalization.
  */
 export const parseAttendanceExcel = (file: File): Promise<ExcelAttendanceRecord[]> => {
   return new Promise((resolve, reject) => {
@@ -59,13 +75,126 @@ export const parseAttendanceExcel = (file: File): Promise<ExcelAttendanceRecord[
         const workbook = XLSX.read(data, { type: 'binary' })
         const sheetName = workbook.SheetNames[0]
         const worksheet = workbook.Sheets[sheetName]
-        const jsonData = XLSX.utils.sheet_to_json<ExcelAttendanceRecord>(worksheet)
 
-        // parsed records count: jsonData.length
-        resolve(jsonData)
+        // read as arrays so we can normalize headers reliably
+        const rows: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false })
+
+        if (!rows || rows.length === 0) {
+          return reject(new Error('Empty or invalid Excel sheet'))
+        }
+
+        const rawHeaders: string[] = (rows[0] || []).map((h: any) =>
+          String(h || '')
+            .trim()
+            .toLowerCase()
+        )
+
+        // build normalized header -> canonical header
+        const normalizedHeaders = rawHeaders.map((h) => {
+          if (!h) return ''
+          return (
+            HEADER_MAP[h] ??
+            HEADER_MAP[h.replace(/\s+/g, '')] ?? // try without spaces
+            // fallback: title-case the header (keeps custom headers)
+            h
+              .split(/\s+/)
+              .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(' ')
+          )
+        })
+
+        // convert rows to objects using normalized/canonical headers
+        const dataRows = rows
+          .slice(1)
+          .filter((r) => r.some((c: any) => String(c || '').trim() !== ''))
+        const json = dataRows.map((row) => {
+          const obj: any = {}
+          normalizedHeaders.forEach((hdr, i) => {
+            if (!hdr) return
+            obj[hdr] = row[i] !== undefined ? String(row[i]).trim() : ''
+          })
+          return obj as ExcelAttendanceRecord
+        })
+
+        resolve(json)
       } catch (error) {
-        // parse error
-        reject(new Error('Failed to parse Excel file. Please check the format.'))
+        reject(
+          new Error('Failed to parse attendance Excel file. Please check the template format.')
+        )
+      }
+    }
+
+    reader.onerror = () => {
+      reject(new Error('Failed to read file'))
+    }
+
+    reader.readAsBinaryString(file)
+  })
+}
+
+/**
+ * Debug variant - parse attendance Excel file and return parsed rows plus raw debug info
+ * This function is useful for debugging header / column mapping and should be used only for dev / logging
+ */
+export const parseAttendanceExcelWithDebug = async (
+  file: File
+): Promise<{
+  records: ExcelAttendanceRecord[]
+  rawHeaders: string[]
+  normalizedHeaders: string[]
+  rawRows: any[][]
+  sheetName: string
+}> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+
+    reader.onload = (e) => {
+      try {
+        const data = e.target?.result
+        const workbook = XLSX.read(data, { type: 'binary' })
+        const sheetName = workbook.SheetNames[0]
+        const worksheet = workbook.Sheets[sheetName]
+
+        const rows: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false })
+        if (!rows || rows.length === 0) {
+          return reject(new Error('Empty or invalid Excel sheet'))
+        }
+
+        const rawHeaders: string[] = (rows[0] || []).map((h: any) =>
+          String(h || '')
+            .trim()
+            .toLowerCase()
+        )
+
+        const normalizedHeaders = rawHeaders.map((h) => {
+          if (!h) return ''
+          return (
+            HEADER_MAP[h] ??
+            HEADER_MAP[h.replace(/\s+/g, '')] ??
+            h
+              .split(/\s+/)
+              .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(' ')
+          )
+        })
+
+        const dataRows = rows
+          .slice(1)
+          .filter((r) => r.some((c: any) => String(c || '').trim() !== ''))
+        const json = dataRows.map((row) => {
+          const obj: any = {}
+          normalizedHeaders.forEach((hdr, i) => {
+            if (!hdr) return
+            obj[hdr] = row[i] !== undefined ? String(row[i]).trim() : ''
+          })
+          return obj as ExcelAttendanceRecord
+        })
+
+        resolve({ records: json, rawHeaders, normalizedHeaders, rawRows: rows, sheetName })
+      } catch (error) {
+        reject(
+          new Error('Failed to parse attendance Excel file. Please check the template format.')
+        )
       }
     }
 
@@ -317,7 +446,7 @@ export const generateAttendanceTemplate = (includeInstructions: boolean = true):
 
   const worksheet = XLSX.utils.json_to_sheet(templateData)
   const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance Template')
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance')
 
   // Set column widths
   worksheet['!cols'] = [
