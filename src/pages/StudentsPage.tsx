@@ -44,6 +44,7 @@ export default function StudentsPage() {
     isOpen: boolean
     student: Student | null
   }>({ isOpen: false, student: null })
+  const [bulkDeleteConfirmation, setBulkDeleteConfirmation] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { addToast } = useToast()
   const queryClient = useQueryClient()
@@ -120,6 +121,36 @@ export default function StudentsPage() {
     },
   })
 
+  // Bulk delete mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (studentIds: number[]) => {
+      const results = await Promise.allSettled(studentIds.map((id) => studentService.delete(id)))
+      const successful = results.filter((r) => r.status === 'fulfilled').length
+      const failed = results.filter((r) => r.status === 'rejected').length
+      return { successful, failed, total: studentIds.length }
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['students'] })
+      queryClient.refetchQueries({ queryKey: ['students'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
+      if (data.failed > 0) {
+        addToast(
+          `Deleted ${data.successful} of ${data.total} students. ${data.failed} failed.`,
+          'info'
+        )
+      } else {
+        addToast(`Successfully deleted ${data.successful} students`, 'success')
+      }
+      setSelectedStudents(new Set())
+      setBulkDeleteConfirmation(false)
+    },
+    onError: (error: any) => {
+      console.error('[Students] Failed to bulk delete students:', error)
+      addToast(error?.message || 'Failed to delete students', 'error')
+      setBulkDeleteConfirmation(false)
+    },
+  })
+
   // Filter students based on debounced search
   const filteredStudents = students.filter(
     (student) =>
@@ -157,6 +188,18 @@ export default function StudentsPage() {
     if (deleteConfirmation.student) {
       deleteMutation.mutate(deleteConfirmation.student.id)
     }
+  }
+
+  const handleBulkDelete = () => {
+    if (selectedStudents.size === 0) {
+      addToast('No students selected', 'warning')
+      return
+    }
+    setBulkDeleteConfirmation(true)
+  }
+
+  const confirmBulkDelete = () => {
+    bulkDeleteMutation.mutate(Array.from(selectedStudents))
   }
 
   const handleAddStudent = () => {
@@ -359,6 +402,17 @@ export default function StudentsPage() {
               <FileSpreadsheet className="w-4 h-4 mr-2" />
               Export Students
             </Button>
+            {selectedStudents.size > 0 && (
+              <Button
+                variant="outline"
+                className="border-red-600 bg-red-900/20 hover:bg-red-900/40 hover:border-red-500 text-red-400 hover:text-red-300 transition-all h-11 px-5 shadow-enterprise-sm"
+                onClick={handleBulkDelete}
+                disabled={bulkDeleteMutation.isPending}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Selected ({selectedStudents.size})
+              </Button>
+            )}
             <div className="ml-auto flex items-center gap-2 text-slate-400 text-sm">
               <FileText className="w-4 h-4" />
               <span className="font-medium">
@@ -572,7 +626,7 @@ export default function StudentsPage() {
         onSend={handleEmailSend}
       />
 
-      {/* Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={deleteConfirmation.isOpen}
         onClose={() => setDeleteConfirmation({ isOpen: false, student: null })}
@@ -583,6 +637,19 @@ export default function StudentsPage() {
         cancelText="Cancel"
         variant="danger"
         isLoading={deleteMutation.isPending}
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={bulkDeleteConfirmation}
+        onClose={() => setBulkDeleteConfirmation(false)}
+        onConfirm={confirmBulkDelete}
+        title="Delete Multiple Students"
+        description={`Are you sure you want to delete ${selectedStudents.size} selected students? This action cannot be undone and will remove all associated records.`}
+        confirmText={`Delete ${selectedStudents.size} Students`}
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={bulkDeleteMutation.isPending}
       />
     </MainLayout>
   )

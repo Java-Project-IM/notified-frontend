@@ -9,6 +9,7 @@ import {
   Search,
   Filter,
   Calendar,
+  Users,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,6 +33,7 @@ interface EmailRecord {
   createdAt: string
   metadata?: {
     recipient?: string
+    recipients?: string[]
     subject?: string
     messageId?: string
     sentCount?: number
@@ -136,6 +138,33 @@ export default function EmailHistoryPage() {
     }
     return true
   })
+
+  const getRecipientDisplay = (email: EmailRecord) => {
+    const isBulk = email.metadata?.totalRecipients && email.metadata.totalRecipients > 1
+
+    if (isBulk) {
+      const recipients = email.metadata?.recipients || []
+      const count = email.metadata?.totalRecipients || recipients.length
+      return {
+        display: `${count} Recipients`,
+        isBulk: true,
+        recipients: recipients,
+        count: count,
+      }
+    }
+
+    // Single recipient
+    const recipient =
+      email.metadata?.recipient ||
+      (email.student ? `${email.student.firstName} ${email.student.lastName}` : 'Unknown')
+
+    return {
+      display: recipient,
+      isBulk: false,
+      recipients: [email.metadata?.recipient || ''],
+      count: 1,
+    }
+  }
 
   return (
     <MainLayout>
@@ -243,66 +272,104 @@ export default function EmailHistoryPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-slate-900/50 divide-y divide-slate-700/30">
-                  {filteredEmails.map((email, index) => (
-                    <motion.tr
-                      key={email._id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="hover:bg-slate-800/60 transition-colors group"
-                    >
-                      <td className="px-6 py-5 whitespace-nowrap">
-                        <div className="flex items-center gap-2 text-sm text-slate-200 font-medium">
-                          <Clock className="w-4 h-4 text-slate-400" />
-                          {formatDate(email.createdAt)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-5">
-                        <div className="text-sm text-slate-200 font-medium">
-                          {email.metadata?.recipient || email.student
-                            ? `${email.student?.firstName} ${email.student?.lastName}`
-                            : 'Multiple Recipients'}
-                        </div>
-                        {email.metadata?.totalRecipients && email.metadata.totalRecipients > 1 && (
-                          <div className="text-xs text-slate-500 mt-1">
-                            {email.metadata.sentCount || email.metadata.totalRecipients} of{' '}
-                            {email.metadata.totalRecipients} recipients
+                  {filteredEmails.map((email, index) => {
+                    const recipientInfo = getRecipientDisplay(email)
+
+                    return (
+                      <motion.tr
+                        key={email._id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="hover:bg-slate-800/60 transition-colors group"
+                      >
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="flex items-center gap-2 text-sm text-slate-200 font-medium">
+                            <Clock className="w-4 h-4 text-slate-400" />
+                            {formatDate(email.createdAt)}
                           </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-5">
-                        <div className="text-sm text-slate-300 max-w-xs truncate">
-                          {email.metadata?.subject || 'No subject'}
-                        </div>
-                      </td>
-                      <td className="px-6 py-5 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white font-semibold text-xs">
-                            {email.performedBy.name.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <div className="text-sm text-slate-200 font-medium">
-                              {email.performedBy.name}
+                        </td>
+                        <td className="px-6 py-5">
+                          {recipientInfo.isBulk ? (
+                            <div className="group/tooltip relative">
+                              <div className="flex items-center gap-2 text-sm text-slate-200 font-medium cursor-help">
+                                <Users className="w-4 h-4 text-purple-400" />
+                                <span>{recipientInfo.display}</span>
+                              </div>
+                              {recipientInfo.recipients.length > 0 && (
+                                <div className="invisible group-hover/tooltip:visible absolute z-50 left-0 top-full mt-2 w-80 max-h-60 overflow-y-auto bg-slate-800 border border-slate-700 rounded-lg shadow-enterprise-xl p-3">
+                                  <div className="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-2">
+                                    <Mail className="w-3 h-3" />
+                                    Recipients ({recipientInfo.count}):
+                                  </div>
+                                  <div className="space-y-1">
+                                    {recipientInfo.recipients.slice(0, 20).map((recipient, idx) => (
+                                      <div key={idx} className="text-xs text-slate-400 truncate">
+                                        • {recipient}
+                                      </div>
+                                    ))}
+                                    {recipientInfo.recipients.length > 20 && (
+                                      <div className="text-xs text-slate-500 italic">
+                                        ... and {recipientInfo.recipients.length - 20} more
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                              <div className="text-xs text-slate-500 mt-1">
+                                {email.metadata?.sentCount || email.metadata?.totalRecipients} sent
+                              </div>
                             </div>
-                            <div className="text-xs text-slate-500">{email.performedBy.email}</div>
+                          ) : (
+                            <div className="text-sm text-slate-200 font-medium">
+                              {recipientInfo.display}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="text-sm text-slate-300 max-w-xs truncate">
+                            {email.metadata?.subject || 'No subject'}
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-5 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${
-                            email.metadata?.totalRecipients && email.metadata.totalRecipients > 1
-                              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                              : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                          }`}
-                        >
-                          {email.metadata?.totalRecipients && email.metadata.totalRecipients > 1
-                            ? 'Bulk'
-                            : 'Single'}
-                        </span>
-                      </td>
-                    </motion.tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white font-semibold text-xs">
+                              {email.performedBy.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="text-sm text-slate-200 font-medium">
+                                {email.performedBy.name}
+                              </div>
+                              <div className="text-xs text-slate-500">
+                                {email.performedBy.email}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold ${
+                              recipientInfo.isBulk
+                                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                            }`}
+                          >
+                            {recipientInfo.isBulk ? (
+                              <>
+                                <Users className="w-3 h-3" />
+                                Bulk
+                              </>
+                            ) : (
+                              <>
+                                <User className="w-3 h-3" />
+                                Single
+                              </>
+                            )}
+                          </span>
+                        </td>
+                      </motion.tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>

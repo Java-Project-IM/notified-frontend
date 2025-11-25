@@ -1,17 +1,6 @@
 import { ReactNode, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  Home,
-  Users,
-  BookOpen,
-  ClipboardList,
-  Mail,
-  LogOut,
-  Bell,
-  CheckCircle,
-  Menu,
-  X,
-} from 'lucide-react'
+import { Home, Users, BookOpen, ClipboardList, Mail, LogOut, Bell, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/store/toastStore'
@@ -70,12 +59,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
       icon: ClipboardList,
       path: ROUTES.RECORDS,
       color: '#10B981',
-    },
-    {
-      label: 'Attendance',
-      icon: CheckCircle,
-      path: ROUTES.ATTENDANCE,
-      color: '#8B5CF6',
     },
     {
       label: 'Email History',
