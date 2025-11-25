@@ -11,6 +11,7 @@
  * - Schedule management (add/edit multiple class schedules per day)
  * - Fixed checkbox selection issues
  * - Select All button for attendance marking
+ * - Improved schedule clarification for professors
  */
 
 import { useState, useEffect, useMemo } from 'react'
@@ -35,6 +36,7 @@ import {
   Loader2,
   Trash2,
   Edit,
+  Info,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -384,14 +386,32 @@ export default function SubjectDetailsModal({
     })
   }
 
-  // Select all/none - FIXED with dedicated button
+  // Select all/none - FIXED with proper state update
   const handleSelectAll = () => {
-    if (selectedStudents.size === filteredEnrolledStudents.length) {
-      setSelectedStudents(new Set())
-    } else {
-      setSelectedStudents(new Set(filteredEnrolledStudents.map((e) => e.studentId)))
-    }
+    setSelectedStudents((prev) => {
+      const filteredIds = new Set(filteredEnrolledStudents.map((e) => e.studentId))
+      // Check if all filtered students are already selected
+      const allSelected = filteredEnrolledStudents.every((e) => prev.has(e.studentId))
+
+      if (allSelected) {
+        // Deselect all filtered students
+        const newSelection = new Set(prev)
+        filteredIds.forEach((id) => newSelection.delete(id))
+        return newSelection
+      } else {
+        // Select all filtered students
+        const newSelection = new Set(prev)
+        filteredIds.forEach((id) => newSelection.add(id))
+        return newSelection
+      }
+    })
   }
+
+  // Check if all filtered students are selected
+  const allFilteredSelected = useMemo(() => {
+    if (filteredEnrolledStudents.length === 0) return false
+    return filteredEnrolledStudents.every((e) => selectedStudents.has(e.studentId))
+  }, [filteredEnrolledStudents, selectedStudents])
 
   // Schedule management functions
   const handleAddSchedule = () => {
@@ -813,7 +833,17 @@ export default function SubjectDetailsModal({
                       </div>
                       {schedules.length > 0 && (
                         <div className="flex-1">
-                          <label className="block text-sm text-slate-400 mb-2">Schedule Slot</label>
+                          <label className="block text-sm text-slate-400 mb-2 flex items-center gap-2">
+                            Schedule Slot
+                            <div className="group relative">
+                              <Info className="w-4 h-4 text-slate-500 cursor-help" />
+                              <div className="invisible group-hover:visible absolute z-10 left-0 top-full mt-1 w-64 p-3 bg-slate-800 border border-slate-700 rounded-lg shadow-xl text-xs text-slate-300">
+                                Select a specific class session (e.g., Lecture, Lab) to mark
+                                attendance only for that session. Leave as "All Slots" to view all
+                                attendance records for the day.
+                              </div>
+                            </div>
+                          </label>
                           <select
                             value={selectedScheduleSlot || ''}
                             onChange={(e) => setSelectedScheduleSlot(e.target.value || null)}
@@ -899,10 +929,7 @@ export default function SubjectDetailsModal({
                           disabled={filteredEnrolledStudents.length === 0}
                           className="border-slate-600"
                         >
-                          {selectedStudents.size === filteredEnrolledStudents.length &&
-                          selectedStudents.size > 0
-                            ? 'Deselect All'
-                            : 'Select All'}
+                          {allFilteredSelected ? 'Deselect All' : 'Select All'}
                         </Button>
                         {selectedStudents.size > 0 && (
                           <span className="text-sm text-slate-400">
@@ -927,6 +954,7 @@ export default function SubjectDetailsModal({
                             if (!student) return null
                             const attendanceRecord = attendanceStatusMap.get(student.id)
                             const status = attendanceRecord?.status
+                            const isSelected = selectedStudents.has(student.id)
 
                             return (
                               <div
@@ -937,7 +965,7 @@ export default function SubjectDetailsModal({
                                   <div className="flex items-center gap-3 flex-1 min-w-0">
                                     <input
                                       type="checkbox"
-                                      checked={selectedStudents.has(student.id)}
+                                      checked={isSelected}
                                       onChange={() => toggleStudentSelection(student.id)}
                                       className="w-5 h-5 rounded border-slate-600 text-purple-600 focus:ring-2 focus:ring-purple-500 cursor-pointer"
                                     />
@@ -1072,10 +1100,30 @@ export default function SubjectDetailsModal({
                   >
                     <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-700/50">
                       <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
-                          <Calendar className="w-5 h-5 text-blue-400" />
-                          Class Schedules
-                        </h3>
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
+                            <Calendar className="w-5 h-5 text-blue-400" />
+                            Class Schedules
+                          </h3>
+                          <div className="group relative">
+                            <Info className="w-4 h-4 text-slate-500 cursor-help" />
+                            <div className="invisible group-hover:visible absolute z-10 left-0 top-full mt-1 w-80 p-4 bg-slate-800 border border-slate-700 rounded-lg shadow-xl text-xs text-slate-300">
+                              <p className="font-semibold mb-2">Managing Class Schedules:</p>
+                              <ul className="space-y-1 list-disc list-inside">
+                                <li>
+                                  Add multiple schedules for different class types (Lecture, Lab,
+                                  Tutorial)
+                                </li>
+                                <li>Each schedule can have different days, times, and locations</li>
+                                <li>
+                                  Use schedule slots when marking attendance to track which session
+                                  students attended
+                                </li>
+                                <li>Example: "Lecture" on Mon/Wed 9-11am, "Lab" on Fri 2-5pm</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
                         {!isEditingSchedules && (
                           <Button
                             onClick={handleAddSchedule}
