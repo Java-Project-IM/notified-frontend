@@ -322,10 +322,10 @@ export default function SubjectDetailsModal({
       const student = e.student
       if (!student) return false
       return (
-        student.studentNumber.toLowerCase().includes(term) ||
-        student.firstName.toLowerCase().includes(term) ||
-        student.lastName.toLowerCase().includes(term) ||
-        student.email.toLowerCase().includes(term)
+        String(student.studentNumber ?? '').toLowerCase().includes(term) ||
+        String(student.firstName ?? '').toLowerCase().includes(term) ||
+        String(student.lastName ?? '').toLowerCase().includes(term) ||
+        String(student.email ?? '').toLowerCase().includes(term)
       )
     })
   }, [enrolledStudents, searchTerm])
@@ -724,12 +724,12 @@ export default function SubjectDetailsModal({
                                 >
                                   <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-semibold">
-                                      {student.firstName[0]}
-                                      {student.lastName[0]}
+                                      {String(student.firstName ?? student.studentNumber ?? '?')[0]}
+                                      {String(student.lastName ?? '?')[0]}
                                     </div>
                                     <div>
                                       <p className="text-slate-200 font-medium">
-                                        {student.firstName} {student.lastName}
+                                        {student.firstName ?? 'Unknown'} {student.lastName ?? ''}
                                       </p>
                                       <p className="text-sm text-slate-500">
                                         {student.studentNumber}
@@ -782,13 +782,13 @@ export default function SubjectDetailsModal({
                               >
                                 <div className="flex items-center gap-3">
                                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-semibold">
-                                    {student.firstName[0]}
-                                    {student.lastName[0]}
+                                    {String(student.firstName ?? student.studentNumber ?? '?')[0]}
+                                    {String(student.lastName ?? '?')[0]}
                                   </div>
-                                  <div>
-                                    <p className="text-slate-200 font-medium">
-                                      {student.firstName} {student.lastName}
-                                    </p>
+                                    <div>
+                                      <p className="text-slate-200 font-medium">
+                                        {student.firstName ?? 'Unknown'} {student.lastName ?? ''}
+                                      </p>
                                     <p className="text-sm text-slate-500">
                                       {student.studentNumber}
                                     </p>
@@ -970,12 +970,12 @@ export default function SubjectDetailsModal({
                                       className="w-5 h-5 rounded border-slate-600 text-purple-600 focus:ring-2 focus:ring-purple-500 cursor-pointer"
                                     />
                                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                      {student.firstName[0]}
-                                      {student.lastName[0]}
+                                      {String(student.firstName ?? student.studentNumber ?? '?')[0]}
+                                      {String(student.lastName ?? '?')[0]}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                       <p className="text-slate-200 font-medium truncate">
-                                        {student.firstName} {student.lastName}
+                                        {student.firstName ?? 'Unknown'} {student.lastName ?? ''}
                                       </p>
                                       <p className="text-sm text-slate-500">
                                         {student.studentNumber}

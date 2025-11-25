@@ -61,10 +61,10 @@ export async function sendEmail(emailData: EmailData): Promise<boolean> {
     } else if (error.response?.status === 401) {
       throw new Error('Unauthorized - Please login again')
     } else if (error.response?.status === 403) {
-      // Permission error - bulk email requires admin/staff role
+      // Permission error - bulk email requires superadmin/admin/staff role
       throw new Error(
         error.response.data?.message ||
-          'You do not have permission to perform this action. Bulk email requires admin or staff role.'
+          'You do not have permission to perform this action. Bulk email requires superadmin, admin, or staff role.'
       )
     } else if (error.response?.status === 429) {
       // Rate limit exceeded
