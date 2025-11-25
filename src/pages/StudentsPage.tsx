@@ -112,6 +112,8 @@ export default function StudentsPage() {
       queryClient.invalidateQueries({ queryKey: ['students'] })
       queryClient.refetchQueries({ queryKey: ['students'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
+      // Ensure subject queries (including enrolled students) are refreshed so SubjectDetailsModal shows up-to-date data
+      queryClient.invalidateQueries({ queryKey: ['subjects'] })
       addToast('Student deleted successfully', 'success')
       console.log('[Students] Student deleted and queries invalidated')
     },
@@ -133,6 +135,8 @@ export default function StudentsPage() {
       queryClient.invalidateQueries({ queryKey: ['students'] })
       queryClient.refetchQueries({ queryKey: ['students'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
+      // Make sure to refresh subject lists and enrolled students so modals update accordingly
+      queryClient.invalidateQueries({ queryKey: ['subjects'] })
       if (data.failed > 0) {
         addToast(
           `Deleted ${data.successful} of ${data.total} students. ${data.failed} failed.`,

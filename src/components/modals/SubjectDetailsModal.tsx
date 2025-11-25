@@ -160,6 +160,12 @@ export default function SubjectDetailsModal({
     enabled: isOpen && !!subject,
   })
 
+  // Only consider enrolled entries that have a valid `student` object.
+  const validEnrolledStudents = useMemo(
+    () => enrolledStudents.filter((e) => !!e.student),
+    [enrolledStudents]
+  )
+
   // Fetch all students for enrollment
   const { data: allStudents = [], isLoading: loadingAllStudents } = useQuery({
     queryKey: ['students'],
@@ -310,15 +316,15 @@ export default function SubjectDetailsModal({
 
   // Available students (not enrolled)
   const availableStudents = useMemo(() => {
-    const enrolledIds = new Set(enrolledStudents.map((e) => e.studentId))
+    const enrolledIds = new Set(validEnrolledStudents.map((e) => e.studentId))
     return allStudents.filter((s) => !enrolledIds.has(s.id))
-  }, [allStudents, enrolledStudents])
+  }, [allStudents, validEnrolledStudents])
 
   // Filtered enrolled students for attendance
   const filteredEnrolledStudents = useMemo(() => {
-    if (!searchTerm) return enrolledStudents
+    if (!searchTerm) return validEnrolledStudents
     const term = searchTerm.toLowerCase()
-    return enrolledStudents.filter((e) => {
+    return validEnrolledStudents.filter((e) => {
       const student = e.student
       if (!student) return false
       return (
@@ -336,7 +342,7 @@ export default function SubjectDetailsModal({
           .includes(term)
       )
     })
-  }, [enrolledStudents, searchTerm])
+  }, [validEnrolledStudents, searchTerm])
 
   // Attendance status map
   const attendanceStatusMap = useMemo(() => {
@@ -547,7 +553,7 @@ export default function SubjectDetailsModal({
                       <div className="flex items-center gap-3 mt-2">
                         <span className="inline-flex items-center gap-1 px-2 py-1 bg-white/20 rounded-lg text-xs">
                           <Users className="w-3 h-3" />
-                          {enrolledStudents.length} students
+                          {validEnrolledStudents.length} students
                         </span>
                         <span className="inline-flex items-center gap-1 px-2 py-1 bg-white/20 rounded-lg text-xs">
                           Year {subject.yearLevel} - {subject.section}
@@ -633,7 +639,7 @@ export default function SubjectDetailsModal({
                           <div className="flex items-center justify-between">
                             <span className="text-slate-400">Total Students</span>
                             <span className="text-2xl font-bold text-blue-400">
-                              {enrolledStudents.length}
+                              {validEnrolledStudents.length}
                             </span>
                           </div>
                           <div className="flex items-center justify-between">
@@ -648,12 +654,12 @@ export default function SubjectDetailsModal({
                           <div className="flex items-center justify-between">
                             <span className="text-slate-400">Attendance Rate</span>
                             <span className="text-2xl font-bold text-purple-400">
-                              {enrolledStudents.length > 0
+                              {validEnrolledStudents.length > 0
                                 ? Math.round(
                                     (filteredAttendanceRecords.filter(
                                       (r: any) => r.status === 'present'
                                     ).length /
-                                      enrolledStudents.length) *
+                                      validEnrolledStudents.length) *
                                       100
                                   )
                                 : 0}
@@ -705,7 +711,7 @@ export default function SubjectDetailsModal({
                         <div className="p-4 bg-slate-800/50 border-b border-slate-700/50">
                           <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
                             <Users className="w-5 h-5 text-blue-400" />
-                            Enrolled Students ({enrolledStudents.length})
+                            Enrolled Students ({validEnrolledStudents.length})
                           </h3>
                         </div>
                         <div className="divide-y divide-slate-700/30 max-h-[500px] overflow-y-auto">
@@ -713,12 +719,12 @@ export default function SubjectDetailsModal({
                             <div className="p-8 text-center text-slate-400">
                               Loading students...
                             </div>
-                          ) : enrolledStudents.length === 0 ? (
+                          ) : validEnrolledStudents.length === 0 ? (
                             <div className="p-8 text-center text-slate-400">
                               No students enrolled yet
                             </div>
                           ) : (
-                            enrolledStudents.map((enrolled) => {
+                            validEnrolledStudents.map((enrolled) => {
                               const student = enrolled.student
                               if (!student) return null
                               return (
@@ -841,7 +847,7 @@ export default function SubjectDetailsModal({
                       </div>
                       {schedules.length > 0 && (
                         <div className="flex-1">
-                          <label className="block text-sm text-slate-400 mb-2 flex items-center gap-2">
+                          <label className="text-sm text-slate-400 mb-2 flex items-center gap-2">
                             Schedule Slot
                             <div className="group relative">
                               <Info className="w-4 h-4 text-slate-500 cursor-help" />
