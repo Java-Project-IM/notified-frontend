@@ -15,6 +15,7 @@
  * - Visual indicators for already-marked attendance
  * - Support for updating attendance status
  * - All 4 status buttons: Present, Absent, Late, Excused
+ * - Clear visual feedback when attendance is marked
  */
 
 import { useState, useEffect, useMemo } from 'react'
@@ -40,7 +41,6 @@ import {
   Trash2,
   Edit,
   Info,
-  RefreshCw,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -210,7 +210,7 @@ export default function SubjectDetailsModal({
     },
   })
 
-  // Unenroll student mutation - FIXED to use correct student ID
+  // Unenroll student mutation
   const unenrollMutation = useMutation({
     mutationFn: (studentId: number) =>
       subjectEnrollmentService.unenrollStudent(subject!.id, studentId),
@@ -257,11 +257,12 @@ export default function SubjectDetailsModal({
         timeSlot: 'arrival',
         scheduleSlot: data.scheduleSlot,
       }),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['subjects', subject?.id, 'attendance', selectedDate, selectedScheduleSlot],
       })
-      addToast('Attendance marked successfully', 'success')
+      const statusText = variables.status.charAt(0).toUpperCase() + variables.status.slice(1)
+      addToast(`✓ Marked as ${statusText}`, 'success')
       refetchAttendance()
     },
     onError: (error: any) => {
@@ -289,8 +290,9 @@ export default function SubjectDetailsModal({
         queryKey: ['subjects', subject?.id, 'attendance', selectedDate, selectedScheduleSlot],
       })
       const slotInfo = variables.scheduleSlot ? ` for ${variables.scheduleSlot}` : ''
+      const statusText = variables.status.charAt(0).toUpperCase() + variables.status.slice(1)
       addToast(
-        `Marked ${variables.studentIds.length} students as ${variables.status}${slotInfo}. Email notifications sent to students and guardians.`,
+        `✓ Marked ${variables.studentIds.length} students as ${statusText}${slotInfo}`,
         'success'
       )
       setSelectedStudents(new Set())
@@ -392,7 +394,7 @@ export default function SubjectDetailsModal({
     enrollAllMutation.mutate(studentIds)
   }
 
-  // FIXED: Toggle student selection with proper event handling
+  // Toggle student selection
   const toggleStudentSelection = (studentId: number, checked: boolean) => {
     setSelectedStudents((prev) => {
       const newSelection = new Set(prev)
@@ -405,20 +407,17 @@ export default function SubjectDetailsModal({
     })
   }
 
-  // Select all/none - FIXED with proper state update
+  // Select all/none
   const handleSelectAll = () => {
     setSelectedStudents((prev) => {
       const filteredIds = new Set(filteredEnrolledStudents.map((e) => e.studentId))
-      // Check if all filtered students are already selected
       const allSelected = filteredEnrolledStudents.every((e) => prev.has(e.studentId))
 
       if (allSelected) {
-        // Deselect all filtered students
         const newSelection = new Set(prev)
         filteredIds.forEach((id) => newSelection.delete(id))
         return newSelection
       } else {
-        // Select all filtered students
         const newSelection = new Set(prev)
         filteredIds.forEach((id) => newSelection.add(id))
         return newSelection
@@ -485,10 +484,8 @@ export default function SubjectDetailsModal({
 
     let newSchedules: SubjectScheduleSlot[]
     if (editingScheduleIndex !== null) {
-      // Update existing schedule
       newSchedules = schedules.map((s, i) => (i === editingScheduleIndex ? scheduleForm : s))
     } else {
-      // Add new schedule
       newSchedules = [...schedules, scheduleForm]
     }
 
@@ -838,8 +835,7 @@ export default function SubjectDetailsModal({
                     animate={{ opacity: 1, y: 0 }}
                     className="space-y-6"
                   >
-                    {/* Date Selector and Search */}
-                    {/* STEP 1: Session Selection - Most Important */}
+                    {/* Session Selection */}
                     <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-xl p-6 border-2 border-blue-500/30">
                       <div className="flex items-start gap-3 mb-4">
                         <div className="bg-blue-500/20 p-2 rounded-lg">
@@ -847,7 +843,7 @@ export default function SubjectDetailsModal({
                         </div>
                         <div className="flex-1">
                           <h3 className="text-lg font-semibold text-slate-200 mb-1">
-                            Step 1: Select Class Session
+                            Select Class Session
                           </h3>
                           <p className="text-sm text-slate-400">
                             Choose the date and class schedule to mark attendance
@@ -885,16 +881,13 @@ export default function SubjectDetailsModal({
                               }}
                               className="w-full h-12 px-4 border border-slate-600 bg-slate-900/50 text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500"
                             >
-                              <option value="">⚠️ Select a schedule slot</option>
+                              <option value="">Select a schedule</option>
                               {schedules.map((schedule, index) => (
                                 <option key={index} value={schedule.slotName}>
-                                  📅 {schedule.slotName} • {schedule.startTime} - {schedule.endTime}
+                                  {schedule.slotName} • {schedule.startTime} - {schedule.endTime}
                                 </option>
                               ))}
                             </select>
-                            <p className="text-xs text-slate-500 mt-1">
-                              💡 Tip: Each schedule tracks attendance separately
-                            </p>
                           </div>
                         )}
                       </div>
@@ -914,16 +907,11 @@ export default function SubjectDetailsModal({
                       )}
                     </div>
 
-                    {/* STEP 2: Quick Actions */}
-                    {schedules.length > 0 && (
+                    {/* Quick Actions */}
+                    {schedules.length > 0 && selectedScheduleSlot && (
                       <div className="bg-slate-900/50 rounded-xl p-5 border border-slate-700/50">
                         <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="w-5 h-5 text-emerald-400" />
-                            <h3 className="text-sm font-semibold text-slate-200">
-                              Step 2: Quick Bulk Actions
-                            </h3>
-                          </div>
+                          <h3 className="text-sm font-semibold text-slate-200">Quick Actions</h3>
                           <span className="text-xs text-slate-400 bg-slate-800 px-3 py-1 rounded-full">
                             {filteredEnrolledStudents.length} students
                           </span>
@@ -934,9 +922,7 @@ export default function SubjectDetailsModal({
                             size="sm"
                             onClick={() => handleMarkAll('present')}
                             disabled={
-                              bulkMarkMutation.isPending ||
-                              filteredEnrolledStudents.length === 0 ||
-                              !selectedScheduleSlot
+                              bulkMarkMutation.isPending || filteredEnrolledStudents.length === 0
                             }
                             className="bg-emerald-600 hover:bg-emerald-700"
                           >
@@ -947,9 +933,7 @@ export default function SubjectDetailsModal({
                             size="sm"
                             onClick={() => handleMarkAll('absent')}
                             disabled={
-                              bulkMarkMutation.isPending ||
-                              filteredEnrolledStudents.length === 0 ||
-                              !selectedScheduleSlot
+                              bulkMarkMutation.isPending || filteredEnrolledStudents.length === 0
                             }
                             className="bg-red-600 hover:bg-red-700"
                           >
@@ -966,14 +950,13 @@ export default function SubjectDetailsModal({
                             disabled={filteredEnrolledStudents.length === 0}
                             className="border-slate-600"
                           >
-                            {allFilteredSelected ? '☑️ Deselect All' : '☐ Select All'}
+                            {allFilteredSelected ? 'Deselect All' : 'Select All'}
                           </Button>
 
                           {selectedStudents.size > 0 && (
                             <>
                               <div className="w-px h-6 bg-slate-600" />
-                              <span className="text-sm font-medium text-blue-400 flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4" />
+                              <span className="text-sm font-medium text-blue-400">
                                 {selectedStudents.size} selected
                               </span>
                               <div className="flex gap-2">
@@ -987,7 +970,7 @@ export default function SubjectDetailsModal({
                                       scheduleSlot: selectedScheduleSlot || undefined,
                                     })
                                   }}
-                                  disabled={bulkMarkMutation.isPending || !selectedScheduleSlot}
+                                  disabled={bulkMarkMutation.isPending}
                                   className="bg-emerald-600 hover:bg-emerald-700"
                                 >
                                   Present
@@ -1002,7 +985,7 @@ export default function SubjectDetailsModal({
                                       scheduleSlot: selectedScheduleSlot || undefined,
                                     })
                                   }}
-                                  disabled={bulkMarkMutation.isPending || !selectedScheduleSlot}
+                                  disabled={bulkMarkMutation.isPending}
                                   className="bg-red-600 hover:bg-red-700"
                                 >
                                   Absent
@@ -1017,7 +1000,7 @@ export default function SubjectDetailsModal({
                                       scheduleSlot: selectedScheduleSlot || undefined,
                                     })
                                   }}
-                                  disabled={bulkMarkMutation.isPending || !selectedScheduleSlot}
+                                  disabled={bulkMarkMutation.isPending}
                                   className="bg-amber-600 hover:bg-amber-700"
                                 >
                                   Late
@@ -1032,7 +1015,7 @@ export default function SubjectDetailsModal({
                                       scheduleSlot: selectedScheduleSlot || undefined,
                                     })
                                   }}
-                                  disabled={bulkMarkMutation.isPending || !selectedScheduleSlot}
+                                  disabled={bulkMarkMutation.isPending}
                                   className="bg-purple-600 hover:bg-purple-700"
                                 >
                                   Excused
@@ -1041,22 +1024,15 @@ export default function SubjectDetailsModal({
                             </>
                           )}
                         </div>
-
-                        {!selectedScheduleSlot && (
-                          <p className="text-xs text-amber-400 mt-3 flex items-center gap-1">
-                            <AlertCircle className="w-3 h-3" />
-                            Please select a schedule slot above to use bulk actions
-                          </p>
-                        )}
                       </div>
                     )}
 
-                    {/* STEP 3: Student Search */}
+                    {/* Student Search */}
                     <div className="relative">
                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 z-10" />
                       <Input
                         type="text"
-                        placeholder="🔍 Search students by name or student number..."
+                        placeholder="Search students by name or student number..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-12 h-12 border-slate-600 bg-slate-900/50 text-slate-100"
@@ -1071,7 +1047,7 @@ export default function SubjectDetailsModal({
                       )}
                     </div>
 
-                    {/* Students List with Attendance - WITH ALL 4 BUTTONS + VISUAL INDICATORS */}
+                    {/* Students List with Attendance */}
                     <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 overflow-hidden">
                       <div className="divide-y divide-slate-700/30 max-h-[500px] overflow-y-auto">
                         {loadingEnrolled || loadingAttendance ? (
@@ -1088,30 +1064,22 @@ export default function SubjectDetailsModal({
                             const attendanceRecord = attendanceStatusMap.get(studentId)
                             const status = attendanceRecord?.status
                             const isSelected = selectedStudents.has(studentId)
-                            const nameColor = status
-                              ? status === 'present'
-                                ? 'text-emerald-200'
-                                : status === 'absent'
-                                  ? 'text-red-300'
-                                  : status === 'late'
-                                    ? 'text-amber-300'
-                                    : 'text-purple-300'
-                              : 'text-slate-200'
-                            const numberColor = status ? 'text-slate-300' : 'text-slate-500'
 
                             return (
-                              <div
+                              <motion.div
                                 key={enrolled.id}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
                                 className={`p-4 transition-all ${
                                   status
-                                    ? 'bg-slate-800/60 border-l-4 ' +
+                                    ? 'border-l-4 ' +
                                       (status === 'present'
-                                        ? 'border-emerald-500 bg-emerald-500/5'
+                                        ? 'border-emerald-500 bg-emerald-500/10'
                                         : status === 'absent'
-                                          ? 'border-red-500 bg-red-500/5'
+                                          ? 'border-red-500 bg-red-500/10'
                                           : status === 'late'
-                                            ? 'border-amber-500 bg-amber-500/5'
-                                            : 'border-purple-500 bg-purple-500/5')
+                                            ? 'border-amber-500 bg-amber-500/10'
+                                            : 'border-purple-500 bg-purple-500/10')
                                     : 'hover:bg-slate-800/60 border-l-4 border-transparent'
                                 }`}
                               >
@@ -1133,48 +1101,41 @@ export default function SubjectDetailsModal({
                                       {String(student?.lastName ?? '?')[0]}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className={`${nameColor} font-medium truncate`}>
+                                      <p
+                                        className={`font-medium truncate ${
+                                          status
+                                            ? status === 'present'
+                                              ? 'text-emerald-300'
+                                              : status === 'absent'
+                                                ? 'text-red-300'
+                                                : status === 'late'
+                                                  ? 'text-amber-300'
+                                                  : 'text-purple-300'
+                                            : 'text-slate-200'
+                                        }`}
+                                      >
                                         {student?.firstName ?? 'Unknown'} {student?.lastName ?? ''}
                                       </p>
-                                      <p className={`text-sm ${numberColor}`}>
+                                      <p className="text-sm text-slate-500">
                                         {student?.studentNumber ?? ''}
                                       </p>
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+                                  <div className="flex items-center gap-2 flex-shrink-0">
                                     {status ? (
-                                      <>
-                                        <span
-                                          className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide ${
-                                            status === 'present'
-                                              ? 'bg-emerald-500/30 text-emerald-300 border-2 border-emerald-500'
-                                              : status === 'absent'
-                                                ? 'bg-red-500/30 text-red-300 border-2 border-red-500'
-                                                : status === 'late'
-                                                  ? 'bg-amber-500/30 text-amber-300 border-2 border-amber-500'
-                                                  : 'bg-purple-500/30 text-purple-300 border-2 border-purple-500'
-                                          }`}
-                                        >
-                                          {status}
-                                        </span>
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          onClick={() =>
-                                            markAttendanceMutation.mutate({
-                                              studentId: studentId,
-                                              status: 'present',
-                                              scheduleSlot: selectedScheduleSlot || undefined,
-                                            })
-                                          }
-                                          disabled={markAttendanceMutation.isPending}
-                                          className="border-blue-500/30 text-blue-400 hover:bg-blue-500/20 h-8 px-3"
-                                          title="Change to another status"
-                                        >
-                                          <RefreshCw className="w-3 h-3 mr-1" />
-                                          Change
-                                        </Button>
-                                      </>
+                                      <span
+                                        className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide ${
+                                          status === 'present'
+                                            ? 'bg-emerald-500/30 text-emerald-300 border-2 border-emerald-500'
+                                            : status === 'absent'
+                                              ? 'bg-red-500/30 text-red-300 border-2 border-red-500'
+                                              : status === 'late'
+                                                ? 'bg-amber-500/30 text-amber-300 border-2 border-amber-500'
+                                                : 'bg-purple-500/30 text-purple-300 border-2 border-purple-500'
+                                        }`}
+                                      >
+                                        ✓ {status}
+                                      </span>
                                     ) : (
                                       <>
                                         <Button
@@ -1186,7 +1147,10 @@ export default function SubjectDetailsModal({
                                               scheduleSlot: selectedScheduleSlot || undefined,
                                             })
                                           }
-                                          disabled={markAttendanceMutation.isPending}
+                                          disabled={
+                                            markAttendanceMutation.isPending ||
+                                            !selectedScheduleSlot
+                                          }
                                           className="bg-emerald-600 hover:bg-emerald-700 h-8 px-2.5"
                                         >
                                           <CheckCircle className="w-3 h-3 mr-1" />
@@ -1201,7 +1165,10 @@ export default function SubjectDetailsModal({
                                               scheduleSlot: selectedScheduleSlot || undefined,
                                             })
                                           }
-                                          disabled={markAttendanceMutation.isPending}
+                                          disabled={
+                                            markAttendanceMutation.isPending ||
+                                            !selectedScheduleSlot
+                                          }
                                           className="bg-red-600 hover:bg-red-700 h-8 px-2.5"
                                         >
                                           <XCircle className="w-3 h-3 mr-1" />
@@ -1216,7 +1183,10 @@ export default function SubjectDetailsModal({
                                               scheduleSlot: selectedScheduleSlot || undefined,
                                             })
                                           }
-                                          disabled={markAttendanceMutation.isPending}
+                                          disabled={
+                                            markAttendanceMutation.isPending ||
+                                            !selectedScheduleSlot
+                                          }
                                           className="bg-amber-600 hover:bg-amber-700 h-8 px-2.5"
                                         >
                                           <Clock className="w-3 h-3 mr-1" />
@@ -1231,7 +1201,10 @@ export default function SubjectDetailsModal({
                                               scheduleSlot: selectedScheduleSlot || undefined,
                                             })
                                           }
-                                          disabled={markAttendanceMutation.isPending}
+                                          disabled={
+                                            markAttendanceMutation.isPending ||
+                                            !selectedScheduleSlot
+                                          }
                                           className="bg-purple-600 hover:bg-purple-700 h-8 px-2.5"
                                         >
                                           <AlertCircle className="w-3 h-3 mr-1" />
@@ -1241,7 +1214,7 @@ export default function SubjectDetailsModal({
                                     )}
                                   </div>
                                 </div>
-                              </div>
+                              </motion.div>
                             )
                           })
                         )}
@@ -1299,7 +1272,7 @@ export default function SubjectDetailsModal({
                   </motion.div>
                 )}
 
-                {/* Schedule Tab - keeping existing code */}
+                {/* Schedule Tab */}
                 {activeTab === 'schedule' && (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -1586,7 +1559,7 @@ export default function SubjectDetailsModal({
             onClose={() => setMarkAllConfirm({ isOpen: false, status: null, scheduleSlot: null })}
             onConfirm={confirmMarkAll}
             title={`Mark All as ${markAllConfirm.status?.charAt(0).toUpperCase()}${markAllConfirm.status?.slice(1)}`}
-            description={`Are you sure you want to mark all ${filteredEnrolledStudents.length} students as ${markAllConfirm.status}${markAllConfirm.scheduleSlot ? ` for ${markAllConfirm.scheduleSlot}` : ''}? Email notifications will be sent to students and their guardians.`}
+            description={`Are you sure you want to mark all ${filteredEnrolledStudents.length} students as ${markAllConfirm.status}${markAllConfirm.scheduleSlot ? ` for ${markAllConfirm.scheduleSlot}` : ''}?`}
             confirmText="Confirm"
             cancelText="Cancel"
             variant="info"
