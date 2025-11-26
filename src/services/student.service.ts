@@ -21,8 +21,9 @@ export const studentService = {
    */
   async getAll(): Promise<Student[]> {
     try {
+      // Request with a high limit to avoid server-side default pagination
       const response = await withTimeout(
-        fetchWithRetry(() => apiClient.get<Student[]>('/students')),
+        fetchWithRetry(() => apiClient.get<Student[]>('/students', { params: { limit: 1000 } })),
         15000,
         'Failed to load students - Request timeout'
       )
