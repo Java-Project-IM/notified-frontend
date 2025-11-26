@@ -1088,6 +1088,16 @@ export default function SubjectDetailsModal({
                             const attendanceRecord = attendanceStatusMap.get(studentId)
                             const status = attendanceRecord?.status
                             const isSelected = selectedStudents.has(studentId)
+                            const nameColor = status
+                              ? status === 'present'
+                                ? 'text-emerald-200'
+                                : status === 'absent'
+                                  ? 'text-red-300'
+                                  : status === 'late'
+                                    ? 'text-amber-300'
+                                    : 'text-purple-300'
+                              : 'text-slate-200'
+                            const numberColor = status ? 'text-slate-300' : 'text-slate-500'
 
                             return (
                               <div
@@ -1123,10 +1133,10 @@ export default function SubjectDetailsModal({
                                       {String(student?.lastName ?? '?')[0]}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-slate-200 font-medium truncate">
+                                      <p className={`${nameColor} font-medium truncate`}>
                                         {student?.firstName ?? 'Unknown'} {student?.lastName ?? ''}
                                       </p>
-                                      <p className="text-sm text-slate-500">
+                                      <p className={`text-sm ${numberColor}`}>
                                         {student?.studentNumber ?? ''}
                                       </p>
                                     </div>
