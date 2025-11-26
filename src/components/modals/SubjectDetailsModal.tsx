@@ -751,7 +751,7 @@ export default function SubjectDetailsModal({
                                       </p>
                                     </div>
                                   </div>
-                                    <Button
+                                  <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={() => unenrollMutation.mutate(enrolled.studentId)}
@@ -990,7 +990,11 @@ export default function SubjectDetailsModal({
                                       className="w-5 h-5"
                                     />
                                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                                      {String(student?.firstName ?? student?.studentNumber ?? '?')[0]}
+                                      {
+                                        String(
+                                          student?.firstName ?? student?.studentNumber ?? '?'
+                                        )[0]
+                                      }
                                       {String(student?.lastName ?? '?')[0]}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -1022,8 +1026,8 @@ export default function SubjectDetailsModal({
                                         <Button
                                           size="sm"
                                           onClick={() =>
-                                                markAttendanceMutation.mutate({
-                                                  studentId: studentId,
+                                            markAttendanceMutation.mutate({
+                                              studentId: studentId,
                                               status: 'present',
                                               scheduleSlot: selectedScheduleSlot || undefined,
                                             })
