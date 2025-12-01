@@ -258,12 +258,15 @@ export default function SubjectDetailsModal({
     staleTime: 1000 * 60 * 2, // 2 minutes
   })
 
-  const subjectEmails = (emailHistoryResponse?.emails || []).filter((e) =>
-    e.recordType === 'subject' && (String(e.recordData) === String(subject?.id) || String(e.recordData).includes(String(subject?.id)))
+  const subjectEmails = (emailHistoryResponse?.emails || []).filter(
+    (e) =>
+      e.recordType === 'subject' &&
+      (String(e.recordData) === String(subject?.id) ||
+        String(e.recordData).includes(String(subject?.id)))
   )
 
   const getRecipientDisplay = (email: EmailHistoryRecord) => {
-    const isBulk = (email.metadata?.totalRecipients || (email.metadata?.recipients?.length || 0)) > 1
+    const isBulk = (email.metadata?.totalRecipients || email.metadata?.recipients?.length || 0) > 1
     if (isBulk) {
       const recipients = email.metadata?.recipients || []
       const count = email.metadata?.totalRecipients || recipients.length
@@ -275,7 +278,9 @@ export default function SubjectDetailsModal({
       }
     }
 
-    const recipient = email.metadata?.recipient || (email.student ? `${email.student.firstName} ${email.student.lastName}` : 'Unknown')
+    const recipient =
+      email.metadata?.recipient ||
+      (email.student ? `${email.student.firstName} ${email.student.lastName}` : 'Unknown')
     return {
       display: recipient,
       isBulk: false,
@@ -614,7 +619,7 @@ export default function SubjectDetailsModal({
                     <div className="sm:col-span-2 bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                        <Mail className="w-5 h-5 text-orange-400" />
+                          <Mail className="w-5 h-5 text-orange-400" />
                           Recent Emails
                         </h3>
                         <button
@@ -627,7 +632,9 @@ export default function SubjectDetailsModal({
                       {loadingEmailHistory ? (
                         <div className="text-sm text-slate-400">Loading email history...</div>
                       ) : subjectEmails.length === 0 ? (
-                        <div className="text-sm text-slate-400">No recent emails for this subject</div>
+                        <div className="text-sm text-slate-400">
+                          No recent emails for this subject
+                        </div>
                       ) : (
                         <div className="space-y-3">
                           {subjectEmails.map((email) => {
