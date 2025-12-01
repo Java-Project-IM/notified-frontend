@@ -7,6 +7,7 @@
  * 3. Snappy enrollment with optimistic updates
  * 4. Dynamic attendance stats updates
  * 5. Real-time enrolled student count
+ * 6. Fixed: Students marked status updates immediately (no longer shows "unmarked" after marking)
  */
 
 import { useState, useEffect, useMemo } from 'react'
@@ -388,10 +389,11 @@ export default function SubjectDetailsModal({
       // Add to marking set
       setMarkingStudents((prev) => new Set(prev).add(variables.studentId))
 
-      // Optimistic update
+      // Cancel outgoing queries
       await queryClient.cancelQueries({
         queryKey: ['subjects', subject?.id, 'attendance', selectedDate, selectedScheduleSlot],
       })
+
       const previousData = queryClient.getQueryData([
         'subjects',
         subject?.id,
@@ -400,20 +402,25 @@ export default function SubjectDetailsModal({
         selectedScheduleSlot,
       ])
 
+      // Optimistically update the cache
       queryClient.setQueryData(
         ['subjects', subject?.id, 'attendance', selectedDate, selectedScheduleSlot],
         (old: any) => {
-          const filtered = (old || []).filter((r: any) => r.studentId !== variables.studentId)
+          const oldRecords = old || []
+          // Remove any existing record for this student
+          const filtered = oldRecords.filter((r: any) => r.studentId !== variables.studentId)
+          // Add the new optimistic record
           return [
             ...filtered,
             {
-              id: Date.now(),
+              id: `temp-${Date.now()}`,
               studentId: variables.studentId,
               subjectId: subject!.id,
               date: selectedDate,
               status: variables.status,
               scheduleSlot: variables.scheduleSlot,
               timeSlot: 'arrival',
+              createdAt: new Date().toISOString(),
             },
           ]
         }
@@ -421,12 +428,14 @@ export default function SubjectDetailsModal({
 
       return { previousData }
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      // Invalidate to refetch with real data from server
       queryClient.invalidateQueries({
         queryKey: ['subjects', subject?.id, 'attendance', selectedDate, selectedScheduleSlot],
       })
     },
     onError: (error: any, variables, context) => {
+      // Rollback on error
       if (context?.previousData) {
         queryClient.setQueryData(
           ['subjects', subject?.id, 'attendance', selectedDate, selectedScheduleSlot],
