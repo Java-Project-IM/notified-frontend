@@ -10,7 +10,7 @@
  * 6. Fixed: Students marked status updates immediately (no longer shows "unmarked" after marking)
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X,
@@ -35,6 +35,8 @@ import {
   Edit,
   Info,
   ChevronRight,
+  Keyboard,
+  Download,
 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
@@ -52,6 +54,8 @@ import { studentService } from '@/services/student.service'
 import { subjectService } from '@/services/subject.service'
 import { getEmailHistory, EmailHistoryRecord } from '@/services/email.service'
 import { cn } from '@/lib/utils'
+import { format } from 'date-fns'
+import * as XLSX from 'xlsx'
 
 interface SubjectDetailsModalProps {
   isOpen: boolean
@@ -93,6 +97,10 @@ export default function SubjectDetailsModal({
 
   // Loading states for individual student marking
   const [markingStudents, setMarkingStudents] = useState<Set<string | number>>(new Set())
+
+  // Keyboard navigation state
+  const [focusedStudentIndex, setFocusedStudentIndex] = useState<number>(-1)
+  const [showShortcutsHint, setShowShortcutsHint] = useState(false)
 
   // Dialog States
   const [enrollAllConfirm, setEnrollAllConfirm] = useState(false)
@@ -263,6 +271,107 @@ export default function SubjectDetailsModal({
     if (filteredEnrolledStudents.length === 0) return false
     return filteredEnrolledStudents.every((e) => selectedStudents.has(e.studentId))
   }, [filteredEnrolledStudents, selectedStudents])
+
+  // --- Keyboard Shortcuts Handler ---
+  const handleKeyboardShortcut = useCallback(
+    (studentId: string | number, status: 'present' | 'absent' | 'late' | 'excused') => {
+      if (!subject || markingStudents.has(studentId)) return
+
+      // The mutation will be triggered by this callback
+      // We'll wire this up after markAttendanceMutation is defined
+    },
+    [subject, markingStudents]
+  )
+
+  // Keyboard shortcuts for attendance marking
+  useEffect(() => {
+    if (!isOpen || activeTab !== 'attendance') return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+
+      const key = e.key.toLowerCase()
+
+      // Navigation: Arrow keys
+      if (key === 'arrowdown') {
+        e.preventDefault()
+        setFocusedStudentIndex((prev) =>
+          prev < filteredEnrolledStudents.length - 1 ? prev + 1 : prev
+        )
+        return
+      }
+
+      if (key === 'arrowup') {
+        e.preventDefault()
+        setFocusedStudentIndex((prev) => (prev > 0 ? prev - 1 : 0))
+        return
+      }
+
+      // Focus search: Ctrl+F or /
+      if (key === '/' || (e.ctrlKey && key === 'f')) {
+        e.preventDefault()
+        const searchInput = document.querySelector('[data-search-input]') as HTMLInputElement
+        searchInput?.focus()
+        return
+      }
+
+      // Toggle shortcuts hint: ?
+      if (key === '?' && e.shiftKey) {
+        e.preventDefault()
+        setShowShortcutsHint((prev) => !prev)
+        return
+      }
+
+      // Escape: Close modal or clear focus
+      if (key === 'escape') {
+        if (focusedStudentIndex >= 0) {
+          setFocusedStudentIndex(-1)
+        } else {
+          onClose()
+        }
+        return
+      }
+
+      // Attendance marking shortcuts (only when a student is focused)
+      if (focusedStudentIndex >= 0 && focusedStudentIndex < filteredEnrolledStudents.length) {
+        const student = filteredEnrolledStudents[focusedStudentIndex]
+        if (!student) return
+
+        const studentId = student.studentId
+        if (markingStudents.has(studentId)) return // Already marking
+
+        let status: 'present' | 'absent' | 'late' | 'excused' | null = null
+
+        if (key === 'p') status = 'present'
+        else if (key === 'a') status = 'absent'
+        else if (key === 'l') status = 'late'
+        else if (key === 'e') status = 'excused'
+
+        if (status) {
+          e.preventDefault()
+          // We'll trigger the mutation directly using a ref pattern
+          // For now, dispatch a custom event that we'll listen for
+          window.dispatchEvent(
+            new CustomEvent('markAttendance', {
+              detail: { studentId, status, scheduleSlot: selectedScheduleSlot },
+            })
+          )
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [
+    isOpen,
+    activeTab,
+    focusedStudentIndex,
+    filteredEnrolledStudents,
+    markingStudents,
+    selectedScheduleSlot,
+    onClose,
+  ])
 
   // --- Email History (Overview Tab) ---
   const { data: emailHistoryResponse, isLoading: loadingEmailHistory } = useQuery({
@@ -469,6 +578,27 @@ export default function SubjectDetailsModal({
     },
   })
 
+  // Listen for keyboard shortcut events to trigger attendance marking
+  useEffect(() => {
+    const handleMarkAttendance = (
+      e: CustomEvent<{
+        studentId: string | number
+        status: 'present' | 'absent' | 'late' | 'excused'
+        scheduleSlot: string | null
+      }>
+    ) => {
+      const { studentId, status, scheduleSlot } = e.detail
+      markAttendanceMutation.mutate({
+        studentId,
+        status,
+        scheduleSlot: scheduleSlot || undefined,
+      })
+    }
+
+    window.addEventListener('markAttendance', handleMarkAttendance as EventListener)
+    return () => window.removeEventListener('markAttendance', handleMarkAttendance as EventListener)
+  }, [markAttendanceMutation])
+
   const bulkMarkMutation = useMutation({
     mutationFn: (data: {
       studentIds: (string | number)[]
@@ -542,6 +672,76 @@ export default function SubjectDetailsModal({
       return newSelection
     })
   }
+
+  // Export current attendance view to Excel
+  const handleExportAttendance = useCallback(() => {
+    if (!subject || !selectedScheduleSlot) {
+      addToast('Please select a schedule slot first', 'warning')
+      return
+    }
+
+    // Build export data from enrolled students and their attendance status
+    const exportData = filteredEnrolledStudents
+      .map((enrolled) => {
+        const student = enrolled.student
+        if (!student) return null
+
+        const studentIdStr = String(enrolled.studentId)
+        const record = attendanceStatusMap.get(studentIdStr)
+
+        return {
+          'Student Number': student.studentNumber || '',
+          'First Name': student.firstName || '',
+          'Last Name': student.lastName || '',
+          Email: student.email || '',
+          'Subject Code': subject.code || '',
+          'Subject Name': subject.name || '',
+          'Schedule Slot': selectedScheduleSlot,
+          Date: selectedDate,
+          Status: record?.status
+            ? record.status.charAt(0).toUpperCase() + record.status.slice(1)
+            : 'Unmarked',
+          'Marked At': record?.createdAt
+            ? format(new Date(record.createdAt), 'yyyy-MM-dd HH:mm:ss')
+            : '',
+        }
+      })
+      .filter(Boolean)
+
+    if (exportData.length === 0) {
+      addToast('No data to export', 'warning')
+      return
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData)
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance')
+
+    // Set column widths
+    worksheet['!cols'] = [
+      { wch: 15 }, // Student Number
+      { wch: 15 }, // First Name
+      { wch: 15 }, // Last Name
+      { wch: 25 }, // Email
+      { wch: 12 }, // Subject Code
+      { wch: 20 }, // Subject Name
+      { wch: 15 }, // Schedule Slot
+      { wch: 12 }, // Date
+      { wch: 10 }, // Status
+      { wch: 20 }, // Marked At
+    ]
+
+    const filename = `${subject.code}_attendance_${selectedDate}.xlsx`
+    XLSX.writeFile(workbook, filename)
+    addToast(`Exported to ${filename}`, 'success')
+  }, [
+    subject,
+    selectedScheduleSlot,
+    selectedDate,
+    filteredEnrolledStudents,
+    attendanceStatusMap,
+    addToast,
+  ])
 
   const handleSelectAll = () => {
     setSelectedStudents((prev) => {
@@ -1080,6 +1280,15 @@ export default function SubjectDetailsModal({
                             >
                               {allFilteredSelected ? 'Deselect All' : 'Select All'}
                             </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleExportAttendance}
+                              className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                            >
+                              <Download className="w-4 h-4 mr-1" />
+                              Export
+                            </Button>
                             {selectedStudents.size > 0 && (
                               <span className="text-sm font-medium text-indigo-400 bg-indigo-400/10 px-2 py-1 rounded">
                                 {selectedStudents.size} selected
@@ -1193,12 +1402,80 @@ export default function SubjectDetailsModal({
                       <div className="p-3 border-b border-slate-700/50 flex items-center gap-3">
                         <Search className="w-4 h-4 text-slate-400" />
                         <input
-                          placeholder="Filter student list..."
+                          data-search-input
+                          placeholder="Filter student list... (Press / to focus)"
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
                           className="bg-transparent border-none focus:ring-0 text-sm w-full text-slate-200 placeholder:text-slate-500"
                         />
+                        <button
+                          onClick={() => setShowShortcutsHint((prev) => !prev)}
+                          className="p-1.5 rounded-lg hover:bg-slate-700/50 text-slate-400 hover:text-slate-200 transition-colors"
+                          title="Keyboard shortcuts (Shift+?)"
+                        >
+                          <Keyboard className="w-4 h-4" />
+                        </button>
                       </div>
+
+                      {/* Keyboard Shortcuts Hint */}
+                      <AnimatePresence>
+                        {showShortcutsHint && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden border-b border-slate-700/50"
+                          >
+                            <div className="p-3 bg-slate-900/50">
+                              <div className="flex flex-wrap gap-4 text-xs text-slate-400">
+                                <span className="font-semibold text-slate-300">Shortcuts:</span>
+                                <span>
+                                  <kbd className="px-1.5 py-0.5 bg-slate-700 rounded text-[10px] font-mono">
+                                    ↑/↓
+                                  </kbd>{' '}
+                                  Navigate
+                                </span>
+                                <span>
+                                  <kbd className="px-1.5 py-0.5 bg-emerald-700/50 rounded text-[10px] font-mono text-emerald-300">
+                                    P
+                                  </kbd>{' '}
+                                  Present
+                                </span>
+                                <span>
+                                  <kbd className="px-1.5 py-0.5 bg-rose-700/50 rounded text-[10px] font-mono text-rose-300">
+                                    A
+                                  </kbd>{' '}
+                                  Absent
+                                </span>
+                                <span>
+                                  <kbd className="px-1.5 py-0.5 bg-amber-700/50 rounded text-[10px] font-mono text-amber-300">
+                                    L
+                                  </kbd>{' '}
+                                  Late
+                                </span>
+                                <span>
+                                  <kbd className="px-1.5 py-0.5 bg-purple-700/50 rounded text-[10px] font-mono text-purple-300">
+                                    E
+                                  </kbd>{' '}
+                                  Excused
+                                </span>
+                                <span>
+                                  <kbd className="px-1.5 py-0.5 bg-slate-700 rounded text-[10px] font-mono">
+                                    /
+                                  </kbd>{' '}
+                                  Search
+                                </span>
+                                <span>
+                                  <kbd className="px-1.5 py-0.5 bg-slate-700 rounded text-[10px] font-mono">
+                                    Esc
+                                  </kbd>{' '}
+                                  Close
+                                </span>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                       <div className="max-h-[500px] overflow-y-auto thin-scrollbar">
                         {!selectedScheduleSlot ? (
                           <div className="py-12 flex flex-col items-center justify-center text-slate-500">
@@ -1208,7 +1485,7 @@ export default function SubjectDetailsModal({
                         ) : filteredEnrolledStudents.length === 0 ? (
                           <div className="py-12 text-center text-slate-500">No students found</div>
                         ) : (
-                          filteredEnrolledStudents.map((enrolled) => {
+                          filteredEnrolledStudents.map((enrolled, index) => {
                             const student = enrolled.student
                             if (!student) return null
                             // Convert to string for consistent map lookup (backend returns string IDs)
@@ -1217,13 +1494,18 @@ export default function SubjectDetailsModal({
                             const status = record?.status
                             const isSelected = selectedStudents.has(enrolled.studentId)
                             const isMarking = markingStudents.has(enrolled.studentId)
+                            const isFocused = focusedStudentIndex === index
 
                             return (
                               <div
                                 key={enrolled.id}
+                                onClick={() => setFocusedStudentIndex(index)}
                                 className={cn(
-                                  'flex items-center gap-4 p-4 border-b border-slate-700/30 transition-all hover:bg-slate-800/40',
+                                  'flex items-center gap-4 p-4 border-b border-slate-700/30 transition-all hover:bg-slate-800/40 cursor-pointer',
                                   isSelected ? 'bg-indigo-500/10' : '',
+                                  isFocused
+                                    ? 'ring-2 ring-indigo-500 ring-inset bg-indigo-500/10'
+                                    : '',
                                   status === 'present'
                                     ? 'bg-emerald-500/5'
                                     : status === 'absent'
@@ -1241,6 +1523,11 @@ export default function SubjectDetailsModal({
                                 <div className="flex-1 min-w-0">
                                   <p className="font-medium text-slate-200 truncate">
                                     {student.firstName} {student.lastName}
+                                    {isFocused && (
+                                      <span className="ml-2 text-xs text-indigo-400">
+                                        (Press P/A/L/E)
+                                      </span>
+                                    )}
                                   </p>
                                   <p className="text-xs text-slate-400">{student.studentNumber}</p>
                                 </div>
