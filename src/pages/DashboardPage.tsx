@@ -20,6 +20,8 @@ import {
   Percent,
   History,
   ChevronRight,
+  Bell,
+  AlertTriangle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/ui/page-header'
@@ -31,6 +33,8 @@ import { ROUTES } from '@/utils/constants'
 import { getGreeting, cn } from '@/lib/utils'
 import MainLayout from '@/layouts/MainLayout'
 import { format } from 'date-fns'
+import { AlertCenter } from '@/components/alerts/AlertCenter'
+import { useSmartTriggers } from '@/hooks/useSmartTriggers'
 
 // Enhanced stats interface
 interface EnhancedDashboardStats {
@@ -130,6 +134,13 @@ export default function DashboardPage() {
     queryFn: () => attendanceService.getTodayStats(),
     refetchInterval: 30000, // Refresh every 30 seconds
   })
+
+  // Smart triggers for alerts
+  const {
+    summary: alertSummary,
+    hasUnacknowledged: hasAlerts,
+    unacknowledgedCount: alertCount,
+  } = useSmartTriggers({ autoRefresh: true, refreshInterval: 60000 })
 
   // Enhanced stats with real attendance breakdown
   const enhancedStats: EnhancedDashboardStats = {
@@ -297,6 +308,61 @@ export default function DashboardPage() {
             </div>
           </div>
         </motion.div>
+
+        {/* Alert Center - Smart Triggers */}
+        {(hasAlerts || (alertSummary && alertSummary.total > 0)) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18, duration: 0.6 }}
+          >
+            <div className="bg-slate-800/50 rounded-2xl shadow-enterprise-lg border border-slate-700/50 backdrop-blur-sm overflow-hidden">
+              <div className="p-6 border-b border-slate-700/50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="p-2.5 bg-amber-500/20 rounded-xl border border-amber-500/30">
+                        <Bell className="w-6 h-6 text-amber-400" />
+                      </div>
+                      {hasAlerts && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+                          {alertCount > 9 ? '9+' : alertCount}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-100">Attendance Alerts</h2>
+                      <p className="text-slate-400 text-sm mt-0.5">Students requiring attention</p>
+                    </div>
+                  </div>
+                  {alertSummary && (
+                    <div className="flex items-center gap-4">
+                      {alertSummary.byType.consecutive_absence > 0 && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 rounded-lg border border-red-500/30">
+                          <UserX className="w-4 h-4 text-red-400" />
+                          <span className="text-sm font-medium text-red-400">
+                            {alertSummary.byType.consecutive_absence} absent
+                          </span>
+                        </div>
+                      )}
+                      {alertSummary.byType.low_attendance > 0 && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 rounded-lg border border-amber-500/30">
+                          <AlertTriangle className="w-4 h-4 text-amber-400" />
+                          <span className="text-sm font-medium text-amber-400">
+                            {alertSummary.byType.low_attendance} low rate
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="p-4">
+                <AlertCenter maxItems={5} />
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Quick Actions & Recent Activity Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

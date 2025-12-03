@@ -518,3 +518,635 @@ migrate()
 ---
 
 This prompt should be given to the backend developer or used when working on the backend repository to ensure all frontend features work correctly with dynamic data.
+
+---
+
+## 🚨 NEW: Smart Triggers & Alerts System
+
+The frontend now includes an Alert Center for monitoring attendance issues automatically.
+
+### NEW ENDPOINTS: Alert Management
+
+#### 1. Get All Alerts
+
+**Endpoint:** `GET /alerts`
+
+**Query Parameters:**
+
+- `type`: 'consecutive_absence' | 'low_attendance' | 'pattern_warning'
+- `severity`: 'warning' | 'critical' | 'info'
+- `acknowledged`: boolean
+- `studentId`: string
+- `subjectId`: string
+
+**Response:**
+
+```typescript
+{
+  success: true,
+  data: Array<{
+    id: string
+    type: 'consecutive_absence' | 'low_attendance' | 'pattern_warning'
+    severity: 'warning' | 'critical' | 'info'
+    studentId: string
+    studentName: string
+    studentNumber: string
+    subjectId?: string
+    subjectName?: string
+    message: string
+    details: {
+      consecutiveDays?: number
+      attendanceRate?: number
+      threshold?: number
+      startDate?: string
+      endDate?: string
+    }
+    acknowledged: boolean
+    createdAt: string
+    acknowledgedAt?: string
+    acknowledgedBy?: string
+  }>
+}
+```
+
+#### 2. Get Alert Summary
+
+**Endpoint:** `GET /alerts/summary`
+
+**Response:**
+
+```typescript
+{
+  success: true,
+  data: {
+    total: number
+    critical: number
+    warning: number
+    unacknowledged: number
+    byType: {
+      consecutive_absence: number
+      low_attendance: number
+      pattern_warning: number
+    }
+  }
+}
+```
+
+#### 3. Acknowledge Alert
+
+**Endpoint:** `PUT /alerts/:alertId/acknowledge`
+
+#### 4. Acknowledge Multiple Alerts
+
+**Endpoint:** `PUT /alerts/acknowledge-multiple`
+
+**Request Body:**
+
+```json
+{ "alertIds": ["id1", "id2", "id3"] }
+```
+
+#### 5. Dismiss Alert
+
+**Endpoint:** `DELETE /alerts/:alertId`
+
+#### 6. Get Students with Consecutive Absences
+
+**Endpoint:** `GET /alerts/consecutive-absences?threshold=3`
+
+**Response:**
+
+```typescript
+{
+  success: true,
+  data: Array<{
+    studentId: string
+    studentName: string
+    consecutiveDays: number
+    startDate: string
+    subjects: string[]
+  }>
+}
+```
+
+#### 7. Get Students with Low Attendance
+
+**Endpoint:** `GET /alerts/low-attendance?threshold=80`
+
+**Response:**
+
+```typescript
+{
+  success: true,
+  data: Array<{
+    studentId: string
+    studentName: string
+    attendanceRate: number
+    totalClasses: number
+    attendedClasses: number
+  }>
+}
+```
+
+#### 8. Get Alert Configuration
+
+**Endpoint:** `GET /alerts/config`
+
+**Response:**
+
+```typescript
+{
+  success: true,
+  data: {
+    consecutiveAbsenceThreshold: number  // Default: 3
+    lowAttendanceThreshold: number       // Default: 80
+    enableConsecutiveAlerts: boolean
+    enableLowAttendanceAlerts: boolean
+    enablePatternAlerts: boolean
+    autoSendEmail: boolean
+    emailRecipients: ('guardian' | 'student' | 'admin')[]
+  }
+}
+```
+
+#### 9. Update Alert Configuration
+
+**Endpoint:** `PUT /alerts/config`
+
+#### 10. Run Alert Scan
+
+**Endpoint:** `POST /alerts/scan`
+
+Manually triggers a scan of all students to generate new alerts.
+
+**Response:**
+
+```typescript
+{
+  success: true,
+  data: {
+    newAlerts: number
+    scannedStudents: number
+  }
+}
+```
+
+#### 11. Send Alert Notification
+
+**Endpoint:** `POST /alerts/:alertId/notify`
+
+**Request Body:**
+
+```json
+{ "recipients": ["guardian", "admin"] }
+```
+
+### Alert Model Schema
+
+```javascript
+const alertSchema = new mongoose.Schema(
+  {
+    type: {
+      type: String,
+      enum: ['consecutive_absence', 'low_attendance', 'pattern_warning'],
+      required: true,
+    },
+    severity: {
+      type: String,
+      enum: ['warning', 'critical', 'info'],
+      required: true,
+    },
+    student: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Student',
+      required: true,
+    },
+    subject: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Subject',
+    },
+    message: {
+      type: String,
+      required: true,
+    },
+    details: {
+      consecutiveDays: Number,
+      attendanceRate: Number,
+      threshold: Number,
+      startDate: Date,
+      endDate: Date,
+    },
+    acknowledged: {
+      type: Boolean,
+      default: false,
+    },
+    acknowledgedAt: Date,
+    acknowledgedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  },
+  { timestamps: true }
+)
+
+// Index for efficient queries
+alertSchema.index({ student: 1, type: 1, acknowledged: 1 })
+alertSchema.index({ severity: 1, acknowledged: 1 })
+alertSchema.index({ createdAt: -1 })
+```
+
+### Alert Generation Logic
+
+```javascript
+// Run this as a scheduled job (e.g., daily at 6 AM)
+async function generateAlerts() {
+  const config = (await AlertConfig.findOne()) || DEFAULT_CONFIG
+
+  if (config.enableConsecutiveAlerts) {
+    await checkConsecutiveAbsences(config.consecutiveAbsenceThreshold)
+  }
+
+  if (config.enableLowAttendanceAlerts) {
+    await checkLowAttendance(config.lowAttendanceThreshold)
+  }
+}
+
+async function checkConsecutiveAbsences(threshold) {
+  // Get all students
+  const students = await Student.find({ status: 'active' })
+
+  for (const student of students) {
+    // Get last N attendance records
+    const records = await Attendance.find({ student: student._id })
+      .sort({ date: -1 })
+      .limit(threshold + 2)
+
+    // Count consecutive absences from most recent
+    let consecutive = 0
+    let startDate = null
+    let endDate = null
+
+    for (const record of records) {
+      if (record.status === 'absent') {
+        consecutive++
+        if (!endDate) endDate = record.date
+        startDate = record.date
+      } else {
+        break
+      }
+    }
+
+    if (consecutive >= threshold) {
+      // Check if alert already exists
+      const existing = await Alert.findOne({
+        student: student._id,
+        type: 'consecutive_absence',
+        acknowledged: false,
+        'details.consecutiveDays': consecutive,
+      })
+
+      if (!existing) {
+        await Alert.create({
+          type: 'consecutive_absence',
+          severity: consecutive >= 5 ? 'critical' : 'warning',
+          student: student._id,
+          message: `${student.firstName} ${student.lastName} has been absent for ${consecutive} consecutive days`,
+          details: {
+            consecutiveDays: consecutive,
+            startDate,
+            endDate,
+            threshold,
+          },
+        })
+      }
+    }
+  }
+}
+
+async function checkLowAttendance(threshold) {
+  // Get attendance rates for all students
+  const stats = await Attendance.aggregate([
+    {
+      $group: {
+        _id: '$student',
+        total: { $sum: 1 },
+        attended: {
+          $sum: {
+            $cond: [{ $in: ['$status', ['present', 'late', 'excused']] }, 1, 0],
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        attendanceRate: {
+          $multiply: [{ $divide: ['$attended', '$total'] }, 100],
+        },
+        total: 1,
+        attended: 1,
+      },
+    },
+    {
+      $match: {
+        attendanceRate: { $lt: threshold },
+        total: { $gte: 5 }, // Minimum records to trigger
+      },
+    },
+  ])
+
+  for (const stat of stats) {
+    const student = await Student.findById(stat._id)
+    if (!student) continue
+
+    const existing = await Alert.findOne({
+      student: stat._id,
+      type: 'low_attendance',
+      acknowledged: false,
+    })
+
+    if (!existing) {
+      await Alert.create({
+        type: 'low_attendance',
+        severity: stat.attendanceRate < 60 ? 'critical' : 'warning',
+        student: stat._id,
+        message: `${student.firstName} ${student.lastName}'s attendance rate is ${Math.round(stat.attendanceRate)}%`,
+        details: {
+          attendanceRate: Math.round(stat.attendanceRate),
+          threshold,
+        },
+      })
+    }
+  }
+}
+```
+
+---
+
+## ✉️ NEW: Enhanced Email System
+
+### NEW ENDPOINTS: Email Enhancements
+
+#### 1. Send HTML Email
+
+**Endpoint:** `POST /emails/send-html`
+
+**Request Body:**
+
+```json
+{
+  "to": "email@example.com",
+  "subject": "Subject line",
+  "html": "<html>...</html>",
+  "text": "Plain text fallback",
+  "attachments": [
+    {
+      "filename": "document.pdf",
+      "content": "base64...",
+      "contentType": "application/pdf"
+    }
+  ],
+  "tags": ["alert", "attendance"]
+}
+```
+
+#### 2. Schedule Email
+
+**Endpoint:** `POST /emails/schedule`
+
+**Request Body:**
+
+```json
+{
+  "to": "email@example.com",
+  "subject": "Subject",
+  "html": "<html>...</html>",
+  "scheduledAt": "2024-12-04T09:00:00Z"
+}
+```
+
+**Response:**
+
+```typescript
+{
+  success: true,
+  data: {
+    id: string
+    to: string
+    subject: string
+    scheduledAt: string
+    status: 'pending'
+    createdAt: string
+  }
+}
+```
+
+#### 3. Get Scheduled Emails
+
+**Endpoint:** `GET /emails/scheduled?status=pending`
+
+#### 4. Cancel Scheduled Email
+
+**Endpoint:** `DELETE /emails/scheduled/:emailId`
+
+#### 5. Get Email Bounces
+
+**Endpoint:** `GET /emails/bounces`
+
+**Response:**
+
+```typescript
+{
+  success: true,
+  data: Array<{
+    id: string
+    email: string
+    type: 'hard' | 'soft'
+    reason: string
+    timestamp: string
+  }>
+}
+```
+
+#### 6. Check Email Bounce Status
+
+**Endpoint:** `GET /emails/bounces/check/:email`
+
+**Response:**
+
+```json
+{ "success": true, "data": { "bounced": true, "type": "hard" } }
+```
+
+#### 7. Get Unsubscribes
+
+**Endpoint:** `GET /emails/unsubscribes`
+
+#### 8. Check Unsubscribe Status
+
+**Endpoint:** `GET /emails/unsubscribes/check/:email`
+
+#### 9. Unsubscribe Email
+
+**Endpoint:** `POST /emails/unsubscribes`
+
+**Request Body:**
+
+```json
+{ "email": "user@example.com", "reason": "Too many emails" }
+```
+
+#### 10. Resubscribe Email
+
+**Endpoint:** `DELETE /emails/unsubscribes/:email`
+
+#### 11. Get Email Stats
+
+**Endpoint:** `GET /emails/stats?period=week`
+
+**Response:**
+
+```typescript
+{
+  success: true,
+  data: {
+    totalSent: number
+    delivered: number
+    bounced: number
+    pending: number
+    opens: number
+    clicks: number
+    bounceRate: number
+    deliveryRate: number
+  }
+}
+```
+
+### Email Models
+
+```javascript
+// ScheduledEmail model
+const scheduledEmailSchema = new mongoose.Schema(
+  {
+    to: [String],
+    subject: String,
+    html: String,
+    text: String,
+    attachments: [
+      {
+        filename: String,
+        content: String,
+        contentType: String,
+      },
+    ],
+    scheduledAt: { type: Date, required: true, index: true },
+    status: {
+      type: String,
+      enum: ['pending', 'sent', 'failed', 'cancelled'],
+      default: 'pending',
+    },
+    sentAt: Date,
+    error: String,
+  },
+  { timestamps: true }
+)
+
+// EmailBounce model
+const emailBounceSchema = new mongoose.Schema(
+  {
+    email: { type: String, required: true, index: true },
+    type: { type: String, enum: ['hard', 'soft'], required: true },
+    reason: String,
+    originalEmailId: String,
+  },
+  { timestamps: true }
+)
+
+// Unsubscribe model
+const unsubscribeSchema = new mongoose.Schema(
+  {
+    email: { type: String, required: true, unique: true },
+    reason: String,
+    status: {
+      type: String,
+      enum: ['unsubscribed', 'resubscribed'],
+      default: 'unsubscribed',
+    },
+    resubscribedAt: Date,
+  },
+  { timestamps: true }
+)
+```
+
+### Scheduled Email Worker
+
+```javascript
+// Run every minute to check for emails to send
+const cron = require('node-cron')
+
+cron.schedule('* * * * *', async () => {
+  const now = new Date()
+
+  const emailsToSend = await ScheduledEmail.find({
+    status: 'pending',
+    scheduledAt: { $lte: now },
+  }).limit(10)
+
+  for (const email of emailsToSend) {
+    try {
+      await sendEmail(email)
+      email.status = 'sent'
+      email.sentAt = new Date()
+    } catch (error) {
+      email.status = 'failed'
+      email.error = error.message
+    }
+    await email.save()
+  }
+})
+```
+
+---
+
+## 📋 Updated Testing Checklist
+
+After implementing all features, verify:
+
+### Attendance & Stats
+
+- [ ] `GET /attendance/today/stats` returns correct counts
+- [ ] Unmarked students appear in subject attendance list
+- [ ] Status filter counts match actual data
+- [ ] `markedBy` field is populated when marking attendance
+
+### Alerts System
+
+- [ ] `GET /alerts` returns filtered alerts correctly
+- [ ] `GET /alerts/summary` shows accurate counts
+- [ ] Acknowledging alerts updates their status
+- [ ] Consecutive absence detection works correctly
+- [ ] Low attendance alerts trigger at threshold
+- [ ] Alert notifications send emails
+
+### Email System
+
+- [ ] HTML emails render correctly
+- [ ] Scheduled emails are sent at correct time
+- [ ] Bounced emails are tracked
+- [ ] Unsubscribe links work
+- [ ] Email attachments are handled
+
+---
+
+## 🚀 Updated Features Summary
+
+| Feature                    | Required Endpoint                    |
+| -------------------------- | ------------------------------------ |
+| Today's Summary Widget     | `GET /attendance/today/stats`        |
+| Alert Center Dashboard     | `GET /alerts`, `GET /alerts/summary` |
+| Consecutive Absence Alerts | `GET /alerts/consecutive-absences`   |
+| Low Attendance Warnings    | `GET /alerts/low-attendance`         |
+| Alert Notifications        | `POST /alerts/:id/notify`            |
+| Scheduled Emails           | `POST /emails/schedule`              |
+| Bounce Handling            | `GET /emails/bounces`                |
+| Unsubscribe Management     | `GET/POST /emails/unsubscribes`      |
+| Email Statistics           | `GET /emails/stats`                  |
