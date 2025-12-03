@@ -448,17 +448,40 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
   // --- Email History (Overview Tab) ---
   const { data: emailHistoryResponse, isLoading: loadingEmailHistory } = useQuery({
     queryKey: ['email-history', 'subject', subject?.id],
-    queryFn: () => getEmailHistory(1, 5),
+    queryFn: () => getEmailHistory(1, 20),
     enabled: isOpen && !!subject && activeTab === 'overview',
-    staleTime: 1000 * 60 * 2,
+    staleTime: 1000 * 10, // 10 seconds - keeps data fresh
+    refetchInterval: 1000 * 30, // Auto-refresh every 30 seconds
+    refetchOnWindowFocus: true, // Refresh when user returns to tab
   })
 
-  const subjectEmails = (emailHistoryResponse?.emails || []).filter(
-    (e) =>
-      e.recordType === 'subject' &&
-      (String(e.recordData) === String(subject?.id) ||
-        String(e.recordData).includes(String(subject?.id)))
-  )
+  // Filter emails for this subject - check multiple possible fields
+  const subjectEmails = useMemo(() => {
+    const emails = emailHistoryResponse?.emails || []
+    if (!subject) return []
+
+    // Get subject identifiers to match against
+    const subjectId = String(subject.id)
+    const subjectCode = subject.subjectCode?.toLowerCase() || ''
+
+    return emails
+      .filter((e) => {
+        // Check recordType if it exists
+        if (e.recordType === 'subject' && String(e.recordData) === subjectId) {
+          return true
+        }
+        // Check if email metadata contains subject reference
+        if (e.metadata?.subject?.toLowerCase().includes(subjectCode)) {
+          return true
+        }
+        // Check recordData for subject ID
+        if (String(e.recordData) === subjectId) {
+          return true
+        }
+        return false
+      })
+      .slice(0, 5) // Limit to 5 most recent
+  }, [emailHistoryResponse, subject])
 
   const getRecipientDisplay = (email: EmailHistoryRecord) => {
     const isBulk = (email.metadata?.totalRecipients || email.metadata?.recipients?.length || 0) > 1
@@ -882,8 +905,8 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
           'First Name': student.firstName || '',
           'Last Name': student.lastName || '',
           Email: student.email || '',
-          'Subject Code': subject.code || '',
-          'Subject Name': subject.name || '',
+          'Subject Code': subject.subjectCode || '',
+          'Subject Name': subject.subjectName || '',
           'Schedule Slot': selectedScheduleSlot,
           Date: selectedDate,
           Status: record?.status
@@ -919,7 +942,7 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
       { wch: 20 }, // Marked At
     ]
 
-    const filename = `${subject.code}_attendance_${selectedDate}.xlsx`
+    const filename = `${subject.subjectCode}_attendance_${selectedDate}.xlsx`
     XLSX.writeFile(workbook, filename)
     addToast(`Exported to ${filename}`, 'success')
   }, [
@@ -1288,12 +1311,14 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  onClick={() => unenrollMutation.mutate(enrolled.studentId)}
+                                  onClick={() =>
+                                    unenrollMutation.mutate(Number(enrolled.studentId))
+                                  }
                                   disabled={unenrollMutation.isPending}
                                   className="h-8 w-8 text-red-400 opacity-0 group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-300 transition-all"
                                 >
                                   {unenrollMutation.isPending &&
-                                  unenrollMutation.variables === enrolled.studentId ? (
+                                  unenrollMutation.variables === Number(enrolled.studentId) ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
                                   ) : (
                                     <UserMinus className="w-4 h-4" />
@@ -1809,6 +1834,19 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                                             title="Mark Late"
                                           >
                                             <Clock className="w-4 h-4" />
+                                          </button>
+                                          <button
+                                            onClick={() =>
+                                              markAttendanceMutation.mutate({
+                                                studentId: enrolled.studentId,
+                                                status: 'excused',
+                                                scheduleSlot: selectedScheduleSlot,
+                                              })
+                                            }
+                                            className="p-1 hover:bg-purple-500/20 rounded text-purple-500 transition-colors"
+                                            title="Mark Excused"
+                                          >
+                                            <AlertCircle className="w-4 h-4" />
                                           </button>
                                         </>
                                       )}
