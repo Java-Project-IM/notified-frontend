@@ -241,8 +241,12 @@ export default function EmailHistoryPage() {
         >
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <div className="text-center">
-                <div className="inline-block w-12 h-12 border-4 border-orange-900 border-t-orange-500 rounded-full animate-spin mb-4"></div>
+              <div className="text-center space-y-4">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-orange-400 animate-bounce [animation-delay:-0.3s]" />
+                  <div className="w-3 h-3 rounded-full bg-amber-400 animate-bounce [animation-delay:-0.15s]" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-400 animate-bounce" />
+                </div>
                 <p className="text-slate-400 font-medium">Loading email history...</p>
               </div>
             </div>

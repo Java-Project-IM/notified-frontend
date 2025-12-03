@@ -292,8 +292,12 @@ Date Range: ${selectedDate || 'All Time'}
                 {isLoading ? (
                   <tr>
                     <td colSpan={6} className="text-center py-16 text-slate-400">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 border-4 border-emerald-900 border-t-emerald-500 rounded-full animate-spin" />
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-emerald-400 animate-bounce [animation-delay:-0.3s]" />
+                          <div className="w-3 h-3 rounded-full bg-teal-400 animate-bounce [animation-delay:-0.15s]" />
+                          <div className="w-3 h-3 rounded-full bg-cyan-400 animate-bounce" />
+                        </div>
                         <p className="font-medium">Loading attendance records...</p>
                       </div>
                     </td>
