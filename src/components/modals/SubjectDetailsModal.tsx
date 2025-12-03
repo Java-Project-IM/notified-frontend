@@ -1177,72 +1177,14 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                       </dl>
                     </div>
 
-                    {/* Recent Email History for Subject */}
-                    <div className="sm:col-span-2 bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                          <Mail className="w-5 h-5 text-orange-400" />
-                          Recent Emails
-                        </h3>
-                        <button
-                          onClick={() => navigate('/email-history')}
-                          className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
-                        >
-                          View all
-                        </button>
-                      </div>
-                      {loadingEmailHistory ? (
-                        <div className="flex items-center gap-2 text-sm text-slate-400">
-                          <div className="w-2 h-2 rounded-full bg-orange-400 animate-bounce [animation-delay:-0.3s]" />
-                          <div className="w-2 h-2 rounded-full bg-amber-400 animate-bounce [animation-delay:-0.15s]" />
-                          <div className="w-2 h-2 rounded-full bg-yellow-400 animate-bounce" />
-                          <span className="ml-2">Loading...</span>
-                        </div>
-                      ) : subjectEmails.length === 0 ? (
-                        <div className="text-sm text-slate-400 py-4 text-center">
-                          <Mail className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          No recent emails for enrolled students
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          {subjectEmails.map((email) => {
-                            const r = getRecipientDisplay(email)
-                            return (
-                              <div
-                                key={email._id}
-                                className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-xl border border-slate-700/30 hover:border-orange-500/30 transition-colors"
-                              >
-                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
-                                  <Clock className="w-4 h-4 text-orange-400" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-slate-200 font-medium truncate">
-                                    {email.metadata?.subject || 'Attendance Alert'}
-                                  </p>
-                                  <p className="text-xs text-slate-400 truncate">To: {r.display}</p>
-                                </div>
-                                <div className="text-xs text-slate-500 flex-shrink-0">
-                                  {new Date(email.createdAt).toLocaleString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  })}
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      )}
-                    </div>
-
+                    {/* Quick Stats - Side by side with Details */}
                     <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 flex flex-col justify-between">
                       <div>
                         <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
                           <Users className="w-5 h-5 text-emerald-400" />
                           Quick Stats
                         </h3>
-                        <div className="space-y-5">
+                        <div className="space-y-4">
                           <div className="flex items-center justify-between p-3 bg-slate-800/80 rounded-xl border border-slate-700/50">
                             <span className="text-slate-300 text-sm">Total Enrolled</span>
                             <span className="text-xl font-bold text-white">
@@ -1276,6 +1218,65 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                               }}
                             />
                           </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Recent Email History for Subject - Full width below */}
+                    <div className="md:col-span-2 bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-orange-400" />
+                          Recent Emails
+                        </h3>
+                        <button
+                          onClick={() => navigate('/email-history')}
+                          className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+                        >
+                          View all
+                        </button>
+                      </div>
+                      {loadingEmailHistory ? (
+                        <div className="flex items-center gap-2 text-sm text-slate-400">
+                          <div className="w-2 h-2 rounded-full bg-orange-400 animate-bounce [animation-delay:-0.3s]" />
+                          <div className="w-2 h-2 rounded-full bg-amber-400 animate-bounce [animation-delay:-0.15s]" />
+                          <div className="w-2 h-2 rounded-full bg-yellow-400 animate-bounce" />
+                          <span className="ml-2">Loading...</span>
+                        </div>
+                      ) : subjectEmails.length === 0 ? (
+                        <div className="text-sm text-slate-400 py-4 text-center">
+                          <Mail className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          No recent emails for enrolled students
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {subjectEmails.map((email) => {
+                            const r = getRecipientDisplay(email)
+                            return (
+                              <div
+                                key={email._id}
+                                className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-xl border border-slate-700/30 hover:border-orange-500/30 transition-colors"
+                              >
+                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
+                                  <Clock className="w-4 h-4 text-orange-400" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-slate-200 font-medium truncate">
+                                    {email.metadata?.subject || 'Attendance Alert'}
+                                  </p>
+                                  <p className="text-xs text-slate-400 truncate">To: {r.display}</p>
+                                </div>
+                                <div className="text-xs text-slate-500 flex-shrink-0">
+                                  {new Date(email.createdAt).toLocaleString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </div>
+                              </div>
+                            )
+                          })}
                         </div>
                       )}
                     </div>
