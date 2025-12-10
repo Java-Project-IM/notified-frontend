@@ -17,6 +17,41 @@ export interface EmailResponse {
   emailsSent?: number
 }
 
+export interface EmailHistoryRecord {
+  _id: string
+  recordType: string
+  recordData: string
+  performedBy: {
+    _id: string
+    name: string
+    email: string
+  }
+  student?: {
+    _id: string
+    studentNumber: string
+    firstName: string
+    lastName: string
+  }
+  metadata?: {
+    recipient?: string
+    recipients?: string[]
+    subject?: string
+    messageId?: string
+    totalRecipients?: number
+    sentCount?: number
+    failedCount?: number
+  }
+  createdAt: string
+  updatedAt: string
+}
+
+export interface EmailHistoryResponse {
+  emails: EmailHistoryRecord[]
+  total: number
+  page: number
+  limit: number
+}
+
 /**
  * Send email to one or more recipients
  * @param emailData - Email data including recipients, subject, message, and optional attachments
@@ -61,10 +96,10 @@ export async function sendEmail(emailData: EmailData): Promise<boolean> {
     } else if (error.response?.status === 401) {
       throw new Error('Unauthorized - Please login again')
     } else if (error.response?.status === 403) {
-      // Permission error - bulk email requires admin/staff role
+      // Permission error - bulk email requires superadmin/admin/staff role
       throw new Error(
         error.response.data?.message ||
-          'You do not have permission to perform this action. Bulk email requires admin or staff role.'
+          'You do not have permission to perform this action. Bulk email requires superadmin, admin, or staff role.'
       )
     } else if (error.response?.status === 429) {
       // Rate limit exceeded
@@ -158,9 +193,55 @@ export async function testEmailConfig(testEmail: string): Promise<boolean> {
   }
 }
 
+/**
+ * Get email history with pagination
+ * @param page - Page number (default: 1)
+ * @param limit - Items per page (default: 20)
+ * @param startDate - Optional start date filter
+ * @param endDate - Optional end date filter
+ * @returns Promise<EmailHistoryResponse> - Paginated email history
+ */
+export async function getEmailHistory(
+  page: number = 1,
+  limit: number = 20,
+  startDate?: string,
+  endDate?: string
+): Promise<EmailHistoryResponse> {
+  try {
+    const params = new URLSearchParams()
+    params.append('page', page.toString())
+    params.append('limit', limit.toString())
+    if (startDate) params.append('startDate', startDate)
+    if (endDate) params.append('endDate', endDate)
+
+    const response = await api.get<any>(`/emails/history?${params.toString()}`)
+
+    // Handle different response formats
+    if (response.data.data) {
+      return {
+        emails: response.data.data.emails || response.data.data,
+        total: response.data.data.total || 0,
+        page: response.data.data.page || page,
+        limit: response.data.data.limit || limit,
+      }
+    }
+
+    return {
+      emails: response.data.emails || response.data,
+      total: response.data.total || 0,
+      page: response.data.page || page,
+      limit: response.data.limit || limit,
+    }
+  } catch (error) {
+    logError('EmailService', 'getEmailHistory', error)
+    throw new Error('Failed to fetch email history')
+  }
+}
+
 export default {
   sendEmail,
   sendGuardianEmail,
   getEmailConfig,
   testEmailConfig,
+  getEmailHistory,
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X,
@@ -7,14 +7,17 @@ import {
   AlertCircle,
   Loader2,
   Paperclip,
-  AlertTriangle,
   ShieldAlert,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/store/toastStore'
 import { useAuthStore } from '@/store/authStore'
+import { ROLES } from '@/utils/constants'
+import { generateEmailTemplate } from '@/utils/email-templates'
 
 interface EmailModalProps {
   isOpen: boolean
@@ -46,11 +49,15 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
   const [attachments, setAttachments] = useState<File[]>([])
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState('')
+  const [showPreview, setShowPreview] = useState(false)
   const { addToast } = useToast()
 
   // Get user from auth store for permission checks
   const user = useAuthStore((state) => state.user)
-  const isBulkAllowed = user && ['admin', 'staff'].includes(user.role)
+  // Allow Superadmin, Admin, Registrar to send bulk emails
+  const isBulkAllowed =
+    !!user &&
+    [ROLES.SUPERADMIN, ROLES.ADMIN, ROLES.REGISTRAR, ROLES.STAFF].includes(user.role as any)
 
   const recipientCount = Array.isArray(recipients)
     ? recipients.length
@@ -68,8 +75,21 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
       setMessage('')
       setAttachments([])
       setError('')
+      setShowPreview(false)
     }
   }, [isOpen, recipients])
+
+  // Generate email preview HTML
+  const emailPreviewHtml = useMemo(() => {
+    if (!subject && !message) return ''
+    return generateEmailTemplate({
+      recipientName: to.split(',')[0]?.trim() || 'Recipient',
+      subject: subject || 'No Subject',
+      message: message || 'No message content',
+      senderName: user?.name || 'Administrator',
+      senderRole: user?.role,
+    })
+  }, [subject, message, to, user])
 
   const validateEmail = (email: string): boolean => {
     const emailPattern =
@@ -104,9 +124,11 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
       return false
     }
 
-    // Permission check for bulk email (admin/staff only)
+    // Permission check for bulk email (superadmin/admin/staff only)
     if (emails.length > 1 && !isBulkAllowed) {
-      setError('Bulk email requires admin or staff role. You can only send to one recipient.')
+      setError(
+        'Bulk email requires superadmin, admin, or staff role. You can only send to one recipient.'
+      )
       return false
     }
 
@@ -238,7 +260,7 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
             </div>
 
             {/* Form Content */}
-            <div className="p-8 space-y-6 max-h-[calc(100vh-300px)] overflow-y-auto">
+            <div className="p-8 space-y-6 max-h-[calc(100vh-300px)] overflow-y-auto thin-scrollbar">
               {/* Permission Warning for Bulk Email */}
               <AnimatePresence>
                 {hasPermissionIssue && (
@@ -252,8 +274,8 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
                     <div className="flex-1">
                       <p className="text-sm font-medium text-amber-300">Permission Required</p>
                       <p className="text-xs text-amber-400 mt-1">
-                        Bulk email requires admin or staff role. You can only send to one recipient
-                        at a time.
+                        Bulk email requires superadmin, admin, or staff role. You can only send to
+                        one recipient at a time.
                       </p>
                     </div>
                   </motion.div>
@@ -335,19 +357,56 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
                 transition={{ delay: 0.3 }}
                 className="space-y-2"
               >
-                <Label htmlFor="message" className="text-slate-300 font-medium">
-                  Message
-                </Label>
-                <textarea
-                  id="message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Type your message here..."
-                  rows={8}
-                  className="w-full px-4 py-3 border-2 border-slate-600 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
-                  disabled={isSending}
-                  maxLength={VALIDATION.MESSAGE_MAX}
-                />
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="message" className="text-slate-300 font-medium">
+                    Message
+                  </Label>
+                  <button
+                    type="button"
+                    onClick={() => setShowPreview(!showPreview)}
+                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                  >
+                    {showPreview ? (
+                      <>
+                        <EyeOff className="w-3.5 h-3.5" />
+                        Hide Preview
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="w-3.5 h-3.5" />
+                        Show Preview
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {showPreview && emailPreviewHtml ? (
+                  <div className="border border-slate-600 rounded-xl overflow-hidden">
+                    <div className="bg-slate-700/50 px-4 py-2 border-b border-slate-600 flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500/50" />
+                      <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
+                      <div className="w-3 h-3 rounded-full bg-green-500/50" />
+                      <span className="ml-2 text-xs text-slate-400">Email Preview</span>
+                    </div>
+                    <iframe
+                      srcDoc={emailPreviewHtml}
+                      className="w-full h-80 bg-white"
+                      title="Email Preview"
+                      sandbox=""
+                    />
+                  </div>
+                ) : (
+                  <textarea
+                    id="message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Type your message here..."
+                    rows={8}
+                    className="w-full px-4 py-3 border-2 border-slate-600 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
+                    disabled={isSending}
+                    maxLength={VALIDATION.MESSAGE_MAX}
+                  />
+                )}
                 <p className="text-xs text-slate-400">
                   {message.length}/{VALIDATION.MESSAGE_MAX} characters (min {VALIDATION.MESSAGE_MIN}
                   )
@@ -411,7 +470,6 @@ export default function EmailModal({ isOpen, onClose, recipients, onSend }: Emai
               </motion.div>
             </div>
 
-            {/* Footer with Actions */}
             {/* Footer with Actions */}
             <div className="px-8 py-6 bg-slate-900/50 border-t border-slate-700/50 flex items-center justify-end gap-3">
               <Button

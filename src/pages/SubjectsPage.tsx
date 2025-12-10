@@ -10,11 +10,14 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { TableSkeleton } from '@/components/ui/skeleton'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { useToast } from '@/store/toastStore'
+import { useAuthStore } from '@/store/authStore'
 import { subjectService } from '@/services/subject.service'
+import { subjectEnrollmentService } from '@/services/subject-enrollment.service'
 import { Subject, SubjectFormData } from '@/types'
 import SubjectModal from '@/components/modals/SubjectModal'
 import SubjectDetailsModal from '@/components/modals/SubjectDetailsModal'
 import { useDebounce } from '@/hooks/useDebounce'
+import { canManageSubjects } from '@/utils/permissions'
 
 export default function SubjectsPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -29,6 +32,10 @@ export default function SubjectsPage() {
   }>({ isOpen: false, subject: null })
   const { addToast } = useToast()
   const queryClient = useQueryClient()
+  const { user } = useAuthStore()
+
+  // Permission check for role-based UI
+  const userCanManageSubjects = canManageSubjects(user?.role)
 
   // Fetch subjects
   const { data: subjects = [], isLoading } = useQuery({
@@ -41,11 +48,41 @@ export default function SubjectsPage() {
     },
   })
 
+  // Fetch enrollment counts for all subjects
+  const { data: enrollmentCounts = {} } = useQuery({
+    queryKey: ['subjects', 'enrollment-counts'],
+    queryFn: async () => {
+      const counts: Record<string | number, number> = {}
+      await Promise.all(
+        subjects.map(async (subject) => {
+          try {
+            const enrolled = await subjectEnrollmentService.getEnrolledStudents(subject.id)
+            // Filter out orphaned enrollments (deleted students with remaining enrollment records)
+            const validEnrollments = enrolled.filter((e) => e.student != null)
+            const orphanedCount = enrolled.length - validEnrollments.length
+            if (orphanedCount > 0) {
+              console.warn(
+                `[Subjects] Found ${orphanedCount} orphaned enrollment(s) in subject ${subject.subjectCode} - students may have been deleted`
+              )
+            }
+            counts[subject.id] = validEnrollments.length
+          } catch (error) {
+            console.error(`Failed to fetch enrollment for subject ${subject.id}`, error)
+            counts[subject.id] = 0
+          }
+        })
+      )
+      return counts
+    },
+    enabled: subjects.length > 0,
+  })
+
   // Create mutation
   const createMutation = useMutation({
     mutationFn: subjectService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] })
+      queryClient.invalidateQueries({ queryKey: ['subjects', 'enrollment-counts'] })
       addToast('Subject added successfully', 'success')
       setIsModalOpen(false)
     },
@@ -74,6 +111,7 @@ export default function SubjectsPage() {
     mutationFn: (id: string | number) => subjectService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] })
+      queryClient.invalidateQueries({ queryKey: ['subjects', 'enrollment-counts'] })
       addToast('Subject deleted successfully', 'success')
     },
     onError: (error: any) => {
@@ -143,6 +181,8 @@ export default function SubjectsPage() {
   const handleDetailsModalClose = () => {
     setIsDetailsModalOpen(false)
     setSelectedSubject(null)
+    // Refresh enrollment counts when modal closes
+    queryClient.invalidateQueries({ queryKey: ['subjects', 'enrollment-counts'] })
   }
 
   return (
@@ -181,12 +221,17 @@ export default function SubjectsPage() {
             },
           ]}
           actions={[
-            {
-              label: 'Add Subject',
-              onClick: handleAddSubject,
-              icon: Plus,
-              variant: 'primary',
-            },
+            // Only show Add Subject for users who can manage subjects
+            ...(userCanManageSubjects
+              ? [
+                  {
+                    label: 'Add Subject',
+                    onClick: handleAddSubject,
+                    icon: Plus,
+                    variant: 'primary' as const,
+                  },
+                ]
+              : []),
           ]}
         />
 
@@ -267,61 +312,72 @@ export default function SubjectsPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredSubjects.map((subject, index) => (
-                    <motion.tr
-                      key={subject.id ?? subject.subjectCode ?? `subject-${index}`}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="border-b border-slate-700/30 hover:bg-slate-800/60 transition-colors group cursor-pointer"
-                      onClick={() => handleViewDetails(subject)}
-                    >
-                      <td className="p-5 font-semibold text-purple-400 text-sm">
-                        {subject.subjectCode}
-                      </td>
-                      <td className="p-5 text-slate-200 font-medium text-sm">
-                        {subject.subjectName}
-                      </td>
-                      <td className="p-5 text-slate-300 text-sm">Year {subject.yearLevel}</td>
-                      <td className="p-5">
-                        <span className="inline-flex px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs font-medium border border-purple-500/30">
-                          {subject.section}
-                        </span>
-                      </td>
-                      <td className="p-5 text-slate-400 text-sm">
-                        <span className="inline-flex items-center gap-1">
-                          <Users className="w-4 h-4" />0 students
-                        </span>
-                      </td>
-                      <td className="p-5" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => handleViewDetails(subject)}
-                            className="p-2.5 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-blue-500/30"
-                            title="View Details & Manage Attendance"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleEditSubject(subject)}
-                            disabled={updateMutation.isPending}
-                            className="p-2.5 text-emerald-400 hover:bg-emerald-500/20 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Edit Subject"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(subject)}
-                            disabled={deleteMutation.isPending}
-                            className="p-2.5 text-red-400 hover:bg-red-500/20 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Delete Subject"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))
+                  filteredSubjects.map((subject, index) => {
+                    const enrollmentCount = enrollmentCounts[subject.id] ?? 0
+                    return (
+                      <motion.tr
+                        key={subject.id ?? subject.subjectCode ?? `subject-${index}`}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="border-b border-slate-700/30 hover:bg-slate-800/60 transition-colors group cursor-pointer"
+                        onClick={() => handleViewDetails(subject)}
+                      >
+                        <td className="p-5 font-semibold text-purple-400 text-sm">
+                          {subject.subjectCode}
+                        </td>
+                        <td className="p-5 text-slate-200 font-medium text-sm">
+                          {subject.subjectName}
+                        </td>
+                        <td className="p-5 text-slate-300 text-sm">Year {subject.yearLevel}</td>
+                        <td className="p-5">
+                          <span className="inline-flex px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs font-medium border border-purple-500/30">
+                            {subject.section}
+                          </span>
+                        </td>
+                        <td className="p-5 text-slate-400 text-sm">
+                          <span className="inline-flex items-center gap-1">
+                            <Users className="w-4 h-4" />
+                            {enrollmentCount} {enrollmentCount === 1 ? 'student' : 'students'}
+                          </span>
+                        </td>
+                        <td className="p-5" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-center gap-2">
+                            {/* View - always visible */}
+                            <button
+                              onClick={() => handleViewDetails(subject)}
+                              className="p-2.5 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-blue-500/30"
+                              title="View Details & Manage Attendance"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            {/* Edit - only for users who can manage subjects */}
+                            {userCanManageSubjects && (
+                              <button
+                                onClick={() => handleEditSubject(subject)}
+                                disabled={updateMutation.isPending}
+                                className="p-2.5 text-emerald-400 hover:bg-emerald-500/20 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Edit Subject"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                            )}
+                            {/* Delete - only for users who can manage subjects */}
+                            {userCanManageSubjects && (
+                              <button
+                                onClick={() => handleDelete(subject)}
+                                disabled={deleteMutation.isPending}
+                                className="p-2.5 text-red-400 hover:bg-red-500/20 rounded-lg transition-all hover:scale-110 border border-transparent hover:border-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Delete Subject"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </motion.tr>
+                    )
+                  })
                 )}
               </tbody>
             </table>

@@ -17,30 +17,44 @@ export type TimeSlot = 'arrival' | 'departure'
  */
 export interface AttendanceRecord {
   readonly id: string | number
-  studentId: number
-  studentNumber: string
-  firstName: string
-  lastName: string
-  email: string
+  studentId: string | number
+  studentNumber?: string
+  firstName?: string
+  lastName?: string
+  email?: string
   subjectId?: string | number
   subjectCode?: string
   subjectName?: string
   status: AttendanceStatus
-  timeSlot: TimeSlot
-  timestamp: string // ISO 8601 date string
+  timeSlot?: TimeSlot
+  scheduleSlot?: string
+  timestamp?: string // ISO 8601 date string
+  date?: string // ISO 8601 date string (alternative to timestamp)
   notes?: string
+  remarks?: string // backend field name
   createdAt: string
   updatedAt?: string
+  // Populated student object (from backend)
+  student?: {
+    _id?: string
+    id?: string | number
+    studentNumber: string
+    firstName: string
+    lastName: string
+    email: string
+    section?: string
+    guardianEmail?: string
+  }
 }
 
 /**
  * Attendance form data for creating/updating records
  */
 export interface AttendanceFormData {
-  studentId: number
+  studentId: string | number
   subjectId?: string | number
   status: AttendanceStatus
-  timeSlot: TimeSlot
+  timeSlot?: TimeSlot
   timestamp?: string
   notes?: string
 }

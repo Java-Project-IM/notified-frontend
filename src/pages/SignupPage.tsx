@@ -20,8 +20,8 @@ import { authService } from '@/services/auth.service'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/store/toastStore'
 import { ROUTES, APP_NAME, TOAST_MESSAGES } from '@/utils/constants'
-import { validateEmail } from '@/lib/utils'
 import { AuthResponse } from '@/types'
+import { validators, sanitizers } from '@/utils/validation-rules'
 
 export default function SignupPage() {
   const navigate = useNavigate()
@@ -69,7 +69,7 @@ export default function SignupPage() {
     e.preventDefault()
     console.log('Signup form submitted with:', formData)
 
-    // Validation
+    // Validation using comprehensive validators
     const newErrors: {
       name?: string
       email?: string
@@ -77,41 +77,40 @@ export default function SignupPage() {
       confirmPassword?: string
     } = {}
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required'
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters'
-    } else if (formData.name.trim().length > 100) {
-      newErrors.name = 'Name must be 100 characters or less'
-    } else if (!/^[a-zA-Z\s-]+$/.test(formData.name.trim())) {
-      newErrors.name = 'Name can only contain letters, spaces, and hyphens'
+    // Name validation using comprehensive validator
+    const nameResult = validators.personName(formData.name, 'Name')
+    if (!nameResult.isValid) {
+      newErrors.name = nameResult.error
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required'
-    } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address'
+    // Email validation using comprehensive validator
+    const emailResult = validators.email(formData.email)
+    if (!emailResult.isValid) {
+      newErrors.email = emailResult.error
     }
 
-    if (!formData.password) {
-      newErrors.password = 'Password is required'
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters'
-    } else if (formData.password.length > 100) {
-      newErrors.password = 'Password must be 100 characters or less'
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password =
-        'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+    // Password validation using comprehensive validator
+    const passwordResult = validators.password(formData.password)
+    if (!passwordResult.isValid) {
+      newErrors.password = passwordResult.error
     }
 
-    // Confirm password validation and explicit mismatch toast
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password'
-    } else if (formData.password !== formData.confirmPassword) {
-      // show specific toast for mismatch and set field error
-      setErrors({ ...newErrors, confirmPassword: 'Passwords do not match' })
-      addToast('Passwords do not match', 'error')
-      return
+    // Confirm password validation using comprehensive validator
+    const confirmResult = validators.passwordConfirmation(
+      formData.password,
+      formData.confirmPassword
+    )
+    if (!confirmResult.isValid) {
+      newErrors.confirmPassword = confirmResult.error
+      if (
+        formData.password &&
+        formData.confirmPassword &&
+        formData.password !== formData.confirmPassword
+      ) {
+        setErrors({ ...newErrors, confirmPassword: 'Passwords do not match' })
+        addToast('Passwords do not match', 'error')
+        return
+      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -124,8 +123,8 @@ export default function SignupPage() {
     addToast('Creating your account...', 'info')
     // Only send the required fields (exclude confirmPassword)
     signupMutation.mutate({
-      name: formData.name,
-      email: formData.email,
+      name: sanitizers.input(formData.name),
+      email: sanitizers.email(formData.email),
       password: formData.password,
     })
   }

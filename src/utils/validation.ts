@@ -1,6 +1,12 @@
 // ============================================================================
 // INPUT VALIDATION & SANITIZATION UTILITIES
 // ============================================================================
+// This file provides backward-compatible validation utilities.
+// For comprehensive validation, see validation-rules.ts and business-validation.ts
+
+// Re-export comprehensive validators
+export * from './validation-rules'
+export * from './business-validation'
 
 /**
  * Email validation regex (RFC 5322 compliant)
@@ -260,19 +266,23 @@ export function validateSection(section: string): ValidationResult {
 }
 
 /**
- * Validate year level (1-4)
+ * Validate year level (1-12 for grade levels, or 1-6 for college)
  * @param yearLevel - Year level to validate
+ * @param maxLevel - Maximum allowed level (default 12)
  * @returns Validation result
  */
-export function validateYearLevel(yearLevel: number | string): ValidationResult {
+export function validateYearLevel(
+  yearLevel: number | string,
+  maxLevel: number = 12
+): ValidationResult {
   const year = typeof yearLevel === 'string' ? parseInt(yearLevel, 10) : yearLevel
 
   if (isNaN(year)) {
     return { isValid: false, error: 'Year level must be a number' }
   }
 
-  if (year < 1 || year > 4) {
-    return { isValid: false, error: 'Year level must be between 1 and 4' }
+  if (year < 1 || year > maxLevel) {
+    return { isValid: false, error: `Year level must be between 1 and ${maxLevel}` }
   }
 
   return { isValid: true }

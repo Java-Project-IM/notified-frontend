@@ -29,12 +29,13 @@ export interface SubjectSchedule {
  * Enrolled student in a subject
  */
 export interface EnrolledStudent {
-  readonly id: number
-  studentId: number
+  readonly id: string | number
+  studentId: string | number
   subjectId: string | number
   enrolledAt: string
   student?: {
-    id: number
+    id: string | number
+    _id?: string // MongoDB ObjectId
     studentNumber: string
     firstName: string
     lastName: string
@@ -83,7 +84,7 @@ export interface BulkEnrollmentData {
  */
 export interface SubjectAttendanceData {
   subjectId: string | number
-  studentId: number
+  studentId: string | number
   date: string
   status: 'present' | 'absent' | 'late' | 'excused'
   timeSlot?: 'arrival' | 'departure'
@@ -96,7 +97,7 @@ export interface SubjectAttendanceData {
  */
 export interface BulkSubjectAttendanceData {
   subjectId: string | number
-  studentIds: number[]
+  studentIds: (string | number)[]
   date: string
   status: 'present' | 'absent' | 'late' | 'excused'
   timeSlot?: 'arrival' | 'departure'

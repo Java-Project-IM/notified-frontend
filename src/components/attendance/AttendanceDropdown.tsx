@@ -12,6 +12,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle, DoorOpen, Clock, AlertCircle, Mail, ChevronDown, Loader2 } from 'lucide-react'
@@ -47,6 +48,7 @@ export const AttendanceDropdown = ({
   const [sendNotification, setSendNotification] = useState(true)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 })
   const toast = useToast()
+  const queryClient = useQueryClient()
 
   const triggerRef = useRef<HTMLButtonElement | null>(null)
   const menuId = `attendance-dropdown-menu-${student.id}`
@@ -154,6 +156,7 @@ export const AttendanceDropdown = ({
             message,
           })
           toast.success('Guardian notified via email', 'Email Sent')
+          queryClient.invalidateQueries({ queryKey: ['email-history'] })
         } catch (emailError) {
           toast.warning('Attendance marked, but email notification failed', 'Partial Success')
         }

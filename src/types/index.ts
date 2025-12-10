@@ -14,8 +14,13 @@ export * from './subject.types'
 
 /**
  * User role types for authorization
+ * - professor: Can view subjects, mark attendance, view students
+ * - registrar: Full student/enrollment management
+ * - admin: Full system access
+ * - superadmin: Full system access (legacy alias for admin)
+ * - staff: Limited view-only access (legacy)
  */
-export type UserRole = 'superadmin' | 'admin' | 'staff'
+export type UserRole = 'professor' | 'registrar' | 'admin' | 'superadmin' | 'staff'
 
 /**
  * User entity from the authentication system
@@ -58,6 +63,17 @@ export interface SignupData {
 // ============================================================================
 
 /**
+ * Student status types
+ */
+export type StudentStatus =
+  | 'active'
+  | 'inactive'
+  | 'graduated'
+  | 'transferred'
+  | 'suspended'
+  | 'dropped'
+
+/**
  * Student entity with all database fields
  */
 export interface Student {
@@ -66,9 +82,16 @@ export interface Student {
   firstName: string // Min 2, Max 50 characters
   lastName: string // Min 2, Max 50 characters
   email: string // Valid email format
+  birthdate?: string // ISO 8601 date string (YYYY-MM-DD)
+  age?: number // Calculated from birthdate (3-100)
+  contact?: string // Phone number (10-15 digits)
+  status?: StudentStatus // Student enrollment status
   section?: string // Optional, alphanumeric
   guardianName?: string // Optional, min 2 characters if provided
   guardianEmail?: string // Optional, valid email if provided
+  guardianContact?: string // Optional, guardian phone number
+  nfcId?: string // Optional, NFC card ID (hex string)
+  profilePhoto?: string // Optional, URL to profile photo
   createdAt: string // ISO 8601 date string
   updatedAt?: string // ISO 8601 date string
 }
@@ -81,9 +104,14 @@ export interface StudentFormData {
   firstName: string
   lastName: string
   email: string
+  birthdate?: string
+  contact?: string
+  status?: StudentStatus
   section?: string
   guardianName?: string
   guardianEmail?: string
+  guardianContact?: string
+  nfcId?: string
 }
 
 // ============================================================================
@@ -98,7 +126,11 @@ export interface Subject {
   subjectCode: string // Format: e.g., "CS101", "MATH201"
   subjectName: string
   section: string
-  yearLevel: number // 1-4 for college years
+  yearLevel: number // 1-12 for grade/year levels
+  capacity?: number // Maximum enrollment capacity (1-500)
+  description?: string // Optional subject description
+  instructor?: string // Optional instructor name
+  room?: string // Optional room/location
   createdAt: string // ISO 8601 date string
   updatedAt?: string // ISO 8601 date string
 }
@@ -111,6 +143,10 @@ export interface SubjectFormData {
   subjectName: string
   section: string
   yearLevel: number
+  capacity?: number
+  description?: string
+  instructor?: string
+  room?: string
 }
 
 // ============================================================================

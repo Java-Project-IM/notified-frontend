@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, User, Mail, Users as UsersIcon, Hash } from 'lucide-react'
+import { X, User, Mail, Users as UsersIcon, Hash, Calendar, Phone, CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Student, StudentFormData } from '@/types'
+import { Student, StudentFormData, StudentStatus } from '@/types'
+import {
+  validators,
+  sanitizers,
+  VALIDATION_CONSTANTS,
+  STUDENT_STATUS,
+} from '@/utils/validation-rules'
 
 interface StudentModalProps {
   isOpen: boolean
@@ -27,9 +33,14 @@ export default function StudentModal({
     firstName: '',
     lastName: '',
     email: '',
+    birthdate: '',
+    contact: '',
+    status: 'active',
     section: '',
     guardianName: '',
     guardianEmail: '',
+    guardianContact: '',
+    nfcId: '',
   })
 
   const [errors, setErrors] = useState<Partial<Record<keyof StudentFormData, string>>>({})
@@ -41,9 +52,14 @@ export default function StudentModal({
         firstName: student.firstName,
         lastName: student.lastName,
         email: student.email,
+        birthdate: student.birthdate || '',
+        contact: student.contact || '',
+        status: student.status || 'active',
         section: student.section || '',
         guardianName: student.guardianName || '',
         guardianEmail: student.guardianEmail || '',
+        guardianContact: student.guardianContact || '',
+        nfcId: student.nfcId || '',
       })
     } else if (generatedNumber) {
       setFormData((prev) => ({ ...prev, studentNumber: generatedNumber }))
@@ -53,58 +69,83 @@ export default function StudentModal({
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof StudentFormData, string>> = {}
 
-    // Student Number validation
-    if (!formData.studentNumber.trim()) {
-      newErrors.studentNumber = 'Student number is required'
-    } else if (formData.studentNumber.trim().length < 3) {
-      newErrors.studentNumber = 'Student number must be at least 3 characters'
+    // Student Number validation using comprehensive validator
+    const studentNumberResult = validators.studentNumber(formData.studentNumber)
+    if (!studentNumberResult.isValid) {
+      newErrors.studentNumber = studentNumberResult.error
     }
 
-    // First Name validation
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required'
-    } else if (formData.firstName.trim().length < 2) {
-      newErrors.firstName = 'First name must be at least 2 characters'
-    } else if (!/^[a-zA-Z\s-]+$/.test(formData.firstName.trim())) {
-      newErrors.firstName = 'First name can only contain letters, spaces, and hyphens'
+    // First Name validation using comprehensive validator
+    const firstNameResult = validators.personName(formData.firstName, 'First name')
+    if (!firstNameResult.isValid) {
+      newErrors.firstName = firstNameResult.error
     }
 
-    // Last Name validation
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required'
-    } else if (formData.lastName.trim().length < 2) {
-      newErrors.lastName = 'Last name must be at least 2 characters'
-    } else if (!/^[a-zA-Z\s-]+$/.test(formData.lastName.trim())) {
-      newErrors.lastName = 'Last name can only contain letters, spaces, and hyphens'
+    // Last Name validation using comprehensive validator
+    const lastNameResult = validators.personName(formData.lastName, 'Last name')
+    if (!lastNameResult.isValid) {
+      newErrors.lastName = lastNameResult.error
     }
 
-    // Email validation
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address'
+    // Email validation using comprehensive validator
+    const emailResult = validators.email(formData.email)
+    if (!emailResult.isValid) {
+      newErrors.email = emailResult.error
     }
 
-    // Section validation (optional but if provided, validate format)
+    // Birthdate validation (optional but if provided, validate)
+    if (formData.birthdate && formData.birthdate.trim().length > 0) {
+      const birthdateResult = validators.birthdate(formData.birthdate)
+      if (!birthdateResult.isValid) {
+        newErrors.birthdate = birthdateResult.error
+      }
+    }
+
+    // Contact validation (optional but if provided, validate)
+    if (formData.contact && formData.contact.trim().length > 0) {
+      const contactResult = validators.contact(formData.contact)
+      if (!contactResult.isValid) {
+        newErrors.contact = contactResult.error
+      }
+    }
+
+    // Section validation (optional but if provided, validate)
     if (formData.section && formData.section.trim().length > 0) {
-      if (formData.section.trim().length > 10) {
-        newErrors.section = 'Section must be 10 characters or less'
+      const sectionResult = validators.section(formData.section)
+      if (!sectionResult.isValid) {
+        newErrors.section = sectionResult.error
       }
     }
 
     // Guardian Name validation (optional but if provided, validate)
     if (formData.guardianName && formData.guardianName.trim().length > 0) {
-      if (formData.guardianName.trim().length < 2) {
-        newErrors.guardianName = 'Guardian name must be at least 2 characters'
-      } else if (!/^[a-zA-Z\s-]+$/.test(formData.guardianName.trim())) {
-        newErrors.guardianName = 'Guardian name can only contain letters, spaces, and hyphens'
+      const guardianNameResult = validators.personName(formData.guardianName, 'Guardian name')
+      if (!guardianNameResult.isValid) {
+        newErrors.guardianName = guardianNameResult.error
       }
     }
 
     // Guardian Email validation (optional but if provided, validate)
     if (formData.guardianEmail && formData.guardianEmail.trim().length > 0) {
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.guardianEmail)) {
-        newErrors.guardianEmail = 'Please enter a valid guardian email address'
+      const guardianEmailResult = validators.email(formData.guardianEmail)
+      if (!guardianEmailResult.isValid) {
+        newErrors.guardianEmail = 'Guardian: ' + guardianEmailResult.error
+      }
+    }
+
+    // Guardian Contact validation (optional but if provided, validate)
+    if (formData.guardianContact && formData.guardianContact.trim().length > 0) {
+      const guardianContactResult = validators.contact(formData.guardianContact)
+      if (!guardianContactResult.isValid) {
+        newErrors.guardianContact = 'Guardian: ' + guardianContactResult.error
+      }
+    }
+
+    // NFC ID validation (optional but if provided, validate)
+    if (formData.nfcId && formData.nfcId.trim().length > 0) {
+      const nfcResult = validators.nfcId(formData.nfcId)
+      if (!nfcResult.isValid) {
+        newErrors.nfcId = nfcResult.error
       }
     }
 
@@ -132,9 +173,14 @@ export default function StudentModal({
       firstName: '',
       lastName: '',
       email: '',
+      birthdate: '',
+      contact: '',
+      status: 'active',
       section: '',
       guardianName: '',
       guardianEmail: '',
+      guardianContact: '',
+      nfcId: '',
     })
     setErrors({})
     onClose()
@@ -160,7 +206,7 @@ export default function StudentModal({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', duration: 0.5 }}
-              className="bg-slate-800/95 backdrop-blur-xl rounded-3xl shadow-enterprise-2xl border border-slate-700/50 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+              className="bg-slate-800/95 backdrop-blur-xl rounded-3xl shadow-enterprise-2xl border border-slate-700/50 w-full max-w-2xl max-h-[90vh] overflow-y-auto thin-scrollbar"
             >
               {/* Header */}
               <div className="sticky top-0 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-6 rounded-t-3xl shadow-lg z-10 border-b border-blue-500/30">
@@ -314,19 +360,111 @@ export default function StudentModal({
                   {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
                 </div>
 
-                {/* Section */}
+                {/* Birthdate and Contact */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <Calendar className="w-4 h-4 inline mr-1" />
+                      Birthdate
+                    </label>
+                    <Input
+                      type="date"
+                      value={formData.birthdate || ''}
+                      onChange={(e) => handleChange('birthdate', e.target.value)}
+                      className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                        errors.birthdate
+                          ? 'border-red-500 focus:border-red-600'
+                          : 'border-slate-600 focus:border-blue-500'
+                      }`}
+                    />
+                    {errors.birthdate && (
+                      <p className="text-red-400 text-sm mt-1">{errors.birthdate}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <Phone className="w-4 h-4 inline mr-1" />
+                      Contact Number
+                    </label>
+                    <Input
+                      type="tel"
+                      value={formData.contact || ''}
+                      onChange={(e) => handleChange('contact', e.target.value)}
+                      placeholder="+639123456789"
+                      className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                        errors.contact
+                          ? 'border-red-500 focus:border-red-600'
+                          : 'border-slate-600 focus:border-blue-500'
+                      }`}
+                    />
+                    {errors.contact && (
+                      <p className="text-red-400 text-sm mt-1">{errors.contact}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Section and Status */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <UsersIcon className="w-4 h-4 inline mr-1" />
+                      Section
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.section || ''}
+                      onChange={(e) => handleChange('section', e.target.value)}
+                      placeholder="e.g., A, B, 1-A"
+                      className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                        errors.section
+                          ? 'border-red-500 focus:border-red-600'
+                          : 'border-slate-600 focus:border-blue-500'
+                      }`}
+                    />
+                    {errors.section && (
+                      <p className="text-red-400 text-sm mt-1">{errors.section}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
+                    <select
+                      value={formData.status || 'active'}
+                      onChange={(e) => handleChange('status', e.target.value)}
+                      className="w-full h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 border-slate-600 focus:border-blue-500 px-3"
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="graduated">Graduated</option>
+                      <option value="transferred">Transferred</option>
+                      <option value="suspended">Suspended</option>
+                      <option value="dropped">Dropped</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* NFC ID (Optional) */}
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    <UsersIcon className="w-4 h-4 inline mr-1" />
-                    Section
+                    <CreditCard className="w-4 h-4 inline mr-1" />
+                    NFC Card ID (Optional)
                   </label>
                   <Input
                     type="text"
-                    value={formData.section}
-                    onChange={(e) => handleChange('section', e.target.value)}
-                    placeholder="e.g., A, B, 1-A"
-                    className="h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 border-slate-600 focus:border-blue-500"
+                    value={formData.nfcId || ''}
+                    onChange={(e) => handleChange('nfcId', e.target.value.toUpperCase())}
+                    placeholder="e.g., A1B2C3D4E5F6"
+                    className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                      errors.nfcId
+                        ? 'border-red-500 focus:border-red-600'
+                        : 'border-slate-600 focus:border-blue-500'
+                    }`}
                   />
+                  {errors.nfcId && <p className="text-red-400 text-sm mt-1">{errors.nfcId}</p>}
+                  <p className="text-slate-500 text-xs mt-1">
+                    Hexadecimal format (8-32 characters)
+                  </p>
                 </div>
 
                 {/* Guardian Info */}
@@ -345,28 +483,57 @@ export default function StudentModal({
                         value={formData.guardianName}
                         onChange={(e) => handleChange('guardianName', e.target.value)}
                         placeholder="Jane Doe"
-                        className="h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 border-slate-600 focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Guardian Email
-                      </label>
-                      <Input
-                        type="email"
-                        value={formData.guardianEmail}
-                        onChange={(e) => handleChange('guardianEmail', e.target.value)}
-                        placeholder="jane.doe@example.com"
                         className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
-                          errors.guardianEmail
+                          errors.guardianName
                             ? 'border-red-500 focus:border-red-600'
                             : 'border-slate-600 focus:border-blue-500'
                         }`}
                       />
-                      {errors.guardianEmail && (
-                        <p className="text-red-400 text-sm mt-1">{errors.guardianEmail}</p>
+                      {errors.guardianName && (
+                        <p className="text-red-400 text-sm mt-1">{errors.guardianName}</p>
                       )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                          Guardian Email
+                        </label>
+                        <Input
+                          type="email"
+                          value={formData.guardianEmail || ''}
+                          onChange={(e) => handleChange('guardianEmail', e.target.value)}
+                          placeholder="jane.doe@example.com"
+                          className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                            errors.guardianEmail
+                              ? 'border-red-500 focus:border-red-600'
+                              : 'border-slate-600 focus:border-blue-500'
+                          }`}
+                        />
+                        {errors.guardianEmail && (
+                          <p className="text-red-400 text-sm mt-1">{errors.guardianEmail}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                          Guardian Contact
+                        </label>
+                        <Input
+                          type="tel"
+                          value={formData.guardianContact || ''}
+                          onChange={(e) => handleChange('guardianContact', e.target.value)}
+                          placeholder="+639123456789"
+                          className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                            errors.guardianContact
+                              ? 'border-red-500 focus:border-red-600'
+                              : 'border-slate-600 focus:border-blue-500'
+                          }`}
+                        />
+                        {errors.guardianContact && (
+                          <p className="text-red-400 text-sm mt-1">{errors.guardianContact}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
