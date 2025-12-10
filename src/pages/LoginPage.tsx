@@ -10,8 +10,8 @@ import { authService } from '@/services/auth.service'
 import { useAuthStore } from '@/store/authStore'
 import { useToast } from '@/store/toastStore'
 import { ROUTES, APP_NAME, TOAST_MESSAGES } from '@/utils/constants'
-import { validateEmail } from '@/lib/utils'
 import { AuthResponse } from '@/types'
+import { validators } from '@/utils/validation-rules'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -52,15 +52,16 @@ export default function LoginPage() {
     e.preventDefault()
     console.log('Login form submitted with:', formData)
 
-    // Validation
+    // Validation using comprehensive validators
     const newErrors: { email?: string; password?: string } = {}
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required'
-    } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address'
+    // Email validation using comprehensive validator
+    const emailResult = validators.email(formData.email)
+    if (!emailResult.isValid) {
+      newErrors.email = emailResult.error
     }
 
+    // Password validation (basic check for login - not full strength check)
     if (!formData.password) {
       newErrors.password = 'Password is required'
     } else if (formData.password.length < 6) {

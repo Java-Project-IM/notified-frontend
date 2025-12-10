@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, BookOpen, Hash, GraduationCap, Users } from 'lucide-react'
+import { X, BookOpen, Hash, GraduationCap, Users, User, MapPin, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Subject, SubjectFormData } from '@/types'
+import { validators, sanitizers, VALIDATION_CONSTANTS } from '@/utils/validation-rules'
 
 interface SubjectModalProps {
   isOpen: boolean
@@ -25,6 +26,10 @@ export default function SubjectModal({
     subjectName: '',
     section: '',
     yearLevel: 1,
+    capacity: undefined,
+    description: '',
+    instructor: '',
+    room: '',
   })
 
   const [errors, setErrors] = useState<Partial<Record<keyof SubjectFormData, string>>>({})
@@ -36,6 +41,10 @@ export default function SubjectModal({
         subjectName: subject.subjectName,
         section: subject.section,
         yearLevel: subject.yearLevel,
+        capacity: subject.capacity,
+        description: subject.description || '',
+        instructor: subject.instructor || '',
+        room: subject.room || '',
       })
     }
   }, [subject])
@@ -43,41 +52,56 @@ export default function SubjectModal({
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof SubjectFormData, string>> = {}
 
-    // Subject Code validation
-    if (!formData.subjectCode.trim()) {
-      newErrors.subjectCode = 'Subject code is required'
-    } else if (formData.subjectCode.trim().length < 2) {
-      newErrors.subjectCode = 'Subject code must be at least 2 characters'
-    } else if (formData.subjectCode.trim().length > 20) {
-      newErrors.subjectCode = 'Subject code must be 20 characters or less'
-    } else if (!/^[A-Z0-9-]+$/.test(formData.subjectCode.trim())) {
-      newErrors.subjectCode =
-        'Subject code can only contain uppercase letters, numbers, and hyphens'
+    // Subject Code validation using comprehensive validator
+    const subjectCodeResult = validators.subjectCode(formData.subjectCode)
+    if (!subjectCodeResult.isValid) {
+      newErrors.subjectCode = subjectCodeResult.error
     }
 
-    // Subject Name validation
-    if (!formData.subjectName.trim()) {
-      newErrors.subjectName = 'Subject name is required'
-    } else if (formData.subjectName.trim().length < 3) {
-      newErrors.subjectName = 'Subject name must be at least 3 characters'
-    } else if (formData.subjectName.trim().length > 100) {
-      newErrors.subjectName = 'Subject name must be 100 characters or less'
+    // Subject Name validation using comprehensive validator
+    const subjectNameResult = validators.subjectName(formData.subjectName)
+    if (!subjectNameResult.isValid) {
+      newErrors.subjectName = subjectNameResult.error
     }
 
-    // Section validation
-    if (!formData.section.trim()) {
-      newErrors.section = 'Section is required'
-    } else if (formData.section.trim().length > 10) {
-      newErrors.section = 'Section must be 10 characters or less'
-    } else if (!/^[A-Z0-9-]+$/.test(formData.section.trim())) {
-      newErrors.section = 'Section can only contain uppercase letters, numbers, and hyphens'
+    // Section validation using comprehensive validator
+    const sectionResult = validators.section(formData.section)
+    if (!sectionResult.isValid) {
+      newErrors.section = sectionResult.error
     }
 
-    // Year Level validation
-    if (!formData.yearLevel || isNaN(formData.yearLevel)) {
-      newErrors.yearLevel = 'Year level is required'
-    } else if (formData.yearLevel < 1 || formData.yearLevel > 12) {
-      newErrors.yearLevel = 'Year level must be between 1 and 12'
+    // Year Level validation using comprehensive validator
+    const yearLevelResult = validators.yearLevel(formData.yearLevel)
+    if (!yearLevelResult.isValid) {
+      newErrors.yearLevel = yearLevelResult.error
+    }
+
+    // Capacity validation (optional but if provided, validate)
+    if (formData.capacity !== undefined && formData.capacity !== null) {
+      const capacityResult = validators.capacity(formData.capacity)
+      if (!capacityResult.isValid) {
+        newErrors.capacity = capacityResult.error
+      }
+    }
+
+    // Description validation (optional, just length check)
+    if (formData.description && formData.description.length > 500) {
+      newErrors.description = 'Description must be 500 characters or less'
+    }
+
+    // Instructor name validation (optional)
+    if (formData.instructor && formData.instructor.trim().length > 0) {
+      const instructorResult = validators.personName(formData.instructor, 'Instructor name')
+      if (!instructorResult.isValid) {
+        newErrors.instructor = instructorResult.error
+      }
+    }
+
+    // Room validation (optional, alphanumeric)
+    if (formData.room && formData.room.trim().length > 0) {
+      if (formData.room.length > 50) {
+        newErrors.room = 'Room must be 50 characters or less'
+      }
     }
 
     setErrors(newErrors)
@@ -107,6 +131,10 @@ export default function SubjectModal({
       subjectName: '',
       section: '',
       yearLevel: 1,
+      capacity: undefined,
+      description: '',
+      instructor: '',
+      room: '',
     })
     setErrors({})
     onClose()
@@ -270,6 +298,104 @@ export default function SubjectModal({
                       <p className="text-red-400 text-sm mt-1">{errors.section}</p>
                     )}
                   </div>
+                </div>
+
+                {/* Capacity and Room */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <Users className="w-4 h-4 inline mr-1" />
+                      Capacity (Optional)
+                    </label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="500"
+                      value={formData.capacity || ''}
+                      onChange={(e) =>
+                        handleChange(
+                          'capacity',
+                          e.target.value ? parseInt(e.target.value) : undefined
+                        )
+                      }
+                      placeholder="e.g., 30, 50"
+                      className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                        errors.capacity
+                          ? 'border-red-500 focus:border-red-600'
+                          : 'border-slate-600 focus:border-purple-500'
+                      }`}
+                    />
+                    {errors.capacity && (
+                      <p className="text-red-400 text-sm mt-1">{errors.capacity}</p>
+                    )}
+                    <p className="text-slate-500 text-xs mt-1">Maximum enrollment limit (1-500)</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      <MapPin className="w-4 h-4 inline mr-1" />
+                      Room (Optional)
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.room || ''}
+                      onChange={(e) => handleChange('room', e.target.value)}
+                      placeholder="e.g., Room 101, Lab A"
+                      className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                        errors.room
+                          ? 'border-red-500 focus:border-red-600'
+                          : 'border-slate-600 focus:border-purple-500'
+                      }`}
+                    />
+                    {errors.room && <p className="text-red-400 text-sm mt-1">{errors.room}</p>}
+                  </div>
+                </div>
+
+                {/* Instructor */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <User className="w-4 h-4 inline mr-1" />
+                    Instructor (Optional)
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.instructor || ''}
+                    onChange={(e) => handleChange('instructor', e.target.value)}
+                    placeholder="e.g., Dr. John Smith"
+                    className={`h-12 rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 ${
+                      errors.instructor
+                        ? 'border-red-500 focus:border-red-600'
+                        : 'border-slate-600 focus:border-purple-500'
+                    }`}
+                  />
+                  {errors.instructor && (
+                    <p className="text-red-400 text-sm mt-1">{errors.instructor}</p>
+                  )}
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <FileText className="w-4 h-4 inline mr-1" />
+                    Description (Optional)
+                  </label>
+                  <textarea
+                    value={formData.description || ''}
+                    onChange={(e) => handleChange('description', e.target.value)}
+                    placeholder="Brief description of the subject..."
+                    rows={3}
+                    className={`w-full rounded-xl border-2 bg-slate-900/50 text-slate-100 placeholder:text-slate-500 p-3 resize-none ${
+                      errors.description
+                        ? 'border-red-500 focus:border-red-600'
+                        : 'border-slate-600 focus:border-purple-500'
+                    }`}
+                  />
+                  {errors.description && (
+                    <p className="text-red-400 text-sm mt-1">{errors.description}</p>
+                  )}
+                  <p className="text-slate-500 text-xs mt-1">
+                    {(formData.description || '').length}/500 characters
+                  </p>
                 </div>
 
                 {/* Actions */}

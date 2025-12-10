@@ -1,6 +1,7 @@
 import apiClient from './api'
 import { Student, StudentFormData } from '@/types'
 import { fetchWithRetry, logError, withTimeout } from '@/utils/errorHandling'
+import { validators, sanitizers, VALIDATION_CONSTANTS } from '@/utils/validation-rules'
 import {
   validateEmail,
   validateName,
@@ -113,58 +114,91 @@ export const studentService = {
   async create(data: StudentFormData): Promise<Student> {
     // creating student
 
-    // Validate required fields
-    const studentNumberValidation = validateStudentNumber(data.studentNumber)
+    // Validate required fields using comprehensive validators
+    const studentNumberValidation = validators.studentNumber(data.studentNumber)
     if (!studentNumberValidation.isValid) {
       throw new Error(studentNumberValidation.error)
     }
 
-    const firstNameValidation = validateName(data.firstName, 'First name')
+    const firstNameValidation = validators.personName(data.firstName, 'First name')
     if (!firstNameValidation.isValid) {
       throw new Error(firstNameValidation.error)
     }
 
-    const lastNameValidation = validateName(data.lastName, 'Last name')
+    const lastNameValidation = validators.personName(data.lastName, 'Last name')
     if (!lastNameValidation.isValid) {
       throw new Error(lastNameValidation.error)
     }
 
-    const emailValidation = validateEmail(data.email)
+    const emailValidation = validators.email(data.email)
     if (!emailValidation.isValid) {
       throw new Error(emailValidation.error)
     }
 
     // Validate optional fields
     if (data.section) {
-      const sectionValidation = validateSection(data.section)
+      const sectionValidation = validators.section(data.section)
       if (!sectionValidation.isValid) {
         throw new Error(sectionValidation.error)
       }
     }
 
+    if (data.birthdate) {
+      const birthdateValidation = validators.birthdate(data.birthdate)
+      if (!birthdateValidation.isValid) {
+        throw new Error(birthdateValidation.error)
+      }
+    }
+
+    if (data.contact) {
+      const contactValidation = validators.contact(data.contact)
+      if (!contactValidation.isValid) {
+        throw new Error(contactValidation.error)
+      }
+    }
+
     if (data.guardianName) {
-      const guardianNameValidation = validateName(data.guardianName, 'Guardian name')
+      const guardianNameValidation = validators.personName(data.guardianName, 'Guardian name')
       if (!guardianNameValidation.isValid) {
         throw new Error(guardianNameValidation.error)
       }
     }
 
     if (data.guardianEmail) {
-      const guardianEmailValidation = validateEmail(data.guardianEmail)
+      const guardianEmailValidation = validators.email(data.guardianEmail)
       if (!guardianEmailValidation.isValid) {
         throw new Error('Guardian ' + guardianEmailValidation.error)
       }
     }
 
+    if (data.guardianContact) {
+      const guardianContactValidation = validators.contact(data.guardianContact)
+      if (!guardianContactValidation.isValid) {
+        throw new Error('Guardian ' + guardianContactValidation.error)
+      }
+    }
+
+    if (data.nfcId) {
+      const nfcValidation = validators.nfcId(data.nfcId)
+      if (!nfcValidation.isValid) {
+        throw new Error(nfcValidation.error)
+      }
+    }
+
     // Sanitize data
     const sanitizedData: StudentFormData = {
-      studentNumber: data.studentNumber.trim(),
-      firstName: sanitizeString(data.firstName),
-      lastName: sanitizeString(data.lastName),
-      email: sanitizeEmail(data.email),
-      section: data.section ? sanitizeString(data.section) : undefined,
-      guardianName: data.guardianName ? sanitizeString(data.guardianName) : undefined,
-      guardianEmail: data.guardianEmail ? sanitizeEmail(data.guardianEmail) : undefined,
+      studentNumber: sanitizers.trim(data.studentNumber),
+      firstName: sanitizers.input(data.firstName),
+      lastName: sanitizers.input(data.lastName),
+      email: sanitizers.email(data.email),
+      birthdate: data.birthdate ? sanitizers.trim(data.birthdate) : undefined,
+      contact: data.contact ? sanitizers.phone(data.contact) : undefined,
+      status: data.status || 'active',
+      section: data.section ? sanitizers.input(data.section) : undefined,
+      guardianName: data.guardianName ? sanitizers.input(data.guardianName) : undefined,
+      guardianEmail: data.guardianEmail ? sanitizers.email(data.guardianEmail) : undefined,
+      guardianContact: data.guardianContact ? sanitizers.phone(data.guardianContact) : undefined,
+      nfcId: data.nfcId ? sanitizers.trim(data.nfcId).toUpperCase() : undefined,
     }
 
     try {
@@ -190,65 +224,98 @@ export const studentService = {
   async update(id: number, data: Partial<StudentFormData>): Promise<Student> {
     // updating student
 
-    // Validate provided fields
+    // Validate provided fields using comprehensive validators
     if (data.studentNumber) {
-      const validation = validateStudentNumber(data.studentNumber)
+      const validation = validators.studentNumber(data.studentNumber)
       if (!validation.isValid) {
         throw new Error(validation.error)
       }
     }
 
     if (data.firstName) {
-      const validation = validateName(data.firstName, 'First name')
+      const validation = validators.personName(data.firstName, 'First name')
       if (!validation.isValid) {
         throw new Error(validation.error)
       }
     }
 
     if (data.lastName) {
-      const validation = validateName(data.lastName, 'Last name')
+      const validation = validators.personName(data.lastName, 'Last name')
       if (!validation.isValid) {
         throw new Error(validation.error)
       }
     }
 
     if (data.email) {
-      const validation = validateEmail(data.email)
+      const validation = validators.email(data.email)
       if (!validation.isValid) {
         throw new Error(validation.error)
       }
     }
 
     if (data.section) {
-      const validation = validateSection(data.section)
+      const validation = validators.section(data.section)
+      if (!validation.isValid) {
+        throw new Error(validation.error)
+      }
+    }
+
+    if (data.birthdate) {
+      const validation = validators.birthdate(data.birthdate)
+      if (!validation.isValid) {
+        throw new Error(validation.error)
+      }
+    }
+
+    if (data.contact) {
+      const validation = validators.contact(data.contact)
       if (!validation.isValid) {
         throw new Error(validation.error)
       }
     }
 
     if (data.guardianName) {
-      const validation = validateName(data.guardianName, 'Guardian name')
+      const validation = validators.personName(data.guardianName, 'Guardian name')
       if (!validation.isValid) {
         throw new Error(validation.error)
       }
     }
 
     if (data.guardianEmail) {
-      const validation = validateEmail(data.guardianEmail)
+      const validation = validators.email(data.guardianEmail)
       if (!validation.isValid) {
         throw new Error('Guardian ' + validation.error)
       }
     }
 
+    if (data.guardianContact) {
+      const validation = validators.contact(data.guardianContact)
+      if (!validation.isValid) {
+        throw new Error('Guardian ' + validation.error)
+      }
+    }
+
+    if (data.nfcId) {
+      const validation = validators.nfcId(data.nfcId)
+      if (!validation.isValid) {
+        throw new Error(validation.error)
+      }
+    }
+
     // Sanitize data
     const sanitizedData: Partial<StudentFormData> = {}
-    if (data.studentNumber) sanitizedData.studentNumber = data.studentNumber.trim()
-    if (data.firstName) sanitizedData.firstName = sanitizeString(data.firstName)
-    if (data.lastName) sanitizedData.lastName = sanitizeString(data.lastName)
-    if (data.email) sanitizedData.email = sanitizeEmail(data.email)
-    if (data.section) sanitizedData.section = sanitizeString(data.section)
-    if (data.guardianName) sanitizedData.guardianName = sanitizeString(data.guardianName)
-    if (data.guardianEmail) sanitizedData.guardianEmail = sanitizeEmail(data.guardianEmail)
+    if (data.studentNumber) sanitizedData.studentNumber = sanitizers.trim(data.studentNumber)
+    if (data.firstName) sanitizedData.firstName = sanitizers.input(data.firstName)
+    if (data.lastName) sanitizedData.lastName = sanitizers.input(data.lastName)
+    if (data.email) sanitizedData.email = sanitizers.email(data.email)
+    if (data.birthdate) sanitizedData.birthdate = sanitizers.trim(data.birthdate)
+    if (data.contact) sanitizedData.contact = sanitizers.phone(data.contact)
+    if (data.status) sanitizedData.status = data.status
+    if (data.section) sanitizedData.section = sanitizers.input(data.section)
+    if (data.guardianName) sanitizedData.guardianName = sanitizers.input(data.guardianName)
+    if (data.guardianEmail) sanitizedData.guardianEmail = sanitizers.email(data.guardianEmail)
+    if (data.guardianContact) sanitizedData.guardianContact = sanitizers.phone(data.guardianContact)
+    if (data.nfcId) sanitizedData.nfcId = sanitizers.trim(data.nfcId).toUpperCase()
 
     try {
       const response = await withTimeout(
@@ -294,8 +361,13 @@ export const studentService = {
   async search(query: string): Promise<Student[]> {
     // searching students
 
-    // Sanitize search query
-    const sanitizedQuery = sanitizeString(query)
+    // Validate and sanitize search query using comprehensive validators
+    const searchValidation = validators.searchTerm(query)
+    if (!searchValidation.isValid && query.trim().length > 0) {
+      throw new Error(searchValidation.error)
+    }
+
+    const sanitizedQuery = sanitizers.search(query)
 
     if (sanitizedQuery.length === 0) {
       return []
