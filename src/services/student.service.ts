@@ -390,4 +390,71 @@ export const studentService = {
       throw error
     }
   },
+
+  /**
+   * Get student's enrollments
+   * @param studentId - Student ID
+   * @returns Array of enrollments with subject details
+   */
+  async getEnrollments(studentId: number): Promise<
+    {
+      id: string
+      subjectId: string
+      enrolledAt: string
+      subject?: {
+        id: string
+        subjectCode: string
+        subjectName: string
+        section: string
+      }
+    }[]
+  > {
+    try {
+      const response = await withTimeout(
+        fetchWithRetry(() => apiClient.get(`/students/${studentId}/enrollments`)),
+        10000,
+        'Failed to load enrollments'
+      )
+      return response.data
+    } catch (error) {
+      logError('StudentService', 'getEnrollments', error)
+      throw error
+    }
+  },
+
+  /**
+   * Get student's attendance summary
+   * @param studentId - Student ID
+   * @returns Attendance summary with overall stats and per-subject breakdown
+   */
+  async getAttendanceSummary(studentId: number): Promise<{
+    totalDays: number
+    present: number
+    absent: number
+    late: number
+    excused: number
+    attendanceRate: number
+    bySubject: Array<{
+      subjectId: string
+      subjectCode: string
+      subjectName: string
+      present: number
+      absent: number
+      late?: number
+      excused?: number
+      attendanceRate: number
+    }>
+  }> {
+    try {
+      const response = await withTimeout(
+        fetchWithRetry(() => apiClient.get(`/students/${studentId}/attendance/summary`)),
+        10000,
+        'Failed to load attendance summary'
+      )
+      return response.data
+    } catch (error) {
+      logError('StudentService', 'getAttendanceSummary', error)
+      throw error
+    }
+  },
 }
