@@ -212,245 +212,175 @@ export default function SignupPage() {
             {/* Glow effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-3xl blur-3xl" />
 
-            <svg viewBox="0 0 600 600" className="w-full h-auto relative">
-              <defs>
-                <linearGradient id="signupGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#6366f1" />
-                </linearGradient>
-                <linearGradient id="signupGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#8b5cf6" />
-                  <stop offset="100%" stopColor="#6366f1" />
-                </linearGradient>
-                <linearGradient id="signupGradient3" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#10b981" />
-                  <stop offset="100%" stopColor="#3b82f6" />
-                </linearGradient>
-                <filter id="signupGlow">
-                  <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-                  <feMerge>
-                    <feMergeNode in="coloredBlur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
+              <svg viewBox="0 0 600 600" className="w-full h-auto relative">
+                <defs>
+                  <linearGradient id="signupGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="100%" stopColor="#6366f1" />
+                  </linearGradient>
+                  <linearGradient id="signupGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#8b5cf6" />
+                    <stop offset="100%" stopColor="#6366f1" />
+                  </linearGradient>
+                  <linearGradient id="gridGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#1e293b" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#0f172a" stopOpacity="0.9" />
+                  </linearGradient>
+                  <filter id="signupGlow">
+                    <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                    <feMerge>
+                      <feMergeNode in="coloredBlur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
 
-              {/* Central user profile creation illustration */}
-              <motion.g
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.8, type: 'spring' }}
-              >
-                {/* Main card */}
-                <motion.rect
-                  animate={{
-                    y: [0, -8, 0],
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                  x="150"
-                  y="200"
-                  width="300"
-                  height="250"
-                  rx="24"
-                  fill="url(#signupGradient1)"
-                  opacity="0.9"
-                  filter="url(#signupGlow)"
-                />
-
-                {/* User avatar circle */}
-                <motion.circle
-                  animate={{
-                    scale: [1, 1.05, 1],
-                    y: [0, -8, 0],
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                  cx="300"
-                  cy="280"
-                  r="50"
-                  fill="#1e293b"
-                  stroke="url(#signupGradient3)"
-                  strokeWidth="4"
-                />
-
-                {/* User icon inside circle */}
-                <motion.path
-                  animate={{
-                    y: [0, -8, 0],
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                  d="M 300 260 Q 300 250, 310 250 Q 320 250, 320 260 Q 320 270, 310 270 Q 300 270, 300 260 M 285 300 Q 285 285, 300 285 Q 315 285, 315 300"
-                  fill="#60a5fa"
-                />
-
-                {/* Form fields representation */}
-                {[0, 1, 2].map((i) => (
-                  <motion.g
-                    key={i}
-                    animate={{
-                      y: [0, -8, 0],
-                    }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
-                  >
-                    <motion.rect
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{
-                        delay: 0.8 + i * 0.2,
-                        duration: 0.6,
-                      }}
-                      x="180"
-                      y={350 + i * 30}
-                      width="240"
-                      height="20"
-                      rx="10"
-                      fill="#1e293b"
-                      style={{ transformOrigin: 'left' }}
-                    />
-                    <motion.circle
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{
-                        delay: 1 + i * 0.2,
-                        type: 'spring',
-                      }}
-                      cx={195}
-                      cy={360 + i * 30}
-                      r="6"
-                      fill={i === 0 ? '#3b82f6' : i === 1 ? '#8b5cf6' : '#10b981'}
-                    />
-                  </motion.g>
-                ))}
-              </motion.g>
-
-              {/* Orbiting plus icons */}
-              {[0, 1, 2, 3].map((i) => (
+                {/* Background Isometric Grid Platform */}
                 <motion.g
-                  key={i}
-                  animate={{
-                    rotate: 360,
-                  }}
-                  transition={{
-                    duration: 15 + i * 3,
-                    repeat: Infinity,
-                    ease: 'linear',
-                  }}
-                  style={{ transformOrigin: '300px 325px' }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1 }}
                 >
-                  <motion.g
-                    animate={{
-                      scale: [1, 1.3, 1],
-                      opacity: [0.6, 1, 0.6],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      delay: i * 0.4,
-                    }}
-                  >
-                    <line
-                      x1={300 + Math.cos((i * 90 * Math.PI) / 180) * 200}
-                      y1={325 + Math.sin((i * 90 * Math.PI) / 180) * 200 - 12}
-                      x2={300 + Math.cos((i * 90 * Math.PI) / 180) * 200}
-                      y2={325 + Math.sin((i * 90 * Math.PI) / 180) * 200 + 12}
-                      stroke={i % 2 === 0 ? '#3b82f6' : '#8b5cf6'}
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      filter="url(#signupGlow)"
-                    />
-                    <line
-                      x1={300 + Math.cos((i * 90 * Math.PI) / 180) * 200 - 12}
-                      y1={325 + Math.sin((i * 90 * Math.PI) / 180) * 200}
-                      x2={300 + Math.cos((i * 90 * Math.PI) / 180) * 200 + 12}
-                      y2={325 + Math.sin((i * 90 * Math.PI) / 180) * 200}
-                      stroke={i % 2 === 0 ? '#3b82f6' : '#8b5cf6'}
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      filter="url(#signupGlow)"
-                    />
-                  </motion.g>
-                </motion.g>
-              ))}
-
-              {/* Connection lines */}
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <motion.line
-                  key={i}
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: [0, 0.3, 0] }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    delay: i * 0.5,
-                    ease: 'easeInOut',
-                  }}
-                  x1="300"
-                  y1="325"
-                  x2={300 + Math.cos((i * 60 * Math.PI) / 180) * 160}
-                  y2={325 + Math.sin((i * 60 * Math.PI) / 180) * 160}
-                  stroke="#8b5cf6"
-                  strokeWidth="2"
-                  strokeDasharray="5,5"
-                />
-              ))}
-
-              {/* Floating sparkles */}
-              {[...Array(15)].map((_, i) => (
-                <motion.g
-                  key={`sparkle-${i}`}
-                  animate={{
-                    y: [0, -20, 0],
-                    opacity: [0.2, 0.8, 0.2],
-                    rotate: [0, 180, 360],
-                  }}
-                  transition={{
-                    duration: 3 + Math.random() * 2,
-                    repeat: Infinity,
-                    delay: Math.random() * 3,
-                  }}
-                >
-                  <path
-                    d={`M ${100 + Math.random() * 400} ${100 + Math.random() * 400} l 3 0 l -1.5 -3 z`}
-                    fill="#60a5fa"
-                    filter="url(#signupGlow)"
+                   <path
+                    d="M 100 400 L 300 500 L 500 400 L 300 300 Z"
+                    fill="url(#gridGradient)"
+                    stroke="#3b82f6"
+                    strokeWidth="1"
+                    opacity="0.5"
+                  />
+                  <motion.path
+                    d="M 100 400 L 300 500 L 500 400 L 300 300 Z"
+                    fill="none"
+                    stroke="#6366f1"
+                    strokeWidth="1"
+                    strokeDasharray="5,5"
+                    animate={{ opacity: [0.2, 0.5, 0.2] }}
+                    transition={{ duration: 3, repeat: Infinity }}
                   />
                 </motion.g>
-              ))}
 
-              {/* Progress indicators */}
-              {[0, 1, 2, 3].map((i) => (
-                <motion.circle
-                  key={`progress-${i}`}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: [0, 1, 1] }}
-                  transition={{
-                    delay: 1.5 + i * 0.15,
-                    duration: 0.4,
-                  }}
-                  cx={200 + i * 50}
-                  cy={500}
-                  r="8"
-                  fill={i < 3 ? '#10b981' : '#334155'}
-                  stroke={i < 3 ? '#10b981' : '#475569'}
-                  strokeWidth="2"
-                />
-              ))}
-            </svg>
+                {/* Floating Profile Cards Assembly */}
+                <motion.g transform="translate(300, 320)">
+                  {/* Base Card */}
+                  <motion.rect
+                    initial={{ y: 50, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.8 }}
+                    x="-120" y="-160" width="240" height="180" rx="12"
+                    fill="#1e293b" stroke="#475569" strokeWidth="2"
+                    filter="url(#signupGlow)"
+                  />
+                  
+                  {/* Header Bar */}
+                  <motion.rect
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
+                    x="-100" y="-140" width="200" height="30" rx="6"
+                    fill="url(#signupGradient1)"
+                  />
+                  
+                  {/* Profile Photo Placeholder */}
+                  <motion.circle
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.7, type: "spring" }}
+                    cx="-70" cy="-80" r="25"
+                    fill="#334155" stroke="#6366f1" strokeWidth="2"
+                  />
+
+                  {/* Text Lines */}
+                  {[0, 1, 2].map((i) => (
+                    <motion.rect
+                      key={`line-${i}`}
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ delay: 0.9 + i * 0.2, duration: 0.5 }}
+                      x="-30" y={-95 + i * 15} width={100 + (i % 2) * 20} height="8" rx="4"
+                      fill="#475569"
+                    />
+                  ))}
+                </motion.g>
+
+                {/* Connecting Network Nodes */}
+                <motion.g>
+                   {/* Node 1: Academic Cap */}
+                   <motion.g 
+                     animate={{ y: [-5, 5, -5] }}
+                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                     transform="translate(150, 250)"
+                   >
+                     <circle r="30" fill="#1e293b" stroke="#3b82f6" strokeWidth="2" />
+                     <path d="M -15 0 L 0 -10 L 15 0 L 0 10 Z M 15 0 V 10" stroke="#60a5fa" strokeWidth="2" fill="none" />
+                   </motion.g>
+
+                   {/* Node 2: Growth Chart */}
+                   <motion.g 
+                     animate={{ y: [5, -5, 5] }}
+                     transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                     transform="translate(450, 280)"
+                   >
+                     <circle r="30" fill="#1e293b" stroke="#8b5cf6" strokeWidth="2" />
+                      <motion.path
+                        d="M -15 10 L -5 0 L 5 5 L 15 -10"
+                        stroke="#a78bfa" strokeWidth="2" fill="none"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                      />
+                   </motion.g>
+
+                   {/* Connecting Lines */}
+                   <motion.line
+                     x1="180" y1="260" x2="250" y2="290"
+                     stroke="#3b82f6" strokeWidth="2" strokeDasharray="4 4"
+                     animate={{ opacity: [0.2, 0.6, 0.2] }}
+                     transition={{ duration: 2, repeat: Infinity }}
+                   />
+                   <motion.line
+                     x1="420" y1="290" x2="350" y2="310"
+                     stroke="#8b5cf6" strokeWidth="2" strokeDasharray="4 4"
+                     animate={{ opacity: [0.2, 0.6, 0.2] }}
+                     transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                   />
+                </motion.g>
+
+                {/* Floating Plus Signs (Growth) */}
+                {[...Array(5)].map((_, i) => (
+                  <motion.text
+                    key={`plus-${i}`}
+                    x={100 + Math.random() * 400}
+                    y={150 + Math.random() * 300}
+                    fill="#10b981"
+                    fontSize="24"
+                    fontWeight="bold"
+                    opacity="0.6"
+                    animate={{ 
+                      y: [0, -20, 0],
+                      opacity: [0, 0.8, 0],
+                      scale: [0.8, 1.2, 0.8]
+                    }}
+                    transition={{
+                      duration: 2 + Math.random() * 2,
+                      repeat: Infinity,
+                      delay: Math.random() * 2
+                    }}
+                  >
+                    +
+                  </motion.text>
+                ))}
+
+                {/* Success Checkmarks */}
+                <motion.g transform="translate(300, 480)">
+                   <motion.circle
+                     animate={{ scale: [1, 1.1, 1] }}
+                     transition={{ duration: 1.5, repeat: Infinity }}
+                     r="20" fill="#10b981" opacity="0.2"
+                   />
+                   <circle r="12" fill="#10b981" />
+                   <path d="M -4 0 L -1 3 L 5 -3" stroke="#fff" strokeWidth="2" fill="none" />
+                </motion.g>
+              </svg>
 
             {/* Feature badges */}
             <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-4">

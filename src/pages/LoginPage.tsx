@@ -163,209 +163,186 @@ export default function LoginPage() {
             {/* Glow effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-3xl blur-3xl" />
 
-            <svg viewBox="0 0 600 600" className="w-full h-auto relative">
-              <defs>
-                <linearGradient id="loginGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#6366f1" />
-                </linearGradient>
-                <linearGradient id="loginGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#8b5cf6" />
-                  <stop offset="100%" stopColor="#6366f1" />
-                </linearGradient>
-                <filter id="loginGlow">
-                  <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-                  <feMerge>
-                    <feMergeNode in="coloredBlur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
+              <svg viewBox="0 0 600 600" className="w-full h-auto relative">
+                <defs>
+                  <linearGradient id="loginGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="100%" stopColor="#6366f1" />
+                  </linearGradient>
+                  <linearGradient id="loginGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#8b5cf6" />
+                    <stop offset="100%" stopColor="#6366f1" />
+                  </linearGradient>
+                  <linearGradient id="gridGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#1e293b" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#0f172a" stopOpacity="0.9" />
+                  </linearGradient>
+                  <filter id="loginGlow">
+                    <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                    <feMerge>
+                      <feMergeNode in="coloredBlur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                  <filter id="glass">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="5" />
+                  </filter>
+                </defs>
 
-              {/* Central secure lock illustration */}
-              <motion.g
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.8, type: 'spring' }}
-              >
-                {/* Lock body */}
-                <motion.rect
-                  animate={{
-                    y: [0, -5, 0],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                  x="200"
-                  y="280"
-                  width="200"
-                  height="180"
-                  rx="20"
-                  fill="url(#loginGradient1)"
-                  opacity="0.9"
-                  filter="url(#loginGlow)"
-                />
-
-                {/* Lock shackle */}
-                <motion.path
-                  animate={{
-                    y: [0, -5, 0],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                  d="M 240 280 Q 240 200, 300 200 Q 360 200, 360 280"
-                  stroke="url(#loginGradient1)"
-                  strokeWidth="30"
-                  fill="none"
-                  strokeLinecap="round"
-                  opacity="0.9"
-                  filter="url(#loginGlow)"
-                />
-
-                {/* Keyhole */}
-                <motion.circle
-                  animate={{
-                    scale: [1, 1.1, 1],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                  cx="300"
-                  cy="350"
-                  r="20"
-                  fill="#1e293b"
-                />
-                <motion.rect
-                  animate={{
-                    height: [40, 45, 40],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                  x="290"
-                  y="360"
-                  width="20"
-                  height="40"
-                  rx="3"
-                  fill="#1e293b"
-                />
-              </motion.g>
-
-              {/* Orbiting shield icons */}
-              {[0, 1, 2].map((i) => (
+                {/* Central Hub Base */}
                 <motion.g
-                  key={i}
-                  animate={{
-                    rotate: 360,
-                  }}
-                  transition={{
-                    duration: 20 + i * 5,
-                    repeat: Infinity,
-                    ease: 'linear',
-                  }}
-                  style={{ transformOrigin: '300px 300px' }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.8 }}
                 >
-                  <motion.circle
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: [0.6, 1, 0.6],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      delay: i * 0.3,
-                    }}
-                    cx={300 + Math.cos((i * 120 * Math.PI) / 180) * 180}
-                    cy={300 + Math.sin((i * 120 * Math.PI) / 180) * 180}
-                    r="15"
-                    fill={i === 0 ? '#3b82f6' : i === 1 ? '#8b5cf6' : '#6366f1'}
-                    filter="url(#loginGlow)"
+                  {/* Isometric base plates */}
+                  <path
+                    d="M 150 350 L 300 420 L 450 350 L 300 280 Z"
+                    fill="url(#gridGradient)"
+                    stroke="#3b82f6"
+                    strokeWidth="1"
+                    opacity="0.6"
                   />
-                </motion.g>
-              ))}
-
-              {/* Connection lines */}
-              {[0, 1, 2, 3, 4].map((i) => (
-                <motion.line
-                  key={i}
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: [0, 0.3, 0] }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    delay: i * 0.6,
-                    ease: 'easeInOut',
-                  }}
-                  x1="300"
-                  y1="300"
-                  x2={300 + Math.cos((i * 72 * Math.PI) / 180) * 150}
-                  y2={300 + Math.sin((i * 72 * Math.PI) / 180) * 150}
-                  stroke="#3b82f6"
-                  strokeWidth="2"
-                  strokeDasharray="5,5"
-                />
-              ))}
-
-              {/* Floating data particles */}
-              {[...Array(12)].map((_, i) => (
-                <motion.circle
-                  key={`particle-${i}`}
-                  animate={{
-                    y: [0, -30, 0],
-                    opacity: [0.2, 0.8, 0.2],
-                  }}
-                  transition={{
-                    duration: 3 + Math.random() * 2,
-                    repeat: Infinity,
-                    delay: Math.random() * 3,
-                  }}
-                  cx={150 + Math.random() * 300}
-                  cy={150 + Math.random() * 300}
-                  r={2 + Math.random() * 3}
-                  fill="#60a5fa"
-                  filter="url(#loginGlow)"
-                />
-              ))}
-
-              {/* Checkmark indicators */}
-              {[0, 1, 2].map((i) => (
-                <motion.g
-                  key={`check-${i}`}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{
-                    delay: 1 + i * 0.2,
-                    duration: 0.5,
-                    type: 'spring',
-                  }}
-                >
-                  <circle cx={100 + i * 200} cy={500} r="20" fill="#10b981" opacity="0.2" />
                   <motion.path
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{
-                      delay: 1.2 + i * 0.2,
-                      duration: 0.5,
-                    }}
-                    d={`M ${90 + i * 200} 500 L ${98 + i * 200} 508 L ${112 + i * 200} 492`}
-                    stroke="#10b981"
-                    strokeWidth="3"
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                    d="M 150 370 L 300 440 L 450 370 L 300 300 Z"
                     fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    stroke="#6366f1"
+                    strokeWidth="1"
+                    strokeDasharray="5,5"
                   />
                 </motion.g>
-              ))}
-            </svg>
+
+                {/* Orbiting Security Rings */}
+                {[0, 1, 2].map((i) => (
+                  <motion.ellipse
+                    key={`ring-${i}`}
+                    cx="300"
+                    cy="350"
+                    rx={100 + i * 40}
+                    ry={40 + i * 15}
+                    fill="none"
+                    stroke={i === 0 ? '#3b82f6' : i === 1 ? '#8b5cf6' : '#6366f1'}
+                    strokeWidth="2"
+                    strokeDasharray="20 40"
+                    strokeOpacity="0.4"
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 20 + i * 10,
+                      repeat: Infinity,
+                      ease: 'linear',
+                    }}
+                  />
+                ))}
+
+                {/* Floating Central Core - Glassmorphic */}
+                <motion.g
+                  animate={{ y: [-10, 10, -10] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  {/* Core Cube Back */}
+                  <path d="M 260 260 L 340 260 L 340 340 L 260 340 Z" fill="#1e293b" opacity="0.8" />
+                  
+                  {/* Data Streams entering core */}
+                  {[0, 1, 2, 3].map((i) => (
+                    <motion.path
+                      key={`stream-${i}`}
+                      d={`M ${100 + i * 130} ${500 - i * 50} Q 300 300 300 300`}
+                      fill="none"
+                      stroke="url(#loginGradient1)"
+                      strokeWidth="2"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: [0, 0.5, 0] }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        delay: i * 0.8,
+                        ease: 'linear'
+                      }}
+                    />
+                  ))}
+
+                  {/* Main Shield Icon */}
+                  <motion.g transform="translate(270, 270) scale(0.6)">
+                    <motion.path
+                      d="M 50 10 L 90 30 V 55 C 90 80 50 95 50 95 C 50 95 10 80 10 55 V 30 L 50 10 Z"
+                      fill="url(#loginGradient2)"
+                      stroke="#fff"
+                      strokeWidth="4"
+                      filter="url(#loginGlow)"
+                      animate={{ 
+                        filter: ['url(#loginGlow) brightness(1)', 'url(#loginGlow) brightness(1.3)', 'url(#loginGlow) brightness(1)'] 
+                      }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    />
+                    <path
+                      d="M 50 25 V 80 M 30 45 L 70 45"
+                      stroke="#fff"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      opacity="0.8"
+                    />
+                  </motion.g>
+
+                  {/* Scanning Laser Effect */}
+                  <motion.rect
+                    x="250"
+                    y="250"
+                    width="100"
+                    height="2"
+                    fill="#60a5fa"
+                    filter="url(#loginGlow)"
+                    animate={{ y: [0, 100, 0], opacity: [0, 1, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  />
+                </motion.g>
+
+                {/* Floating "Verified" Badges */}
+                <motion.g
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 1, duration: 0.5 }}
+                  transform="translate(420, 200)"
+                >
+                  <rect width="120" height="40" rx="8" fill="#1e293b" stroke="#334155" />
+                  <circle cx="20" cy="20" r="6" fill="#10b981" />
+                  <rect x="35" y="15" width="60" height="4" rx="2" fill="#94a3b8" />
+                  <rect x="35" y="23" width="40" height="4" rx="2" fill="#475569" />
+                </motion.g>
+
+                <motion.g
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 1.2, duration: 0.5 }}
+                  transform="translate(100, 450)"
+                >
+                  <rect width="140" height="50" rx="8" fill="#1e293b" stroke="#334155" />
+                  <rect x="15" y="15" width="20" height="20" rx="4" fill="#3b82f6" />
+                  <rect x="45" y="18" width="70" height="4" rx="2" fill="#94a3b8" />
+                  <rect x="45" y="28" width="50" height="4" rx="2" fill="#475569" />
+                </motion.g>
+
+                {/* Background Particles */}
+                {[...Array(8)].map((_, i) => (
+                  <motion.circle
+                    key={`p-${i}`}
+                    cx={100 + Math.random() * 400}
+                    cy={100 + Math.random() * 400}
+                    r={Math.random() * 3}
+                    fill="#60a5fa"
+                    animate={{ 
+                      y: [0, -30, 0],
+                      opacity: [0.2, 0.8, 0.2]
+                    }}
+                    transition={{
+                      duration: 3 + Math.random() * 2,
+                      repeat: Infinity,
+                      delay: Math.random() * 2
+                    }}
+                  />
+                ))}
+              </svg>
 
             {/* Feature badges */}
             <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-4">
