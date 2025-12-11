@@ -42,6 +42,12 @@ function sanitizeSubjectFormData(data: SubjectInput): SubjectInput {
   if (data.capacity !== undefined) {
     sanitized.capacity = data.capacity
   }
+  if (data.yearLevel !== undefined) {
+    sanitized.yearLevel = data.yearLevel
+  }
+  if (data.section !== undefined) {
+    sanitized.section = sanitizers.text(data.section)
+  }
   if (data.schedule !== undefined) {
     sanitized.schedule = data.schedule
   }
@@ -91,6 +97,39 @@ export const subjectService = {
     const codeValidation = validators.subjectCode(data.subjectCode)
     if (!codeValidation.isValid) {
       throw new Error(codeValidation.error)
+    }
+
+    if (data.section !== undefined) {
+      const sectionValidation = validators.section(data.section)
+      if (!sectionValidation.isValid) {
+        throw new Error(sectionValidation.error)
+      }
+    }
+
+    if (data.yearLevel !== undefined) {
+      const yearLevelValidation = validators.yearLevel(data.yearLevel)
+      if (!yearLevelValidation.isValid) {
+        throw new Error(yearLevelValidation.error)
+      }
+    }
+
+    if (data.section !== undefined) {
+      const sectionValidation = validators.section(data.section)
+      if (!sectionValidation.isValid) {
+        throw new Error(sectionValidation.error)
+      }
+    } else {
+      throw new Error('Section is required')
+    }
+
+    // Validate year level
+    if (data.yearLevel) {
+      const yearLevelValidation = validators.yearLevel(data.yearLevel)
+      if (!yearLevelValidation.isValid) {
+        throw new Error(yearLevelValidation.error)
+      }
+    } else {
+      throw new Error('Year level is required')
     }
 
     // Validate optional fields
