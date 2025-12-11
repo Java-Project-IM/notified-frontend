@@ -59,7 +59,9 @@ import { getEmailHistory, EmailHistoryRecord } from '@/services/email.service'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import * as XLSX from 'xlsx'
+
 import { attendanceMarkedFeedback, selectionFeedback } from '@/utils/feedbackUtils'
+import { useAuthStore } from '@/store/authStore'
 
 interface SubjectDetailsModalProps {
   isOpen: boolean
@@ -131,7 +133,10 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
 
   const { addToast } = useToast()
   const queryClient = useQueryClient()
+
   const navigate = useNavigate()
+  const { user } = useAuthStore()
+  const isRegistrar = user?.role === 'registrar'
 
   // --- Initialization & Data Normalization ---
 
@@ -366,8 +371,13 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
     if (!isOpen || activeTab !== 'attendance') return
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      // Don't trigger if typing in an input or if user is registrar
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        isRegistrar
+      )
+        return
 
       const key = e.key.toLowerCase()
 
@@ -1309,7 +1319,10 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                       <Button
                         onClick={handleEnrollAll}
                         disabled={availableStudents.length === 0 || enrollAllMutation.isPending}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white h-11"
+                        className={cn(
+                          'bg-emerald-600 hover:bg-emerald-700 text-white h-11',
+                          isRegistrar && 'hidden'
+                        )}
                       >
                         {enrollAllMutation.isPending ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -1364,7 +1377,10 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                                     unenrollMutation.mutate(Number(enrolled.studentId))
                                   }
                                   disabled={unenrollMutation.isPending}
-                                  className="h-8 w-8 text-red-400 opacity-0 group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-300 transition-all"
+                                  className={cn(
+                                    'h-8 w-8 text-red-400 opacity-0 group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-300 transition-all',
+                                    isRegistrar && 'hidden'
+                                  )}
                                 >
                                   {unenrollMutation.isPending &&
                                   unenrollMutation.variables === Number(enrolled.studentId) ? (
@@ -1417,7 +1433,10 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                                   size="sm"
                                   onClick={() => enrollMutation.mutate(student.id)}
                                   disabled={enrollMutation.isPending}
-                                  className="h-8 bg-slate-700 hover:bg-emerald-600 text-white transition-colors"
+                                  className={cn(
+                                    'h-8 bg-slate-700 hover:bg-emerald-600 text-white transition-colors',
+                                    isRegistrar && 'hidden'
+                                  )}
                                 >
                                   {enrollMutation.isPending &&
                                   enrollMutation.variables === student.id ? (
@@ -1562,103 +1581,105 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                             )}
                           </div>
 
-                          <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-                            {selectedStudents.size > 0 ? (
-                              <>
-                                <Button
-                                  size="sm"
-                                  className="bg-emerald-600 hover:bg-emerald-700"
-                                  disabled={bulkMarkMutation.isPending}
-                                  onClick={() =>
-                                    bulkMarkMutation.mutate({
-                                      studentIds: Array.from(selectedStudents),
-                                      status: 'present',
-                                      scheduleSlot: selectedScheduleSlot,
-                                    })
-                                  }
-                                >
-                                  {bulkMarkMutation.isPending ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    'Present'
-                                  )}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  className="bg-rose-600 hover:bg-rose-700"
-                                  disabled={bulkMarkMutation.isPending}
-                                  onClick={() =>
-                                    bulkMarkMutation.mutate({
-                                      studentIds: Array.from(selectedStudents),
-                                      status: 'absent',
-                                      scheduleSlot: selectedScheduleSlot,
-                                    })
-                                  }
-                                >
-                                  {bulkMarkMutation.isPending ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    'Absent'
-                                  )}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  className="bg-amber-600 hover:bg-amber-700"
-                                  disabled={bulkMarkMutation.isPending}
-                                  onClick={() =>
-                                    bulkMarkMutation.mutate({
-                                      studentIds: Array.from(selectedStudents),
-                                      status: 'late',
-                                      scheduleSlot: selectedScheduleSlot,
-                                    })
-                                  }
-                                >
-                                  {bulkMarkMutation.isPending ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    'Late'
-                                  )}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  className="bg-purple-600 hover:bg-purple-700"
-                                  disabled={bulkMarkMutation.isPending}
-                                  onClick={() =>
-                                    bulkMarkMutation.mutate({
-                                      studentIds: Array.from(selectedStudents),
-                                      status: 'excused',
-                                      scheduleSlot: selectedScheduleSlot,
-                                    })
-                                  }
-                                >
-                                  {bulkMarkMutation.isPending ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    'Excused'
-                                  )}
-                                </Button>
-                              </>
-                            ) : (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
-                                  onClick={() => handleMarkAll('present')}
-                                >
-                                  Mark All Present
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-rose-400 hover:bg-rose-500/10 hover:text-rose-300"
-                                  onClick={() => handleMarkAll('absent')}
-                                >
-                                  Mark All Absent
-                                </Button>
-                              </>
-                            )}
-                          </div>
+                          {!isRegistrar && (
+                            <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+                              {selectedStudents.size > 0 ? (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    className="bg-emerald-600 hover:bg-emerald-700"
+                                    disabled={bulkMarkMutation.isPending}
+                                    onClick={() =>
+                                      bulkMarkMutation.mutate({
+                                        studentIds: Array.from(selectedStudents),
+                                        status: 'present',
+                                        scheduleSlot: selectedScheduleSlot,
+                                      })
+                                    }
+                                  >
+                                    {bulkMarkMutation.isPending ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      'Present'
+                                    )}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    className="bg-rose-600 hover:bg-rose-700"
+                                    disabled={bulkMarkMutation.isPending}
+                                    onClick={() =>
+                                      bulkMarkMutation.mutate({
+                                        studentIds: Array.from(selectedStudents),
+                                        status: 'absent',
+                                        scheduleSlot: selectedScheduleSlot,
+                                      })
+                                    }
+                                  >
+                                    {bulkMarkMutation.isPending ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      'Absent'
+                                    )}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    className="bg-amber-600 hover:bg-amber-700"
+                                    disabled={bulkMarkMutation.isPending}
+                                    onClick={() =>
+                                      bulkMarkMutation.mutate({
+                                        studentIds: Array.from(selectedStudents),
+                                        status: 'late',
+                                        scheduleSlot: selectedScheduleSlot,
+                                      })
+                                    }
+                                  >
+                                    {bulkMarkMutation.isPending ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      'Late'
+                                    )}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    className="bg-purple-600 hover:bg-purple-700"
+                                    disabled={bulkMarkMutation.isPending}
+                                    onClick={() =>
+                                      bulkMarkMutation.mutate({
+                                        studentIds: Array.from(selectedStudents),
+                                        status: 'excused',
+                                        scheduleSlot: selectedScheduleSlot,
+                                      })
+                                    }
+                                  >
+                                    {bulkMarkMutation.isPending ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      'Excused'
+                                    )}
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
+                                    onClick={() => handleMarkAll('present')}
+                                  >
+                                    Mark All Present
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-rose-400 hover:bg-rose-500/10 hover:text-rose-300"
+                                    onClick={() => handleMarkAll('absent')}
+                                  >
+                                    Mark All Absent
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -1802,11 +1823,12 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                                     toggleStudentSelection(enrolled.studentId, !!c)
                                   }
                                   className="border-slate-500 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                                  disabled={isRegistrar}
                                 />
                                 <div className="flex-1 min-w-0">
                                   <p className="font-medium text-slate-200 truncate">
                                     {student.firstName} {student.lastName}
-                                    {isFocused && (
+                                    {isFocused && !isRegistrar && (
                                       <span className="ml-2 text-xs text-indigo-400">
                                         (Press P/A/L/E)
                                       </span>
@@ -1839,7 +1861,7 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                                   )}
 
                                   {/* Quick Actions per row (only if not selected in bulk) */}
-                                  {selectedStudents.size === 0 && (
+                                  {selectedStudents.size === 0 && !isRegistrar && (
                                     <div className="flex gap-1 ml-2">
                                       {isMarking ? (
                                         <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
@@ -1927,7 +1949,7 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                           Define multiple meeting times (Lecture, Lab, etc.)
                         </p>
                       </div>
-                      {!isEditingSchedules && (
+                      {!isEditingSchedules && !isRegistrar && (
                         <Button
                           onClick={() => {
                             setScheduleForm({
@@ -2051,6 +2073,7 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                             <Button
                               onClick={handleScheduleSave}
                               className="bg-indigo-600 hover:bg-indigo-700 flex-1"
+                              disabled={isRegistrar}
                             >
                               {updateSchedulesMutation.isPending ? (
                                 <Loader2 className="animate-spin w-4 h-4" />
@@ -2102,28 +2125,31 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                                   </div>
                                 )}
                               </div>
-                              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-8 w-8 text-blue-400 hover:bg-blue-500/10"
-                                  onClick={() => {
-                                    setScheduleForm(schedule)
-                                    setEditingScheduleIndex(i)
-                                    setIsEditingSchedules(true)
-                                  }}
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-8 w-8 text-red-400 hover:bg-red-500/10"
-                                  onClick={() => deleteSchedule(i)}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
+
+                              {!isRegistrar && (
+                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-blue-400 hover:bg-blue-500/10"
+                                    onClick={() => {
+                                      setScheduleForm(schedule)
+                                      setEditingScheduleIndex(i)
+                                      setIsEditingSchedules(true)
+                                    }}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-red-400 hover:bg-red-500/10"
+                                    onClick={() => deleteSchedule(i)}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
