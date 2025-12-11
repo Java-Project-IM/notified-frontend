@@ -23,6 +23,8 @@ import { useToast } from '@/store/toastStore'
 import { recordService } from '@/services/record.service'
 import { AttendanceRecord } from '@/types'
 import { format } from 'date-fns'
+
+import * as XLSX from 'xlsx'
 import { cn } from '@/lib/utils'
 
 type FilterType = 'all' | 'present' | 'absent' | 'late' | 'excused'
@@ -76,21 +78,46 @@ export default function RecordsPage() {
   const late = filteredRecords.filter((r) => r.status === 'late').length
   const excused = filteredRecords.filter((r) => r.status === 'excused').length
 
-  const handleShowSummary = () => {
-    const summary = `
-Records Summary
+  const handleExportRecords = () => {
+    if (filteredRecords.length === 0) {
+      addToast('No records to export matching current filters.', 'warning')
+      return
+    }
 
-Total Records: ${filteredRecords.length}
-Present: ${present}
-Absent: ${absent}
-Late: ${late}
-Excused: ${excused}
-Today's Records: ${todayRecords.length}
+    try {
+      addToast('Exporting records...', 'info')
 
-Date Range: ${selectedDate || 'All Time'}
-    `.trim()
+      // Format data for export
+      const exportData = filteredRecords.map((record) => ({
+        'Student Number': record.studentNumber || '-',
+        'Student Name': `${record.firstName} ${record.lastName}`,
+        Email: record.email || '-',
+        'Subject Code': record.subjectCode || 'General',
+        'Subject Name': record.subjectName || '-',
+        Status: record.status.charAt(0).toUpperCase() + record.status.slice(1),
+        Date: format(new Date(record.timestamp || record.createdAt), 'yyyy-MM-dd'),
+        Time: format(new Date(record.timestamp || record.createdAt), 'hh:mm a'),
+        'Schedule Slot': (record as any).scheduleSlot || '-',
+      }))
 
-    addToast(summary, 'info')
+      // Create workbook
+      const worksheet = XLSX.utils.json_to_sheet(exportData)
+      const workbook = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance Records')
+
+      // Generate filename based on filters
+      let filename = 'Attendance_Records'
+      if (selectedDate) filename += `_${selectedDate}`
+      if (filterType !== 'all') filename += `_${filterType}`
+      filename += '.xlsx'
+
+      // Download
+      XLSX.writeFile(workbook, filename)
+      addToast('Exported successfully', 'success')
+    } catch (error) {
+      console.error('Export failed:', error)
+      addToast('Failed to export records', 'error')
+    }
   }
 
   const getStatusIcon = (status: string) => {
@@ -134,14 +161,8 @@ Date Range: ${selectedDate || 'All Time'}
           gradient="from-emerald-600 via-teal-600 to-cyan-600"
           actions={[
             {
-              label: 'Summary',
-              onClick: handleShowSummary,
-              icon: BarChart3,
-              variant: 'outline',
-            },
-            {
               label: 'Export',
-              onClick: () => addToast('Export feature coming soon!', 'info'),
+              onClick: handleExportRecords,
               icon: Download,
               variant: 'outline',
             },

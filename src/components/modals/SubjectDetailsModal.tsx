@@ -61,7 +61,9 @@ import { format } from 'date-fns'
 import * as XLSX from 'xlsx'
 
 import { attendanceMarkedFeedback, selectionFeedback } from '@/utils/feedbackUtils'
+
 import { useAuthStore } from '@/store/authStore'
+import { recordService } from '@/services/record.service'
 
 interface SubjectDetailsModalProps {
   isOpen: boolean
@@ -897,6 +899,97 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
     onError: (error: any) => addToast(error?.message || 'Update failed', 'error'),
   })
 
+  // --- Export Functionality ---
+
+  const handleExportSemesterReport = async () => {
+    if (!subject) return
+
+    try {
+      addToast('Drafting semester report...', 'info')
+
+      // Fetch all attendance records for this subject
+      const allRecords = await recordService.getAllAttendanceRecords({
+        subjectId: subject.id,
+      })
+
+      if (allRecords.length === 0) {
+        addToast('No attendance records found for this subject.', 'warning')
+        return
+      }
+
+      // 1. Get all unique dates (sorted)
+      const dates = Array.from(
+        new Set(allRecords.map((r) => format(new Date(r.timestamp || r.createdAt), 'yyyy-MM-dd')))
+      ).sort()
+
+      // 2. Group records by student
+      const studentMap = new Map<string, { info: any; records: Record<string, string> }>()
+
+      allRecords.forEach((record) => {
+        const studentId = String(record.studentId)
+        if (!studentMap.has(studentId)) {
+          studentMap.set(studentId, {
+            info: {
+              'Student Name': `${record.firstName} ${record.lastName}`,
+              'Student Number': record.studentNumber,
+            },
+            records: {},
+          })
+        }
+
+        const date = format(new Date(record.timestamp || record.createdAt), 'yyyy-MM-dd')
+        // Use the status (Present, Absent, Late, Excused)
+        // Capitalize first letter
+        const status = record.status.charAt(0).toUpperCase() + record.status.slice(1)
+        studentMap.get(studentId)!.records[date] = status
+      })
+
+      // 3. Construct rows for Excel
+      const rows = Array.from(studentMap.values()).map((data) => {
+        const stats = {
+          'Total Present': 0,
+          'Total Absent': 0,
+          'Total Late': 0,
+          'Total Excused': 0,
+        }
+
+        // Fill in dates and calculate stats
+        const dateColumns: Record<string, string> = {}
+        dates.forEach((date) => {
+          const status = data.records[date] || '-'
+          dateColumns[date] = status
+
+          if (status === 'Present') stats['Total Present']++
+          if (status === 'Absent') stats['Total Absent']++
+          if (status === 'Late') stats['Total Late']++
+          if (status === 'Excused') stats['Total Excused']++
+        })
+
+        return {
+          ...data.info,
+          ...stats,
+          ...dateColumns,
+        }
+      })
+
+      // 4. Create Workbook
+      const worksheet = XLSX.utils.json_to_sheet(rows)
+      const workbook = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Semester Report')
+
+      // 5. Download
+      XLSX.writeFile(
+        workbook,
+        `${subject.subjectCode}_Semester_Report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`
+      )
+
+      addToast('Report exported successfully!', 'success')
+    } catch (error) {
+      console.error('Export failed:', error)
+      addToast('Failed to export report.', 'error')
+    }
+  }
+
   // --- Handlers ---
 
   const handleMarkAll = (status: 'present' | 'absent' | 'late' | 'excused') => {
@@ -1236,6 +1329,31 @@ function SubjectDetailsModal({ isOpen, onClose, subject }: SubjectDetailsModalPr
                           </div>
                         </div>
                       )}
+                    </div>
+
+                    {/* Attendance Management Section */}
+                    <div className="md:col-span-2 bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50">
+                      <div className="flex flex-wrap gap-2 items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <ClipboardList className="w-5 h-5 text-blue-400" />
+                          Attendance Management
+                        </h3>
+                        {!isRegistrar && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleExportSemesterReport}
+                            className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Export Semester Report
+                          </Button>
+                        )}
+                      </div>
+                      {/* Placeholder for attendance management content */}
+                      <div className="text-sm text-slate-400 py-4 text-center">
+                        Attendance records and tools will appear here.
+                      </div>
                     </div>
 
                     {/* Recent Email History for Subject - Full width below */}
